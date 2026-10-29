@@ -1243,14 +1243,19 @@ window.NR_FIREBASE = {
     // En Android la galería a veces entrega la foto "a medias" (aún bajando de la nube):
     // se leen los bytes con reintentos y se decodifica desde una copia en memoria.
     async function readBytes(file) {
+      // Tres formas distintas de leer el archivo; algunos Android solo aceptan una de ellas
+      const readers = [
+        f => f.arrayBuffer(),
+        f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error || new Error('read')); r.readAsArrayBuffer(f); }),
+        f => new Response(f).arrayBuffer(),
+        f => f.slice(0, f.size).arrayBuffer(),
+      ];
       let last = null;
-      for (const wait of [0, 350, 800, 1400, 2200, 3200]) {
+      for (const wait of [0, 500, 1200, 2500]) {
         if (wait) await new Promise(r => setTimeout(r, wait));
-        try {
-          const buf = await withTimeout2(file.arrayBuffer ? file.arrayBuffer() : new Response(file).arrayBuffer(), 15000);
-          if (buf && buf.byteLength) return buf;
-          last = new Error('empty');
-        } catch (e) { last = e; }
+        for (const rd of readers) {
+          try { const buf = await withTimeout2(rd(file), 12000); if (buf && buf.byteLength) return buf; last = new Error('empty'); } catch (e) { last = e; }
+        }
       }
       throw last || new Error('read');
     }
@@ -1279,9 +1284,15 @@ window.NR_FIREBASE = {
       if (!file) throw new Error('No se recibió ninguna imagen.');
       if (file.type && !/^image\//.test(file.type) && !IMG_OK.test(file.name || '')) throw new Error('Elige una imagen (JPG, PNG o WEBP).');
       if (file.size > 30 * 1024 * 1024) throw new Error('La imagen es muy pesada (más de 30 MB). Toma una captura de pantalla y súbela.');
-      let buf;
-      try { buf = await readBytes(file); }
-      catch (_) { throw new Error('Tu teléfono todavía está descargando esa imagen. Espera unos segundos y vuelve a elegirla (o toma una captura de pantalla).'); }
+      let buf = null;
+      try { buf = await readBytes(file); } catch (_) { buf = null; }
+      if (!buf) {
+        // No se pudo copiar el archivo: se intenta abrir directamente
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try { return await decodeBlob(file); } catch (_) { await new Promise(r => setTimeout(r, 800)); }
+        }
+        throw new Error('No pudimos leer esa imagen. Si es de Google Fotos o de la nube, ábrela primero en tu galería (o toma una captura de pantalla) y vuelve a subirla.');
+      }
       const type = sniffType(buf, file.type);
       const blob = new Blob([buf], { type });
       for (let attempt = 0; attempt < 3; attempt++) {
@@ -1531,8 +1542,11 @@ window.NR_FIREBASE = {
     });
     $('#pfName').addEventListener('input', () => { if (!draft.avatar) renderPicker(); });
     $('#pfFile').addEventListener('change', async e => {
-      const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-      try { draft.avatar = await resizeImage(f, 256, true); renderPicker(); } catch (err) { showErr('#pfError', err.message); }
+      const f = e.target.files && e.target.files[0]; if (!f) return;
+      const job = resizeImage(f, 256, true);   // se empieza a leer ANTES de tocar el campo (Android pierde el archivo si se limpia antes)
+      $('#pfError').classList.add('hidden');
+      try { draft.avatar = await job; renderPicker(); } catch (err) { showErr('#pfError', err.message); }
+      e.target.value = '';
     });
     $('#pfRemove').addEventListener('click', () => { draft.avatar = ''; renderPicker(); });
     bindForm($('#profileForm'), () => {
@@ -1834,9 +1848,10 @@ window.NR_FIREBASE = {
       const px = e.target.dataset && e.target.dataset.capture; if (!px) return;
       const f = e.target.files && e.target.files[0]; if (!f) return;
       const token = (pay[px].token || 0) + 1; pay[px].token = token;   // solo cuenta la última imagen elegida
+      const job = resizeImage(f, 1600, false);   // se empieza a leer antes de redibujar el formulario
       pay[px].loading = true; $('#' + px + 'Error').classList.add('hidden'); renderPay(px);
       try {
-        const img = await resizeImage(f, 1600, false);
+        const img = await job;
         if (pay[px].token !== token) return;
         pay[px].capture = img; pay[px].viaWa = false;
         $('#' + px + 'Error').classList.add('hidden');
