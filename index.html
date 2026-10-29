@@ -141,7 +141,7 @@
     button:not(:disabled):active, a[href]:active, .filter-btn:active, .pf-type:active { scale: .95; transition-duration: .08s; }
     .btn-primary:not(:disabled):active { scale: .96; filter: brightness(1.15); box-shadow: 0 0 34px rgba(0,240,255,.55); }
     /* onda de luz donde tocas */
-    .rpl { position: relative; overflow: hidden; isolation: isolate; }
+    .rpl { overflow: hidden; isolation: isolate; }   /* sin tocar la posición: los botones flotantes (como la X) se quedan en su sitio */
     .rpl-wave { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; transform: scale(0); opacity: .7;
       background: radial-gradient(circle, rgba(255,255,255,.8) 0%, rgba(0,240,255,.5) 38%, transparent 70%); animation: rplGo .55s ease-out forwards; }
     @keyframes rplGo { to { transform: scale(2.6); opacity: 0; } }
@@ -839,8 +839,7 @@ window.NR_FIREBASE = {
     storageBucket: "nr-digital-5c46d.firebasestorage.app",
     messagingSenderId: "274677345548",
     appId: "1:274677345548:web:a04112976b48bade116d29"
-  },
-  adminEmail: "ner200227ga@gmail.com"
+  }
 };
 </script>
   <script>
@@ -856,6 +855,16 @@ window.NR_FIREBASE = {
     const enabled = !!(conf.apiKey && conf.projectId && !/PEGA|TU_/i.test(conf.apiKey + conf.projectId));
     const VER = '10.12.2', BASE = `https://www.gstatic.com/firebasejs/${VER}/`;
     const ADMIN_EMAIL = String(CFG.adminEmail || '').trim().toLowerCase();
+    // El correo del admin no tiene que aparecer en la página: basta su "huella" (adminKey)
+    const cyrb = str => {
+      let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+      for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+      h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+      h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+      return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+    };
+    const ADMIN_KEY = String(CFG.adminKey || '') || (ADMIN_EMAIL ? cyrb('nr|' + ADMIN_EMAIL) : '');
+    const isAdminEmail = e => !!ADMIN_KEY && cyrb('nr|' + String(e || '').trim().toLowerCase()) === ADMIN_KEY;
 
     /* Cómo se guarda cada tipo de dato en Firestore */
     const SPEC = {
@@ -958,10 +967,10 @@ window.NR_FIREBASE = {
       try { fn(); } finally { var ops = groupOps; groupOps = null; }
       if (!ops.length) return;
       const p = commit(ops, 'grupo');
-      return withTimeout(p, 20000);
+      return withTimeout(p, 60000);
     }
     const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej({ code: 'timeout' }), ms))]);
-    const flush = () => withTimeout(Promise.all([...pending]), 20000);
+    const flush = () => withTimeout(Promise.all([...pending]), 60000);
 
     /* ---------- Suscripciones en tiempo real ---------- */
     function applyCol(key, docs) {
@@ -1037,16 +1046,18 @@ window.NR_FIREBASE = {
     function resync() { if (!user) return; stopOwn(); startOwn(user); }
 
     /* ---------- Sesión ---------- */
-    const isAdmin = () => !!(user && ADMIN_EMAIL && String(user.email).toLowerCase() === ADMIN_EMAIL);
+    const isAdmin = () => !!(user && isAdminEmail(user.email));
     const authCbs = [];
     async function init(mode) {
       scope = mode;
       if (!enabled) return false;
       const [app, a, f] = await Promise.all([import(BASE + 'firebase-app.js'), import(BASE + 'firebase-auth.js'), import(BASE + 'firebase-firestore.js')]);
       fb = { app, auth: a, fs: f };
-      const fbApp = app.initializeApp(conf);
+      // El panel usa su propia sesión: entrar o salir del panel no cierra la sesión de cliente en la tienda (y al revés)
+      const fbApp = mode === 'admin' ? app.initializeApp(conf, 'nr-admin') : app.initializeApp(conf);
       auth = a.getAuth(fbApp); db = f.getFirestore(fbApp);
       try { auth.languageCode = 'es'; } catch (_) {}
+      if (mode === 'store') { try { await a.setPersistence(auth, a.browserLocalPersistence); } catch (_) {} }   // la sesión del cliente queda guardada
       startPublic();
       let first = true;
       await new Promise(resolve => {
@@ -1082,8 +1093,9 @@ window.NR_FIREBASE = {
     const authMsg = e => AUTH_MSG[e && e.code] || 'No se pudo completar. Inténtalo de nuevo.';
 
     window.NRCloud = {
-      enabled, adminEmail: ADMIN_EMAIL,
+      enabled, adminEmail: ADMIN_EMAIL, hasAdmin: !!ADMIN_KEY, isAdminEmail,
       init, get, set, group, flush, whenReady, waitFor, isAdmin, authMsg,
+      has: k => !!SPEC[k],
       ready: k => !!ready[k],
       user: () => user,
       onAuth: cb => authCbs.push(cb),
