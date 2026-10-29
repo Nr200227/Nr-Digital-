@@ -535,7 +535,8 @@
        MODAL · PEDIDO CONFIRMADO (código)
   ====================================================== -->
   <div id="successModal" class="modal fixed inset-0 z-[85] hidden items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-    <div class="glass w-full max-w-sm rounded-3xl p-7 text-center shadow-glow-lg">
+    <div class="glass relative w-full max-w-sm rounded-3xl p-7 text-center shadow-glow-lg">
+      <button type="button" data-close="successModal" aria-label="Cerrar" class="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/5 text-lg text-muted hover:bg-white/10 hover:text-white">✕</button>
       <div class="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-500/15 text-2xl text-emerald-400 ring-1 ring-emerald-500/30">✓</div>
       <h3 class="mt-4 font-display text-xl font-bold">¡Pedido registrado!</h3>
       <p class="mt-2 text-sm text-muted">Guarda tu código. Si tu pedido sigue en espera, toca <b>Soporte</b> y te ayudamos por WhatsApp.</p>
@@ -548,7 +549,7 @@
         <button id="copyCode" class="rounded-xl border border-white/10 py-2.5 text-sm font-semibold transition hover:bg-white/5">Copiar código</button>
         <button id="goOrders" class="btn-primary rounded-xl py-2.5 text-sm font-semibold">Mis pedidos</button>
       </div>
-      <a id="successCapture" href="#" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white transition hover:brightness-110">📲 Enviar pedido por WhatsApp</a>
+      <a id="successCapture" href="#" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white transition hover:brightness-110">📲 Enviar pedido manualmente</a>
       <p id="successCaptureNote" class="mt-1.5 text-xs text-muted">Envíanos tu pedido para procesarlo más rápido.</p>
       <a id="successSupport" href="#" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/10"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.6 8.6c.2 2.4 2.4 4.6 4.8 4.8l.9-1 1.6.7-.3 1.4c-3.6.3-7.1-3.2-6.8-6.8l1.4-.3.7 1.6z" stroke-width="1.5"/></svg> Soporte por WhatsApp</a>
     </div>
@@ -874,7 +875,7 @@ window.NR_FIREBASE = {
       settings:     { doc: 'config/settings', pub: true },
       online:       { doc: 'config/store', field: 'online', pub: true },
       users:        { col: 'users',       id: 'uid' },
-      orders:       { col: 'orders',      id: 'id',   capture: true, sort: 'date' },
+      orders:       { col: 'orders',      id: 'id',   capture: true, sort: 'date', del: true },
       topups:       { col: 'topups',      id: 'id',   capture: true, sort: 'date' },
       giftcards:    { col: 'giftcards',   id: 'code', sort: 'createdAt' },
       services:     { col: 'services',    id: 'id',   del: true },
@@ -1128,6 +1129,7 @@ window.NR_FIREBASE = {
         return snap.exists() ? snap.data().data : null;
       },
       isFirstRun: () => firstRun,
+      remove: path => commit([{ type: 'del', path }], 'borrar'),
     };
   })();
   </script>
@@ -2026,7 +2028,7 @@ window.NR_FIREBASE = {
       $('#successSupport').href = waLink(supportMsg(order));
       const lines = order.items.map(i => `• ${i.name} ×${i.qty} — ${money(i.price * i.qty)}${i.playerId ? `\n   🎮 ID: ${i.playerId}` : ''}`).join('\n');
       $('#successCapture').href = waLink(`🛒 *NUEVO PEDIDO* · ${settings().name}\n\n🧾 Código: *${order.id}*\n👤 ${order.client} · ${order.phone}${current ? '\n📧 ' + current.email : ''}\n\n📦 Productos:\n${lines}\n\n💵 Total: ${order.amountBs ? order.amountBs + ' (' + money(order.amount) + ')' : money(order.amount)}\n💳 Pago: ${METHODS[order.method]}${order.ref ? ' · Ref. ' + order.ref : ''}${order.method !== 'saldo' ? '\n\n📷 Adjunto el capture del pago.' : ''}`);
-      $('#successCaptureNote').textContent = order.method === 'saldo' ? 'Envíanos tu pedido para procesarlo más rápido.' : 'Envíanos tu pedido y adjunta el capture del pago para procesarlo más rápido.';
+      $('#successCaptureNote').textContent = order.method === 'saldo' ? 'Opcional: ya recibimos tu pedido. Úsalo solo si quieres enviarnos el detalle por WhatsApp.' : 'Opcional: ya recibimos tu pedido y tu capture. Úsalo solo si quieres enviarnos el detalle por WhatsApp.';
       openModal('successModal');
     });
 
@@ -2722,7 +2724,16 @@ window.NR_FIREBASE = {
           title: d < 0 ? `Tu ${sv.product} venció` : `Tu ${sv.product} vence ${d === 0 ? 'hoy' : 'en ' + d + ' día' + (d === 1 ? '' : 's')}`,
           text: `Fecha de vencimiento: ${new Date(sv.end).toLocaleDateString('es')}. Renuévalo para no quedarte sin servicio.`,
           action: { type: 'renew', productId: sv.itemId, svId: sv.id } }));
-      return [...explicit, ...auto].sort((a, b) => b.date - a.date);
+      // Suscripción activa: al comprar streaming (pagado o entregado) le llega el aviso de inmediato
+      const subs = [];
+      DB.get('orders', []).filter(o => o.userEmail === current.email && (o.status === 'Pagado' || o.status === 'Completado')).forEach(o => (o.items || []).forEach(i => {
+        if (!isStreamItem(i)) return;
+        const p = adminProducts().find(x => x.id === baseId(i.id)) || {}, dur = +p.durationDays || 30, id = `sub:${o.id}:${i.id}`;
+        subs.push({ id, auto: true, icon: '✅', date: o.date, read: ra.has(id), title: `Suscripción activa por ${dur} días`,
+          text: `${i.name}${i.qty > 1 ? ' ×' + i.qty : ''} · Pedido ${o.id}. ${o.status === 'Completado' ? 'Tus datos de acceso ya están en el pedido.' : 'En breve te enviamos tus datos de acceso.'}`,
+          action: { type: 'order', orderId: o.id } });
+      }));
+      return [...explicit, ...auto, ...subs].sort((a, b) => b.date - a.date);
     }
     function renderBell() {
       const logged = !!current;
