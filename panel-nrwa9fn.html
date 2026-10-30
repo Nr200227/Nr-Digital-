@@ -1087,10 +1087,9 @@
   <!-- ============================================================
        JAVASCRIPT
   ============================================================= -->
-  <script>
-/* =====================================================================
+  <script>/* =====================================================================
    NR Digital · Configuración de Firebase
-   Este archivo va en la misma carpeta que index.html.
+   Este archivo va en la misma carpeta que index.html y admin.html.
    ===================================================================== */
 window.NR_FIREBASE = {
   config: {
@@ -1101,7 +1100,7 @@ window.NR_FIREBASE = {
     messagingSenderId: "274677345548",
     appId: "1:274677345548:web:a04112976b48bade116d29"
   },
-  adminKey: "147e633a8c0615"   // huella del correo de admin (el correo no aparece en la página)
+  adminKey: "147e633a8c0615"
 };
 </script>
   <script>
@@ -1505,7 +1504,7 @@ window.NR_FIREBASE = {
     const validOrder = o => o.status === 'Pagado' || o.status === 'Completado';
     // Número para wa.me: convierte 0412-1234567 (Venezuela) a 584121234567
     const waNum = phone => { let d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('00')) d = d.slice(2); if (d.length === 11 && d.startsWith('0')) d = '58' + d.slice(1); return d.length >= 10 ? d : ''; };
-    const METHODS = { saldo: '💰 Saldo NR', pagomovil: '📱 Pago Móvil', binance: '🪙 Binance Pay' };
+    const METHODS = { saldo: '🟡 Ncoins', pagomovil: '📱 Pago Móvil', binance: '🔶 Binance Pay' };
     let topups = store.get('topups', []);
     const AVATAR_BG = ['linear-gradient(135deg,#0066FF,#00F0FF)', 'linear-gradient(135deg,#7C3AED,#0066FF)', 'linear-gradient(135deg,#059669,#00F0FF)',
                        'linear-gradient(135deg,#E11D48,#F59E0B)', 'linear-gradient(135deg,#F59E0B,#FDE047)', 'linear-gradient(135deg,#334155,#0F172A)'];
@@ -1809,6 +1808,11 @@ window.NR_FIREBASE = {
       const today = orders.filter(o => o.date >= dayStart(Date.now())).length;
       const pending = orders.filter(o => o.status === 'Pendiente').length;
       const delivered = done.reduce((s, o) => s + units(o), 0);
+      // contador público "pedidos entregados" de la tienda (solo sube, nunca baja)
+      if (!CLOUD || (NRCloud.ready('settings') && NRCloud.ready('orders'))) {
+        const cur = store.get('settings', {}) || {};
+        if (done.length > (+cur.deliveredCount || 0)) store.set('settings', { ...cur, deliveredCount: done.length });
+      }
       const pill = (txt, good = true) => `<span class="inline-flex items-center gap-1 rounded-full ${good ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'} px-2 py-0.5 text-xs font-semibold"><i data-lucide="${good ? 'trending-up' : 'trending-down'}" class="h-3 w-3"></i>${txt}</span>`;
       const kpis = [
         { label: 'Ventas Totales', value: money(sales), icon: 'dollar-sign',
@@ -3085,7 +3089,7 @@ window.NR_FIREBASE = {
     ];
     const DEFAULT_BANNERS = [
       { id: 'B-1', img: null, bg: 0, deco: '💎', title: 'Recargas al instante', subtitle: 'Diamantes, UC y más directo a tu ID en minutos.', btnText: 'Ver recargas', action: 'cat', target: 'Recargas', align: 'left', dark: true, active: true },
-      { id: 'B-2', img: null, bg: 1, deco: '💰', title: 'Recarga tu Billetera NR', subtitle: 'Paga con Pago Móvil o Binance y compra al instante con tu saldo.', btnText: 'Abrir billetera', action: 'wallet', target: '', align: 'left', dark: true, active: true },
+      { id: 'B-2', img: null, bg: 1, deco: '💰', title: 'Compra tus Ncoins', subtitle: 'Paga con Pago Móvil o Binance y luego compra al instante con tus Ncoins.', btnText: 'Abrir billetera', action: 'wallet', target: '', align: 'left', dark: true, active: true },
       { id: 'B-3', img: null, bg: 2, deco: '💬', title: '¿Dudas? Te ayudamos', subtitle: 'Escríbenos por WhatsApp y resolvemos tu pedido rápido.', btnText: 'Escribir por WhatsApp', action: 'wa', target: '', align: 'center', dark: true, active: true },
     ];
     const ACTION_LABEL = { none: 'Sin botón', catalog: 'Va al catálogo', cat: 'Abre categoría', prod: 'Abre producto', wallet: 'Abre la billetera', wa: 'Escribe por WhatsApp', url: 'Abre enlace' };
