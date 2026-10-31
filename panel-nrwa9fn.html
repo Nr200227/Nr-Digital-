@@ -810,6 +810,11 @@
             <input id="pfNeedsId" type="checkbox" class="sr-only" />
             <span class="switch shrink-0" id="pfIdSwitch"></span>
           </label>
+          <label id="pfServerRow" class="flex cursor-pointer items-center justify-between gap-3 border-t border-white/10 pt-4">
+            <span class="text-sm"><span class="block font-medium">🌐 Pedir ID de servidor</span><span class="text-xs text-muted">Para juegos como Mobile Legends: al lado del ID sale "Servidor"</span></span>
+            <input id="pfNeedsServer" type="checkbox" class="sr-only" />
+            <span class="switch shrink-0" id="pfSrvSwitch"></span>
+          </label>
           <label class="flex cursor-pointer items-center justify-between gap-3 border-t border-white/10 pt-4">
             <span class="text-sm"><span class="block font-medium">🔐 Recarga interna</span><span class="text-xs text-muted">Para juegos como Roblox: en vez del ID, el cliente elige darte su correo y contraseña o recibir una gift card</span></span>
             <input id="pfInterna" type="checkbox" class="sr-only" />
@@ -2080,6 +2085,10 @@ window.NR_FIREBASE = {
     $('#pfActive').addEventListener('change', syncSwitch);
     const syncIdSwitch = () => $('#pfIdSwitch').className = 'switch ' + ($('#pfNeedsId').checked ? 'on' : '');
     $('#pfNeedsId').addEventListener('change', () => { if ($('#pfNeedsId').checked) { $('#pfInterna').checked = false; syncIntSwitch(); } syncIdSwitch(); });
+    const syncSrvSwitch = () => { $('#pfSrvSwitch').className = 'switch ' + ($('#pfNeedsServer').checked ? 'on' : ''); $('#pfServerRow').classList.toggle('hidden', !$('#pfNeedsId').checked); };
+    $('#pfNeedsServer').addEventListener('change', syncSrvSwitch);
+    $('#pfNeedsId').addEventListener('change', syncSrvSwitch);
+    $('#pfInterna').addEventListener('change', syncSrvSwitch);
     const syncIntSwitch = () => $('#pfIntSwitch').className = 'switch ' + ($('#pfInterna').checked ? 'on' : '');
     $('#pfInterna').addEventListener('change', () => { if ($('#pfInterna').checked) { $('#pfNeedsId').checked = false; syncIdSwitch(); } syncIntSwitch(); });
     // Tipo de producto: muestra solo las opciones de ese tipo
@@ -2212,6 +2221,7 @@ window.NR_FIREBASE = {
       const name = $('#pfName').value.trim(); if (name.length < 3) return toast('Escribe primero el nombre del juego', 'warn');
       if ($('#pfDesc').value.trim() && !confirm('¿Reemplazar la descripción actual por una nueva?')) return;
       const g = GAME_INFO.find(x => x.re.test(name));
+      if (pfKind === 'juego' && /mobile\s*legends|mlbb/i.test(name) && !$('#pfNeedsServer').checked) { $('#pfNeedsId').checked = true; $('#pfNeedsServer').checked = true; syncIdSwitch(); syncSrvSwitch(); }
       if (pfKind === 'juego' && g && g.interna && !$('#pfInterna').checked) { $('#pfInterna').checked = true; $('#pfNeedsId').checked = false; syncIntSwitch(); syncIdSwitch(); toast('Activé "Recarga interna" para este juego'); }
       $('#pfDesc').value = gameDesc(name, pfKind === 'juego' ? pkDraft : [], pfKind === 'juego' && $('#pfNeedsId').checked, pfKind === 'juego' && $('#pfInterna').checked);
     });
@@ -2282,6 +2292,7 @@ window.NR_FIREBASE = {
       pfImg = p ? (p.img || null) : null; renderImgPreview();
       $('#pfActive').checked = p ? p.active : true; syncSwitch();
       $('#pfNeedsId').checked = p ? (p.needsId ?? kindOf(p) === 'juego') : kindOf({ cat: $('#pfCat').value }) === 'juego'; syncIdSwitch();
+      $('#pfNeedsServer').checked = !!(p && (p.needsServer ?? /mobile\s*legends|mlbb/i.test(p.name || ''))); syncSrvSwitch();
       $('#pfInterna').checked = !!(p && p.interna); syncIntSwitch();
       setPfType($('#pfCat').value, false);
       pkDraft = p && Array.isArray(p.packages) ? p.packages.map(k => ({ ...k })) : []; renderPk();
@@ -2316,6 +2327,7 @@ window.NR_FIREBASE = {
                      kind: pfKind,
                      needsId: pfKind === 'juego' && $('#pfNeedsId').checked && !$('#pfInterna').checked,
                      interna: pfKind === 'juego' && $('#pfInterna').checked,
+                     needsServer: pfKind === 'juego' && $('#pfNeedsId').checked && !$('#pfInterna').checked && $('#pfNeedsServer').checked,
                      durationDays: pfKind === 'streaming' ? (Math.max(0, parseInt($('#pfDuration').value, 10) || 0) || 30) : null,
                      giftValue: pfKind === 'gift' ? (Math.max(0, parseFloat($('#pfGift').value) || 0) || +price.toFixed(2) || null) : null,
                      packages: pk.length ? pk : null, pkgIcon: pfKind === 'juego' && pkIcon ? pkIcon : null };
@@ -2525,9 +2537,10 @@ window.NR_FIREBASE = {
       actions.push(`<button data-delorder="${esc(o.id)}" class="ml-auto rounded-xl border border-rose-500/30 px-4 py-2.5 text-sm font-semibold text-rose-300 hover:bg-rose-500/10">🗑️ Borrar pedido</button>`);
       $('#omCode').textContent = o.id;
       const ou = userByEmail(o.userEmail), osn = sanctionOf(ou);
+      const capBox = o.dupCap ? `<div class="mb-4 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">🖼️ <b>Capture repetido:</b> es la misma imagen de comprobante que ${esc(o.dupCap)}. Revisa antes de aprobar.</div>` : '';
       const dupBox = o.dupRef ? `<div class="mb-4 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">🔁 <b>Referencia repetida:</b> ${esc(o.dupRef)} ya usó este número de referencia. Puede ser un capture enviado dos veces.
           ${osn ? `<p class="mt-2 font-semibold">Cliente ya sancionado (${osn.ban ? 'baneado' : 'suspendido'}).</p>` : `<button data-sanction="${esc(o.userEmail)}" data-reason="Capture o referencia repetida" class="mt-2 rounded-lg border border-rose-400/50 px-3 py-1.5 text-xs font-semibold text-rose-200 hover:bg-rose-500/20">⏸️ Suspender a este cliente</button>`}</div>` : '';
-      $('#omBody').innerHTML = `${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
+      $('#omBody').innerHTML = `${capBox}${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-2xl border border-white/10 p-4">
             <p class="text-xs uppercase tracking-widest text-muted">Cliente</p>
@@ -2603,7 +2616,7 @@ window.NR_FIREBASE = {
       $('#allTopups').innerHTML = list.map(t => {
         const u = userByEmail(t.userEmail) || { name: t.client };
         return `<tr>
-          <td class="font-mono text-xs font-semibold text-neon">${esc(t.id)}</td>
+          <td class="font-mono text-xs font-semibold text-neon">${esc(t.id)}${t.dupRef ? `<p class="mt-1 font-sans text-[10px] font-bold text-rose-300">🔁 Ref. repetida (${esc(t.dupRef)})</p>` : ''}${t.dupCap ? `<p class="mt-1 font-sans text-[10px] font-bold text-rose-300">🖼️ Capture repetido (${esc(t.dupCap)})</p>` : ''}</td>
           <td><div class="flex items-center gap-2.5">${avatar(u, 'h-8 w-8')}<div class="leading-tight"><p>${esc(u.name || t.client)}</p><p class="text-xs text-muted">${esc(t.phone || '')}</p></div></div></td>
           <td><p class="font-semibold">${money(t.amount)}</p>${t.amountBs ? `<p class="text-xs text-muted">${esc(t.amountBs)}</p>` : ''}</td>
           <td class="text-xs">${METHODS[t.method] || '—'}<p class="font-mono text-muted">Ref. ${esc(t.ref)}</p></td>
@@ -3605,11 +3618,22 @@ window.NR_FIREBASE = {
     const refKey = r => String(r || '').replace(/\D/g, '').slice(-6);
     function checkDupRefs() {
       const tops = store.get('topups', []); let chO = false, chT = false;
+      // la misma imagen de capture usada en dos pagos
+      const caps = [...orders.map(o => ['o', o]), ...tops.map(t => ['t', t])].filter(([, x]) => x && x.captureSig);
+      caps.forEach(([k, x]) => {
+        if (x.capChecked) return;
+        x.capChecked = true; k === 'o' ? chO = true : chT = true;
+        const other = caps.find(([, y]) => y !== x && y.captureSig === x.captureSig && (y.date || 0) <= (x.date || 0));
+        if (!other) return;
+        x.dupCap = other[1].id;
+        liveAlert({ emoji: '🖼️', title: 'Capture repetido', label: k === 'o' ? 'Ver pedido' : 'Ver recargas',
+          text: `${x.id} · ${x.client} envió la misma imagen de comprobante que ${other[1].id}${other[1].userEmail === x.userEmail ? ' (mismo cliente)' : ''}`,
+          onOpen: () => { if (k === 'o') { showView('pedidos'); openOrder(x.id); } else showView('recargas'); } });
+      });
       const all = [...orders.map(o => ['o', o]), ...tops.map(t => ['t', t])].filter(([, x]) => x && x.ref && refKey(x.ref).length >= 4);
       all.forEach(([k, x]) => {
         if (x.dupChecked) return;
         x.dupChecked = true; k === 'o' ? chO = true : chT = true;
-        if (Date.now() - (x.date || 0) > 7 * 864e5) return;
         const other = all.find(([, y]) => y !== x && refKey(y.ref) === refKey(x.ref) && (y.date || 0) <= (x.date || 0));
         if (!other) return;
         x.dupRef = other[1].id;
