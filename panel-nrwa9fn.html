@@ -1342,7 +1342,12 @@ window.NR_FIREBASE = {
       fb = { app, auth: a, fs: f };
       // El panel usa su propia sesión: entrar o salir del panel no cierra la sesión de cliente en la tienda (y al revés)
       const fbApp = mode === 'admin' ? app.initializeApp(conf, 'nr-admin') : app.initializeApp(conf);
-      auth = a.getAuth(fbApp); db = f.getFirestore(fbApp);
+      auth = a.getAuth(fbApp);
+      // En la tienda, el catálogo queda guardado en el teléfono: la próxima vez abre al instante y luego se actualiza solo
+      if (mode === 'store' && f.initializeFirestore && f.persistentLocalCache) {
+        try { db = f.initializeFirestore(fbApp, { localCache: f.persistentLocalCache({ tabManager: f.persistentMultipleTabManager() }) }); }
+        catch (_) { db = f.getFirestore(fbApp); }
+      } else db = f.getFirestore(fbApp);
       try { auth.languageCode = 'es'; } catch (_) {}
       if (mode === 'store') { try { await a.setPersistence(auth, a.browserLocalPersistence); } catch (_) {} }   // la sesión del cliente queda guardada
       startPublic();
@@ -1614,6 +1619,7 @@ window.NR_FIREBASE = {
       throw new Error('No se pudo abrir la imagen. Toma una captura de pantalla (PNG o JPG) y súbela de nuevo.');
     }
     // Dibuja la imagen en un lienzo y la comprime hasta que pese menos de "limit" caracteres
+    const WEBP_OK = (() => { try { const c = document.createElement('canvas'); c.width = c.height = 2; return c.toDataURL('image/webp').startsWith('data:image/webp'); } catch (_) { return false; } })();
     function compressImage(im, max, limit, bg, crop) {
       let scale = Math.min(1, max / Math.max(crop ? crop.size : Math.max(im.w, im.h), 1));
       for (let tries = 0; tries < 6; tries++) {
@@ -1622,16 +1628,45 @@ window.NR_FIREBASE = {
         const ctx = c.getContext('2d'); ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
         if (crop) crop.draw(ctx, w); else ctx.drawImage(im.src, 0, 0, w, h);
         for (const q of [0.82, 0.7, 0.58, 0.45]) {
-          const out = c.toDataURL('image/jpeg', q);
+          const out = c.toDataURL(WEBP_OK ? 'image/webp' : 'image/jpeg', q);
           if (out.length > 30 && out.length <= limit) return out;
         }
         if (crop) max *= 0.8; else scale *= 0.75;
       }
       throw new Error('No se pudo procesar la imagen. Prueba con otra captura.');
     }
-    async function resizeImage(file, max) {
+    async function resizeImage(file, max, limit = 700000) {
       const im = await openImageFile(file);
-      try { return compressImage(im, max, 700000, '#121212'); } finally { try { im.done(); } catch (_) {} }
+      try { return compressImage(im, max, limit, '#121212'); } finally { try { im.done(); } catch (_) {} }
+    }
+    // Achica las imágenes pesadas que ya están guardadas (productos, banners y logo) para que la tienda cargue rápido
+    let optRunning = false, optTimer = null;
+    async function optimizeImages() {
+      if (optRunning) return;
+      if (CLOUD && !['products', 'banners', 'settings'].every(k => NRCloud.ready(k))) return;
+      const big = (d, lim) => typeof d === 'string' && /^data:image\//.test(d) && d.length > lim;
+      const prods = store.get('products', []), bans = store.get('banners', []), st = { ...(store.get('settings', {}) || {}) };
+      const jobs = [];
+      prods.forEach(p => { if (big(p.img, 150000)) jobs.push([p, 'img', 600, 110000, '#121212']); });
+      bans.forEach(b => { if (big(b.img, 320000)) jobs.push([b, 'img', 1280, 260000, '#121212']); });
+      if (big(st.logo, 90000)) jobs.push([st, 'logo', 256, 60000, '#0A0F1F']);
+      if (!jobs.length) return;
+      optRunning = true; let n = 0, saved = 0; const touched = new Set();
+      for (const [obj, key, max, lim, bg] of jobs) {
+        try {
+          const blob = await (await fetch(obj[key])).blob();
+          const im = await openImageFile(new File([blob], 'imagen', { type: blob.type || 'image/jpeg' }));
+          try {
+            const out = compressImage(im, max, lim, bg);
+            if (out.length < obj[key].length * 0.9) { saved += obj[key].length - out.length; obj[key] = out; n++; touched.add(obj === st ? 's' : prods.includes(obj) ? 'p' : 'b'); }
+          } finally { try { im.done(); } catch (_) {} }
+        } catch (_) {}
+      }
+      if (touched.has('p')) store.set('products', prods);
+      if (touched.has('b')) store.set('banners', bans);
+      if (touched.has('s')) store.set('settings', { ...(store.get('settings', {}) || {}), logo: st.logo });
+      if (n) toast(`⚡ Optimicé ${n} imagen${n === 1 ? '' : 'es'} (${(saved / 1048576).toFixed(1)} MB menos): la tienda carga más rápido`);
+      optRunning = false;
     }
 
     /* ---------- Login ---------- */
@@ -2055,7 +2090,7 @@ window.NR_FIREBASE = {
     $('#cropOk').addEventListener('click', () => {
       try {
         if (cr.make) { const data = cr.make(), fn = cr.done; closeCrop(); fn && fn(data); return; }
-        pfImg = compressImage(cr.im, 800, 500000, '#121212', { size: 800, draw: (ctx, w) => cropDraw(ctx, w) }); renderImgPreview(); closeCrop();
+        pfImg = compressImage(cr.im, 600, 110000, '#121212', { size: 600, draw: (ctx, w) => cropDraw(ctx, w) }); renderImgPreview(); closeCrop();
       }
       catch (err) { toast(err.message, 'err'); }
     });
@@ -2830,7 +2865,7 @@ window.NR_FIREBASE = {
       const job = openImageFile(file);
       try {
         const im = await job;
-        openCrop(im, () => compressImage(cr.im, 256, 150000, '#0A0F1F', { size: 256, draw: (ctx, w) => cropDraw(ctx, w) }), data => {
+        openCrop(im, () => compressImage(cr.im, 256, 60000, '#0A0F1F', { size: 256, draw: (ctx, w) => cropDraw(ctx, w) }), data => {
           store.set('settings', { ...store.get('settings', {}), logo: data }); applyLogo(); toast('Logo actualizado en la tienda');
         });
       } catch (err) { toast(err.message, 'err'); }
@@ -3278,7 +3313,7 @@ window.NR_FIREBASE = {
     $('#bfBg').addEventListener('click', e => { const b = e.target.closest('[data-bg]'); if (b) { bf.bg = +b.dataset.bg; renderBf(); } });
     $('#bfImg').addEventListener('change', async e => {
       const file = e.target.files && e.target.files[0]; if (!file) return;
-      const job = resizeImage(file, 1600);
+      const job = resizeImage(file, 1280, 260000);
       try { bf.img = await job; renderBf(); } catch (err) { toast(err.message, 'err'); }
       e.target.value = '';
     });
@@ -3645,6 +3680,7 @@ window.NR_FIREBASE = {
     }
     function processIncoming() {
       checkDupRefs();
+      clearTimeout(optTimer); optTimer = setTimeout(optimizeImages, 2500);
       if (!CLOUD) return;
       let changedOrders = false, changedProducts = false;
       orders.forEach(o => {
