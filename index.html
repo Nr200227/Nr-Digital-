@@ -295,10 +295,13 @@
           <li><a href="#garantia" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">🛡️</span>Garantía y condiciones</a></li>
           <li><a href="#contacto" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">🕒</span>Horario y contacto</a></li>
           <li><a href="#terminos" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">📄</span>Términos y privacidad</a></li>
+          <li data-vipnav class="hidden"><a href="#vip" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">👑</span>Club VIP</a></li>
+          <li id="menuRaffle" class="hidden"><a href="#sorteo" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">🎟️</span>Sorteo del mes</a></li>
           <li class="pt-2"><button id="mobileAccess" class="mobile-link btn-primary block w-full rounded-xl px-4 py-3 text-center font-semibold">Iniciar sesión</button></li>
         </ul>
       </div>
     </nav>
+    <div id="saleBanner" class="hidden w-full px-4 py-2 text-center text-xs font-semibold leading-snug text-white" style="background:linear-gradient(90deg,#d9480f,#f76707,#e8590c)"></div>
     <div id="maintBanner" class="hidden border-b border-amber-500/20 bg-[#2a2310] px-4 py-2 text-center text-xs font-medium text-amber-300">
       🛠️ Estamos en mantenimiento. Las compras están pausadas temporalmente.
     </div>
@@ -380,6 +383,7 @@
           </div>
           <div id="filters" class="no-scrollbar -mx-3 mt-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:flex-wrap sm:px-0"></div>
         </div>
+        <p id="avgPill" class="mb-4 hidden w-fit rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300"></p>
         <div id="catRows" class="space-y-9 pt-1"></div>
         <div id="catHead" class="mb-4 flex items-baseline justify-between">
           <h2 id="catTitle" class="font-display text-xl font-bold sm:text-2xl">Catálogo</h2>
@@ -399,7 +403,7 @@
 
   <footer class="border-t border-white/10 bg-ink-900">
     <div class="mx-auto max-w-7xl px-4 py-6 text-center text-xs text-muted sm:px-6 lg:px-8">
-      <nav class="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm"><a href="#comprar" class="hover:text-neon">Cómo comprar</a><a href="#faq" class="hover:text-neon">Preguntas</a><a href="#garantia" class="hover:text-neon">Garantía</a><a href="#contacto" class="hover:text-neon">Horario y contacto</a><a href="#terminos" class="hover:text-neon">Términos y privacidad</a></nav>
+      <nav class="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm"><a href="#comprar" class="hover:text-neon">Cómo comprar</a><a href="#faq" class="hover:text-neon">Preguntas</a><a href="#garantia" class="hover:text-neon">Garantía</a><a href="#contacto" class="hover:text-neon">Horario y contacto</a><a href="#terminos" class="hover:text-neon">Términos y privacidad</a><a href="#vip" data-vipnav class="hidden hover:text-neon">Club VIP</a></nav>
       <p>© <span id="year"></span> NR Digital. Todos los derechos reservados.</p>
     </div>
   </footer>
@@ -582,6 +586,26 @@
     </div>
   </div>
 
+  <div id="vipModal" class="modal fixed inset-0 z-[88] hidden items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-label="👑 Club VIP">
+    <div class="glass flex max-h-[88vh] w-full flex-col rounded-t-3xl shadow-glow-lg sm:max-w-lg sm:rounded-3xl">
+      <div class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+        <div class="min-w-0"><p class="text-[11px] font-semibold uppercase tracking-widest text-neon">Niveles de clientes</p><h3 class="font-display text-lg font-bold">👑 Club VIP</h3></div>
+        <button type="button" data-close="vipModal" aria-label="Cerrar" class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/5 text-muted hover:bg-white/10 hover:text-white"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg></button>
+      </div>
+      <div id="vipBody" class="overflow-y-auto overscroll-contain px-5 py-5"></div>
+    </div>
+  </div>
+  <div id="sorteoModal" class="modal fixed inset-0 z-[88] hidden items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-label="🎟️ Sorteo del mes">
+    <div class="glass flex max-h-[88vh] w-full flex-col rounded-t-3xl shadow-glow-lg sm:max-w-lg sm:rounded-3xl">
+      <div class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+        <div class="min-w-0"><p class="text-[11px] font-semibold uppercase tracking-widest text-neon">Cada compra cuenta</p><h3 class="font-display text-lg font-bold">🎟️ Sorteo del mes</h3></div>
+        <button type="button" data-close="sorteoModal" aria-label="Cerrar" class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/5 text-muted hover:bg-white/10 hover:text-white"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg></button>
+      </div>
+      <div id="sorteoBody" class="overflow-y-auto overscroll-contain px-5 py-5"></div>
+    </div>
+  </div>
+  <div id="socialPop" class="pointer-events-none hidden max-w-[17rem] rounded-2xl border border-white/10 px-3 py-2.5 text-xs leading-snug shadow-glow" style="position:fixed;left:.75rem;bottom:5.5rem;z-index:60;background:rgba(10,14,26,.95)"></div>
+
   <div id="reviewModal" class="modal fixed inset-0 z-[88] hidden items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4">
     <div class="glass max-h-[92vh] w-full overflow-y-auto rounded-t-3xl p-5 shadow-glow-lg sm:max-w-md sm:rounded-3xl sm:p-6">
       <div class="flex items-start justify-between gap-3">
@@ -702,6 +726,7 @@
           <p id="pfSpent" class="mt-1 font-display text-3xl font-bold text-neon">$0.00 <span class="text-sm font-semibold text-muted">USD</span></p>
           <p id="pfSpentNote" class="mt-1 text-xs text-muted"></p>
         </div>
+        <div id="pfVip" class="mt-4 w-full"></div>
         <div class="mt-4 flex gap-2">
           <label class="relative cursor-pointer overflow-hidden rounded-lg border border-neon/40 px-3 py-1.5 text-xs font-semibold text-neon transition hover:bg-neon/10">📷 Subir foto
             <input id="pfFile" type="file" accept="image/*,.jpg,.jpeg,.png,.webp" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" /></label>
@@ -746,10 +771,12 @@
         <p id="successCode" class="mt-1 select-all font-mono text-2xl font-bold tracking-wider text-neon"></p>
       </div>
       <p id="successTotal" class="mt-3 text-sm"></p>
+      <div id="successTickets"></div>
       <div class="mt-6 grid grid-cols-2 gap-3">
         <button id="copyCode" class="rounded-xl border border-white/10 py-2.5 text-sm font-semibold transition hover:bg-white/5">Copiar código</button>
         <button id="goOrders" class="btn-primary rounded-xl py-2.5 text-sm font-semibold">Mis pedidos</button>
       </div>
+      <button type="button" id="shareBuy" class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-neon/40 py-2.5 text-sm font-semibold text-neon transition hover:bg-neon/10">📣 Compartir mi compra</button>
       <a id="successCapture" href="#" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3.5 text-sm font-bold text-white transition hover:brightness-110">📲 Enviar pedido manualmente</a>
       <p id="successCaptureNote" class="mt-1.5 text-xs text-muted">Envíanos tu pedido para procesarlo más rápido.</p>
       <a id="successSupport" href="#" target="_blank" rel="noopener" class="mt-3 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/10"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.6 8.6c.2 2.4 2.4 4.6 4.8 4.8l.9-1 1.6.7-.3 1.4c-3.6.3-7.1-3.2-6.8-6.8l1.4-.3.7 1.6z" stroke-width="1.5"/></svg> Soporte por WhatsApp</a>
@@ -1169,6 +1196,9 @@ window.NR_FIREBASE = {
       coupons:      { col: 'coupons',     id: 'code', sort: 'createdAt', del: true },
       reviews:      { col: 'reviews',     id: 'id',   sort: 'date', del: true },
       stats:        { col: 'stats',       id: 'day',  sort: 't' },
+      waitlist:     { col: 'waitlist',    id: 'id',   sort: 'date', del: true },
+      feed:         { doc: 'config/feed', pub: true },
+      priv:         { doc: 'private/panel' },
     };
 
     const cache = {}, ready = {}, known = {};      // known: última versión conocida de cada documento
@@ -1185,7 +1215,7 @@ window.NR_FIREBASE = {
     const emit = (key, oldValue) => { try { window.dispatchEvent(new StorageEvent('storage', { key: 'nradmin_' + key, oldValue: oldValue || null })); } catch (_) {} };
     const cloudError = (err, where) => {
       console.warn('[NR Cloud]', where, err);
-      if (/^leer (coupons|reviews|stats)$/.test(where)) return;   // funciones nuevas: si faltan sus reglas, fallan en silencio
+      if (/^leer (coupons|reviews|stats|waitlist|feed|priv)$/.test(where)) return;   // funciones nuevas: si faltan sus reglas, fallan en silencio
       try { window.dispatchEvent(new CustomEvent('nrcloud-error', { detail: { code: err && err.code, where } })); } catch (_) {}
     };
 
@@ -1301,10 +1331,11 @@ window.NR_FIREBASE = {
       pubUnsubs.push(listenCol('banners', query(collection(db, 'banners'), orderBy('order'))));
       pubUnsubs.push(listenDoc('settings', 'config/settings'));
       pubUnsubs.push(listenDoc('online', 'config/store'));
+      pubUnsubs.push(listenDoc('feed', 'config/feed'));
     }
     function stopOwn() {
       ownUnsubs.forEach(u => { try { u(); } catch (_) {} }); ownUnsubs = [];
-      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj', 'coupons', 'stats'].forEach(k => {
+      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj', 'coupons', 'stats', 'waitlist', 'priv'].forEach(k => {
         Object.keys(known).forEach(x => { if (x.startsWith(k + '/')) delete known[x]; });
         const had = (cache[k] || []).length; cache[k] = []; ready[k] = false; if (had) emit(k);
       });
@@ -1322,6 +1353,8 @@ window.NR_FIREBASE = {
         ownUnsubs.push(listenCol('coupons', collection(db, 'coupons')));
         ownUnsubs.push(listenCol('reviews', query(collection(db, 'reviews'), orderBy('date', 'desc'), limit(400))));
         ownUnsubs.push(listenCol('stats', query(collection(db, 'stats'), orderBy('t', 'desc'), limit(60))));
+        ownUnsubs.push(listenCol('waitlist', query(collection(db, 'waitlist'), orderBy('date', 'desc'), limit(300))));
+        ownUnsubs.push(listenDoc('priv', 'private/panel'));
         ready.clientNotifs = true; cache.clientNotifs = [];      // el panel solo envía avisos
       } else {
         const mine = c => query(collection(db, c), where('userId', '==', u.uid));
@@ -1337,6 +1370,7 @@ window.NR_FIREBASE = {
         ownUnsubs.push(listenCol('giftcards', query(collection(db, 'giftcards'), where('redeemedById', '==', u.uid)), 'r'));
         ready.reports = true; cache.reports = [];
         ready.coupons = true; cache.coupons = []; ready.stats = true; cache.stats = [];
+        ready.waitlist = true; cache.waitlist = []; ready.priv = true;
       }
     }
     function resync() { if (!user) return; stopOwn(); startOwn(user); }
@@ -1544,18 +1578,42 @@ window.NR_FIREBASE = {
     // Paquetes (ej. 100 / 310 / 520 diamantes): cada paquete es un "producto virtual" con id PADRE~PAQUETE
     const baseId = id => String(id).split('~')[0];
     const pkgsOf = p => (Array.isArray(p.packages) ? p.packages : []).filter(k => k && k.label && +k.price > 0);
-    const loadCatalog = () => adminProducts().filter(p => p.active).flatMap(p => {
+    /* ---------- Oferta general (se prende desde el panel) ---------- */
+    // Precio rebajado = precio × (1 − %). Nunca aplica a gift cards. Puede ser para toda la tienda o solo algunas categorías.
+    function saleNow() {
+      try { const sl = settings().sale; return sl && sl.on && +sl.pct > 0 && +sl.pct < 100 && (!+sl.until || Date.now() <= +sl.until) ? sl : null; }
+      catch (_) { return null; }   // al arrancar la página los ajustes aún no están listos
+    }
+    const saleFor = (sl, p) => !!sl && !(+p.giftValue > 0) && (!Array.isArray(sl.cats) || !sl.cats.length || sl.cats.includes(p.cat));
+    const salePrice = (v, sl) => +(v * (1 - +sl.pct / 100)).toFixed(2);
+    const saleBs = (v, sl) => +v > 0 ? roundBs(+v * (1 - +sl.pct / 100)) : null;
+    /* ---------- Club VIP (el nivel de cada cliente lo pones tú en el panel) ---------- */
+    const VIP_DEF = { bronce: ['🥉', 'Bronce', '#CD7F32'], plata: ['🥈', 'Plata', '#C0C0C0'], oro: ['🥇', 'Oro', '#FFD700'], diamante: ['💎', 'Diamante', '#4FD1FF'], revendedor: ['🏪', 'Revendedor', '#A78BFA'] };
+    const VIP_ORDER = ['bronce', 'plata', 'oro', 'diamante', 'revendedor'];
+    const vipCfg = () => { try { const v = settings().vip; return v && typeof v === 'object' ? v : {}; } catch (_) { return {}; } };
+    function vipInfo(id) {
+      const d = VIP_DEF[id]; if (!d) return null;
+      const L = (vipCfg().levels || {})[id] || {};
+      return { id, emoji: String(L.emoji || d[0]), name: String(L.name || d[1]), color: d[2], show: L.show !== false, pct: Math.max(0, Math.min(90, +L.pct || 0)), perks: String(L.perks || '').split('\n').map(x => x.trim()).filter(Boolean) };
+    }
+    function myVip() { try { if (!current || !current.vip || vipCfg().on !== true) return null; return vipInfo(current.vip); } catch (_) { return null; } }
+    const loadCatalog = () => { const sl = saleNow(), vp = myVip(); return adminProducts().filter(p => p.active && !(p.raffle && +p.raffle.drawAt && Date.now() > +p.raffle.drawAt)).flatMap(p => {
+      const off = saleFor(sl, p) && !p.raffle, vOff = !!vp && vp.pct > 0 && !(+p.giftValue > 0) && !p.raffle, any = off || vOff;
+      // oferta primero y luego el descuento VIP (cada paso redondeado a centavos, igual que el panel)
+      const adj = v => { let x = +v; if (off) x = salePrice(x, sl); if (vOff) x = +(x * (1 - vp.pct / 100)).toFixed(2); return x; };
+      const adjBs = v => { if (!(+v > 0)) return null; let x = +v; if (off) x *= 1 - +sl.pct / 100; if (vOff) x *= 1 - vp.pct / 100; return roundBs(x); };
       const base = {
         id: p.id, cat: p.cat, icon: p.icon, img: p.img || null, title: p.name, price: p.price,
         old: p.old || null, tag: p.tag || null, stock: p.stock, desc: p.desc || 'Producto digital con entrega inmediata.', ownDesc: (p.desc || '').trim() || null,
         kind: kindOfP(p), needsId: p.interna ? false : (p.needsId ?? (kindOfP(p) === 'juego')), priceBs: +p.priceBs > 0 ? +p.priceBs : null,
-        giftValue: +p.giftValue > 0 ? +p.giftValue : null, pkgIcon: p.pkgIcon || null, interna: !!p.interna, needsServer: !p.interna && (p.needsServer ?? /mobile\s*legends|mlbb/i.test(p.name || '')),
+        raffle: p.raffle || null, giftValue: +p.giftValue > 0 ? +p.giftValue : null, pkgIcon: p.pkgIcon || null, interna: !!p.interna, needsServer: !p.interna && (p.needsServer ?? /mobile\s*legends|mlbb/i.test(p.name || '')),
       };
+      if (any) Object.assign(base, { price: adj(p.price), old: +p.price, priceBs: adjBs(p.priceBs), tag: off ? `🔥 -${+sl.pct}%` : `${vp.emoji} VIP -${vp.pct}%` });
       const ks = pkgsOf(p);
       if (!ks.length) return [base];
-      const vars = ks.map(k => ({ ...base, id: p.id + '~' + k.id, title: `${p.name} · ${k.label}`, pkgLabel: k.label, price: +k.price, priceBs: +k.priceBs > 0 ? +k.priceBs : null, old: null, variant: true, parentId: p.id }));
-      return [{ ...base, price: Math.min(...vars.map(v => v.price)), priceBs: null, old: null, hasPkgs: true, pkgs: vars }, ...vars];
-    });
+      const vars = ks.map(k => ({ ...base, id: p.id + '~' + k.id, title: `${p.name} · ${k.label}`, pkgLabel: k.label, price: any ? adj(k.price) : +k.price, priceBs: any ? adjBs(k.priceBs) : (+k.priceBs > 0 ? +k.priceBs : null), old: any ? +k.price : null, variant: true, parentId: p.id }));
+      return [{ ...base, price: Math.min(...vars.map(v => v.price)), priceBs: null, old: any ? Math.min(...vars.map(v => v.old)) : null, hasPkgs: true, pkgs: vars }, ...vars];
+    }); };
     const SHOWN = () => PRODUCTS.filter(p => !p.variant);   // lo que se ve en el catálogo (sin los paquetes sueltos)
     let PRODUCTS = loadCatalog();
     let storeOnline = DB.get('online', true);
@@ -1574,6 +1632,7 @@ window.NR_FIREBASE = {
     const roundBs = v => { const r = +settings().round || 0; return r > 0 ? Math.ceil(v / r - 1e-9) * r : Math.round(v * 100) / 100; };
     const amountBs = usd => { const rate = +settings().rate; return rate > 0 ? roundBs(usd * rate) : null; };
     const unitBs = p => (+p.priceBs > 0 ? +p.priceBs : amountBs(p.price));
+    PRODUCTS = loadCatalog();   // ya con los ajustes listos (por si hay oferta activa)
     const bsOf = items => { let t = 0; for (const it of items) { const u = unitBs(it.p); if (u == null) return null; t += u * it.qty; } return Math.round(t * 100) / 100; };
     const cartBs = () => bsOf(cart.map(i => ({ p: PRODUCTS.find(x => x.id === i.id), qty: i.qty })).filter(x => x.p));
     const METHODS = { saldo: 'Ncoins', pagomovil: 'Pago Móvil', binance: 'Binance Pay' };
@@ -1587,6 +1646,14 @@ window.NR_FIREBASE = {
     const NCOIN = cls => `<svg viewBox="0 0 48 48" class="${cls}" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="url(#ncG)" stroke="#9A5F06" stroke-width="1.5"/><circle cx="24" cy="24" r="17" fill="none" stroke="#FFF4C8" stroke-opacity=".75" stroke-width="1.6"/><path d="M17 33V15h3.6l7.5 11.1V15H31.4v18h-3.6l-7.5-11.1V33z" fill="#7C4A00"/><path d="M11 17a14 14 0 0 1 9-7" stroke="#fff" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>`;
     const NC = v => (+(v) || 0).toFixed(2) + ' Ncoins';
     const METHOD_ICON = { saldo: NCOIN('mx-auto h-7 w-7'), pagomovil: '📱', binance: '<span class="bn-logo mx-auto block h-7 w-7" role="img" aria-label="Binance"></span>' };
+    /* ---------- Métodos de pago extra (Zelle, Zinli, transferencia…) que agregas en el panel ---------- */
+    const BASE_METHODS = ['saldo', 'pagomovil', 'binance'];
+    function extraPays() {
+      try { return (settings().extraPays || []).filter(m => m && m.on !== false && /^[a-z0-9]{2,15}$/.test(m.id || '') && !BASE_METHODS.includes(m.id) && String(m.name || '').trim()); }
+      catch (_) { return []; }
+    }
+    const extraOf = id => extraPays().find(m => m.id === id) || null;
+    function syncMethods() { extraPays().forEach(m => { METHODS[m.id] = m.name; METHOD_ICON[m.id] = esc(m.icon || '💳'); }); }
     const WA_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.6 8.6c.2 2.4 2.4 4.6 4.8 4.8l.9-1 1.6.7-.3 1.4c-3.6.3-7.1-3.2-6.8-6.8l1.4-.3.7 1.6z" stroke-width="1.5"/></svg>';
 
     const needsId = p => p.needsId ?? (kindOfP(p) === 'juego');
@@ -1787,6 +1854,7 @@ window.NR_FIREBASE = {
     function renderAccount() {
       const logged = !!current;
       try { renderSanctionBanner(); renderVerify(); } catch (_) {}
+      try { const vk = JSON.stringify(myVip()); if (vk !== lastVipKey) { lastVipKey = vk; refreshCatalog(); } } catch (_) {}
       $('#accessBtn').classList.toggle('sm:inline-flex', !logged);
       $('#userWrap').classList.toggle('md:block', logged);
       $('#mobileAccess').textContent = logged ? 'Mi perfil' : 'Iniciar sesión';
@@ -1916,6 +1984,7 @@ window.NR_FIREBASE = {
       const paid = DB.get('orders', []).filter(o => o.userEmail === current.email && (o.status === 'Pagado' || o.status === 'Completado'));
       const total = paid.reduce((s, o) => s + o.amount, 0);
       $('#pfSpent').innerHTML = `${money(total)} <span class="text-sm font-semibold text-muted">USD</span>`;
+      renderVipCard();
       $('#pfSpentNote').textContent = paid.length ? `En ${paid.length} pedido${paid.length === 1 ? '' : 's'} pagado${paid.length === 1 ? '' : 's'}` : 'Aún no tienes compras pagadas';
     }
     function openProfile() {
@@ -2002,6 +2071,7 @@ window.NR_FIREBASE = {
       return `${p.old ? `<p class="text-[11px] text-neutral-500 line-through">${money(p.old)}</p>` : ''}
         ${p.hasPkgs ? `<p class="text-[10px] font-semibold uppercase tracking-wider text-muted">Desde</p>` : ''}
         <p class="font-display ${big ? 'text-3xl' : 'text-lg sm:text-xl'} font-bold leading-tight">${money(p.price)}</p>
+        ${(() => { if (!Array.isArray(p.comboOf) || !p.comboOf.length) return ''; const sum = p.comboOf.reduce((a, id) => { const c = PRODUCTS.find(x => x.id === id); return a + (c ? +c.price : 0); }, 0); return sum - p.price > 0.009 ? `<p class="${big ? 'text-sm' : 'text-[11px]'} font-semibold text-emerald-400">🧩 Ahorras ${money(sum - p.price)}</p>` : ''; })()}
         ${b != null ? `<p class="${big ? 'text-sm' : 'text-[11px] sm:text-xs'} font-medium text-neon">${fmtBs(b)}</p>` : ''}`;
     }
     function renderProducts() {
@@ -2036,7 +2106,8 @@ window.NR_FIREBASE = {
             <p class="text-[10px] font-semibold uppercase tracking-widest text-neon sm:text-[11px]">${esc(p.cat)}</p>
             <h3 class="line-clamp-2 mt-1 min-h-[2.5rem] text-sm font-semibold leading-snug sm:text-[15px]">${esc(p.title)}</h3>
             <div class="mt-2 flex-1">${priceBlock(p)}</div>
-            <button data-add="${p.id}" ${p.stock > 0 ? '' : 'disabled'} class="btn-primary mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:py-2.5 sm:text-sm">
+            ${p.stock > 0 ? '' : `<button type="button" data-notify="${p.id}" class="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 py-2 text-xs font-semibold text-amber-300 transition hover:bg-amber-500/10 sm:py-2.5 sm:text-sm">${waitAsked(p.id) ? '✓ Te avisaremos' : '🔔 Avísame'}</button>`}
+            <button data-add="${p.id}" ${p.stock > 0 ? '' : 'disabled'} class="btn-primary mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40 sm:py-2.5 sm:text-sm${p.stock > 0 ? '' : ' hidden'}">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l2.4 12.1a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.5L22 8H6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20.5" r="1.3"/><circle cx="18" cy="20.5" r="1.3"/></svg>
               ${p.stock > 0 ? (p.hasPkgs ? 'Elegir paquete' : 'Agregar') : 'Agotado'}
             </button>
@@ -2048,7 +2119,7 @@ window.NR_FIREBASE = {
       const order = storeCats().map(c => c.name), used = [...new Set(list.map(p => p.cat))];
       const cats = [...order.filter(c => used.includes(c)), ...used.filter(c => !order.includes(c))];
       const arrow = (d) => `<button type="button" data-scroll="${d}" aria-label="${d < 0 ? 'Anterior' : 'Siguiente'}" class="cat-arrow absolute top-[38%] z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-neon/30 bg-ink-900/80 text-neon shadow-glow backdrop-blur transition hover:bg-neon-blue hover:text-white ${d < 0 ? '-left-1 sm:-left-3' : '-right-1 sm:-right-3'}"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="${d < 0 ? 'm15 18-6-6 6-6' : 'm9 18 6-6-6-6'}" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
-      $('#catRows').innerHTML = cats.map(c => {
+      $('#catRows').innerHTML = dailyHTML() + cats.map(c => {
         const ci = catInfo(c), items = list.filter(p => p.cat === c);
         return `<section>
           <div class="mb-3 flex items-end justify-between gap-3">
@@ -2145,6 +2216,7 @@ window.NR_FIREBASE = {
             <h3 class="mt-2 font-display text-2xl font-bold leading-tight">${esc(p.title)}</h3>
             <div class="mt-3 text-sm leading-relaxed text-muted">${descHTML(p.desc)}</div>
             <div class="mt-5">${priceBlock(p, true)}</div>
+            ${raffleBoxHTML(p)}
             ${reviewsHTML(p.id)}
             <ul class="mt-5 space-y-2 text-sm text-neutral-300">
               <li>⚡ Entrega rápida después de verificar el pago</li>
@@ -2152,7 +2224,8 @@ window.NR_FIREBASE = {
               <li>${p.stock > 0 ? `✅ ${p.stock} disponible${p.stock === 1 ? '' : 's'}` : '❌ Agotado por ahora'}</li>
             </ul>
             <div class="mt-auto pt-6">
-              <button data-add="${p.id}" data-close="productModal" ${p.stock > 0 ? '' : 'disabled'} class="btn-primary w-full rounded-xl py-3.5 font-semibold disabled:cursor-not-allowed disabled:opacity-40">${p.stock > 0 ? 'Agregar al carrito' : 'Agotado'}</button>
+              ${p.stock > 0 ? `<button data-add="${p.id}" data-close="productModal" class="btn-primary w-full rounded-xl py-3.5 font-semibold">${p.raffle ? '🎟️ Comprar ticket' : 'Agregar al carrito'}</button>`
+                : `<button type="button" data-notify="${p.id}" class="w-full rounded-xl border border-amber-500/40 py-3.5 font-semibold text-amber-300 transition hover:bg-amber-500/10">${waitAsked(p.id) ? '✓ Te avisaremos cuando llegue' : '🔔 Avísame cuando haya'}</button>`}
             </div>
           </div>
         </div>`;
@@ -2164,7 +2237,7 @@ window.NR_FIREBASE = {
     function refreshCatalog() {
       PRODUCTS = loadCatalog(); cleanCart(); saveCart();
       if (activeCat !== 'Todos' && !PRODUCTS.some(p => p.cat === activeCat)) activeCat = 'Todos';
-      renderFilters(); renderProducts(); renderCart();
+      renderFilters(); renderProducts(); renderCart(); renderSaleBanner(); renderRaffleLink(); syncMethods();
     }
     $('#filters').addEventListener('click', e => {
       const b = e.target.closest('.filter-btn'); if (!b) return;
@@ -2233,6 +2306,7 @@ const GAME_INFO = [
       return p.img ? `<img src="${p.img}" alt="" class="h-full w-full object-cover">` : esc(p.icon);
     }
     function renderGamePay(k) {
+      syncMethods();
       const bal = current ? (+current.balance || 0) : 0, price = k ? payAmount.gm() : 0, bs = k ? gmBs() : null;
       const row = (m, icon, title, sub, amt) => { const on = game.method === m; return `
         <button type="button" data-gmpay="${m}" class="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition ${on ? 'border-neon bg-neon/10 shadow-glow' : 'border-white/10 bg-black/30 hover:border-neon/40'}">
@@ -2243,7 +2317,8 @@ const GAME_INFO = [
       $('#gmMethods').innerHTML =
         row('saldo', NCOIN('h-8 w-8'), 'Ncoins', current ? `Disponible: ${NC(bal)}` : 'Inicia sesión para usarlos', `${price.toFixed(2)} NC`) +
         row('pagomovil', '<span class="text-2xl">📱</span>', 'Pago Móvil', 'Verificación manual', bs != null ? fmtBs(bs) : money(price)) +
-        row('binance', '<span class="bn-logo h-7 w-7"></span>', 'Binance Pay (USDT)', 'Verificación manual', `USDT ${price.toFixed(2)}`);
+        row('binance', '<span class="bn-logo h-7 w-7"></span>', 'Binance Pay (USDT)', 'Verificación manual', `USDT ${price.toFixed(2)}`) +
+        extraPays().map(m => row(m.id, `<span class="text-2xl">${esc(m.icon || '💳')}</span>`, esc(m.name), 'Verificación manual', m.cur === 'BS' && bs != null ? fmtBs(bs) : money(price))).join('');
     }
     function renderGame() {
       const p = PRODUCTS.find(x => x.id === game.id); if (!p) return;
@@ -2261,14 +2336,14 @@ const GAME_INFO = [
       if (game.method && k) renderPay('gm');
       $$('[data-lmode]').forEach(b => { const on = b.dataset.lmode === game.lmode; b.className = 'rounded-xl border px-2 py-3 text-center text-xs font-semibold transition ' + (on ? 'border-neon bg-neon/10 text-white shadow-glow' : 'border-white/10 text-muted hover:border-neon/40 hover:text-white'); });
       $('#gmLCuenta').classList.toggle('hidden', game.lmode !== 'cuenta'); $('#gmLGift').classList.toggle('hidden', game.lmode !== 'gift');
-      $('#gmBuy').disabled = soldOut;
-      $('#gmBuy').textContent = soldOut ? 'Agotado' : 'Comprar ahora';
+      $('#gmBuy').disabled = false;
+      $('#gmBuy').textContent = soldOut ? (waitAsked(p.id) ? '✓ Te avisaremos cuando haya' : '🔔 Avísame cuando haya') : 'Comprar ahora';
       $('#gmList').innerHTML = p.pkgs.map(v => {
         const on = v.id === game.pkg, b = unitBs(v);
         return `<li><button type="button" data-pkg="${esc(v.id)}" class="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition ${on ? 'border-neon bg-neon/10 shadow-glow' : 'border-white/10 bg-white/[.03] hover:border-neon/40'}">
           <span class="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-neon-blue/10 text-2xl">${pkgIconHTML(p)}</span>
           <span class="min-w-0 flex-1 font-semibold">${esc(v.pkgLabel)}</span>
-          <span class="text-right"><span class="block font-display text-base font-bold ${on ? 'text-neon' : 'text-white'}">${money(v.price)}</span>${b != null ? `<span class="block text-[11px] font-medium text-neon">${fmtBs(b)}</span>` : ''}</span>
+          <span class="text-right">${v.old ? `<span class="block text-[11px] text-neutral-500 line-through">${money(v.old)}</span>` : ''}<span class="block font-display text-base font-bold ${on ? 'text-neon' : 'text-white'}">${money(v.price)}</span>${b != null ? `<span class="block text-[11px] font-medium text-neon">${fmtBs(b)}</span>` : ''}</span>
           <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border ${on ? 'border-neon bg-neon text-ink' : 'border-white/20'} text-xs font-bold">${on ? '✓' : ''}</span>
         </button></li>`;
       }).join('');
@@ -2292,6 +2367,7 @@ const GAME_INFO = [
     });
     function gameBuy() {
       const p = PRODUCTS.find(x => x.id === game.id); if (!p) return false;
+      if (!(p.stock > 0)) { notifyMe(p.id); renderGame(); return false; }
       const err = m => { $('#gmError').textContent = m; $('#gmError').classList.remove('hidden'); return false; };
       { const why = blockedReason(); if (why) return err(why); }
       if (p.needsId && game.uid.length < 3) { $('#gmUid').focus(); return err('Escribe tu ID de jugador.'); }
@@ -2408,7 +2484,7 @@ const GAME_INFO = [
     /* ---------- Bloque de pago reutilizable (compra y recarga de saldo) ---------- */
     const pay = { co: { method: 'saldo', capture: null, ref: '' }, wa: { method: 'pagomovil', capture: null, ref: '' }, gm: { method: null, capture: null, ref: '' } };
     const gmPkg = () => { const p = PRODUCTS.find(x => x.id === game.id); return p && p.pkgs ? p.pkgs.find(v => v.id === game.pkg) || null : null; };
-    const coBase = () => cart.reduce((s, i) => { const p = PRODUCTS.find(x => x.id === i.id); return s + (p && !(+p.giftValue > 0) ? p.price * i.qty : 0); }, 0);
+    const coBase = () => cart.reduce((s, i) => { const p = PRODUCTS.find(x => x.id === i.id); return s + (p && !(+p.giftValue > 0) && !p.raffle ? p.price * i.qty : 0); }, 0);
     const gmBase = () => { const k = gmPkg(); return k && !(+k.giftValue > 0) ? +k.price : 0; };
     const cutFor = px => coupon ? cutOf(coupon, px === 'co' ? coBase() : px === 'gm' ? gmBase() : 0) : 0;
     const lessBs = (usd, bs, cut) => bs == null || !cut || !(usd > 0) ? bs : roundBs(bs * (usd - cut) / usd);
@@ -2417,6 +2493,13 @@ const GAME_INFO = [
     const payAmount = { co: () => +(cartTotal() - cutFor('co')).toFixed(2), wa: () => walletAmount(), gm: () => { const k = gmPkg(); return k ? +(+k.price - cutFor('gm')).toFixed(2) : 0; } };
     function payDetails(method, usd, bsVal) {
       const st = settings(), row = (k, v, strong) => `<div class="flex items-start justify-between gap-3 py-1"><span class="text-muted">${k}</span><span class="text-right ${strong ? 'font-bold text-white' : 'font-medium'}">${esc(v)}</span></div>`;
+      const ex = extraOf(method);
+      if (ex) {
+        const b = ex.cur === 'BS' && bsVal != null ? fmtBs(bsVal) : null, lines = String(ex.info || '').split('\n').map(x => x.trim()).filter(Boolean);
+        return `<p class="mb-2 text-xs font-semibold uppercase tracking-widest text-neon">Datos para ${esc(ex.name)}</p>`
+          + lines.map(l => { const k = l.indexOf(':'); return k > 0 ? row(l.slice(0, k).trim(), l.slice(k + 1).trim()) : `<p class="py-1 font-medium">${esc(l)}</p>`; }).join('')
+          + `<div class="mt-2 border-t border-white/10 pt-2">${row('Monto a pagar', ex.cur === 'BS' ? (b || money(usd)) : money(usd), true)}${ex.cur === 'BS' && !b ? '<p class="text-xs text-amber-300">Escríbenos por WhatsApp para confirmar el monto en Bs antes de pagar.</p>' : ''}</div>`;
+      }
       if (method === 'pagomovil') {
         const b = bsVal != null ? fmtBs(bsVal) : null;
         return `<p class="mb-2 text-xs font-semibold uppercase tracking-widest text-neon">Datos para Pago Móvil</p>`
@@ -2428,10 +2511,12 @@ const GAME_INFO = [
         + `<div class="mt-2 border-t border-white/10 pt-2">${row('Monto a enviar', money(usd).replace('$', '') + ' USDT', true)}</div>`;
     }
     function renderPay(px) {
-      const st = pay[px], amount = payAmount[px](), methods = px === 'wa' ? ['pagomovil', 'binance'] : ['saldo', 'pagomovil', 'binance'];
+      syncMethods();
+      const st = pay[px], amount = payAmount[px](), methods = [...(px === 'wa' ? ['pagomovil', 'binance'] : ['saldo', 'pagomovil', 'binance']), ...extraPays().map(m => m.id)];
+      if (st.method && !methods.includes(st.method)) st.method = methods[0];
       const bal = current ? (current.balance || 0) : 0;
       $('#' + px + 'Pay').innerHTML = `
-        <div class="grid ${methods.length === 3 ? 'grid-cols-3' : 'grid-cols-2'} gap-2">${methods.map(m => `
+        <div class="grid ${methods.length >= 3 ? 'grid-cols-3' : 'grid-cols-2'} gap-2">${methods.map(m => `
           <button type="button" data-px="${px}" data-method="${m}" class="rounded-xl border px-2 py-3 text-center text-xs font-semibold transition ${st.method === m ? 'border-neon bg-neon/10 text-white shadow-glow' : 'border-white/10 text-muted hover:border-neon/40 hover:text-white'}">
             <span class="mb-1 block text-xl">${METHOD_ICON[m]}</span>${METHODS[m]}${m === 'saldo' ? `<span class="mt-0.5 block font-normal text-amber-300">${(+bal).toFixed(2)}</span>` : ''}</button>`).join('')}
         </div>
@@ -2638,6 +2723,9 @@ const GAME_INFO = [
         stockApplied: !CLOUD && !PUB, giftGenerated: false,
       };
       if (cut) order.coupon = { code: coupon.code, cut };
+      { const vp = myVip(); if (vp && vp.pct > 0) order.vip = { level: vp.id, pct: vp.pct }; }
+      // 🎟️ sorteos: el número de ticket se genera al instante (uno por cada unidad)
+      order.items.forEach(i => { const pr = PRODUCTS.find(x => x.id === i.id); if (pr && pr.raffle) { const r = new Uint32Array(i.qty); crypto.getRandomValues(r); i.tickets = [...r].map(v => String(10000 + (v % 90000))); i.drawAt = +pr.raffle.drawAt || null; i.prize = pr.raffle.prize || ''; } });
       if (CLOUD) {
         // En la nube: el pedido y el descuento del saldo se guardan juntos (todo o nada)
         placing = true; src.btn.disabled = true; src.btn.textContent = 'Enviando pedido…';
@@ -2670,7 +2758,7 @@ const GAME_INFO = [
       if (src.px === 'co') { cart = []; saveCart(); renderCart(); } pay[src.px] = { method: src.px === 'co' ? 'saldo' : null, capture: null, ref: '' };
       Object.keys(playerIds).forEach(k => delete playerIds[k]); Object.keys(playerLogins).forEach(k => delete playerLogins[k]);
       closeModal(src.px === 'co' ? 'checkoutModal' : 'gameModal'); if (src.px === 'gm') game.id = null; refreshCatalog(); renderAccount();
-      $('#successCode').textContent = order.id;
+      $('#successCode').textContent = order.id; lastBuy = order; $('#successTickets').innerHTML = ticketsHTML(order, true);
       $('#successTotal').innerHTML = (order.coupon ? `<span class="text-emerald-300">🏷️ Cupón ${esc(order.coupon.code)} · −${money(order.coupon.cut)}</span><br>` : '') + `Total: <b>${order.amountBs ? esc(order.amountBs).replace('Bs ', 'Bs. ') + '</b> <span class="text-muted">(' + money(order.amount) + ')</span>' : money(order.amount) + '</b>'} · ${method === 'saldo' ? '<span class="text-amber-300">Pagado con Ncoins</span>' : '<span class="text-amber-400">Pago en verificación</span>'}`;
       $('#successSupport').href = waLink(supportMsg(order));
       const lines = order.items.map(i => `• ${i.name} ×${i.qty} — ${money(i.price * i.qty)}${i.playerId ? `\n   🎮 ID: ${i.playerId}` : ''}${i.login ? `\n   ${loginTxt(i.login)}` : ''}`).join('\n');
@@ -2833,7 +2921,7 @@ const GAME_INFO = [
       if (!pay.wa.capture && !pay.wa.viaWa) return err('Sube el capture del pago o elige enviarlo por WhatsApp.');
       const topups = DB.get('topups', []);
       const t = { id: newCode('RS', new Set(topups.map(x => x.id))), userId: current.uid || null, userEmail: current.email, client: current.name, phone: current.phone,
-                  amount, amountBs: pay.wa.method === 'pagomovil' && amountBs(amount) != null ? fmtBs(amountBs(amount)) : null, method: pay.wa.method, ref: pay.wa.ref.trim(), capture: pay.wa.capture, captureVia: pay.wa.viaWa ? 'whatsapp' : null, captureSig: capSig(pay.wa.capture), date: Date.now(), status: 'Pendiente' };
+                  amount, amountBs: (pay.wa.method === 'pagomovil' || (extraOf(pay.wa.method) || {}).cur === 'BS') && amountBs(amount) != null ? fmtBs(amountBs(amount)) : null, method: pay.wa.method, ref: pay.wa.ref.trim(), capture: pay.wa.capture, captureVia: pay.wa.viaWa ? 'whatsapp' : null, captureSig: capSig(pay.wa.capture), date: Date.now(), status: 'Pendiente' };
       if (!saveRoomy('topups', () => [t, ...DB.get('topups', [])])) return err('El navegador se quedó sin espacio. Elige enviar el capture por WhatsApp para continuar.');
       if (CLOUD) { try { await NRCloud.flush(); } catch (e) { return err(NRCloud.authMsg(e)); } }
       if (t.captureVia === 'whatsapp' || PUB) window.open(waLink(`Hola ${settings().name} 👋 Te envío el capture de mi compra de Ncoins.\n\n🧾 Código: ${t.id}\n🟡 ${NC(t.amount)} · ${money(t.amount)}${t.amountBs ? ' (' + t.amountBs + ')' : ''}\n💳 ${METHODS[t.method]} · Ref. ${t.ref}\n\n📷 (adjunto el capture)`), '_blank', 'noopener');
@@ -2925,7 +3013,7 @@ const GAME_INFO = [
     const orderBs = o => o.amountBs || (amountBs(o.amount) != null ? fmtBs(amountBs(o.amount)) : null);
     /* ---------- Datos de acceso de cuentas de streaming ---------- */
     const STREAM_RE = /netflix|prime ?video|disney|hbo|crunchyroll|spotify|youtube|paramount|star ?\+|vix|apple ?tv|deezer|tidal|canva|chatgpt|iptv|magis|streaming/i;
-    const isStreamItem = i => !(+i.giftValue > 0) && (itemKind(i) === 'streaming' || !!(i.delivery && i.delivery.length) || STREAM_RE.test(i.name || ''));
+    const isStreamItem = i => !(+i.giftValue > 0) && !i.tickets && (itemKind(i) === 'streaming' || !!(i.delivery && i.delivery.length) || STREAM_RE.test(i.name || ''));
     function credBlock(o, secret) {
       const its = (o.items || []).filter(isStreamItem); if (!its.length) return '';
       if (!secret) return its.some(i => i.delivery && i.delivery.length) ? '<p class="mt-3 rounded-xl border border-white/10 bg-white/[.03] px-3 py-2 text-xs text-muted">🔒 Inicia sesión con tu cuenta para ver los datos de acceso.</p>' : '';
@@ -2972,12 +3060,156 @@ const GAME_INFO = [
       span.textContent = show ? span.dataset.secret : '••••••••'; b.textContent = show ? 'Ocultar' : 'Ver';
     });
 
+    /* ---------- Club VIP: tarjeta en Mi perfil y hoja de niveles ---------- */
+    var lastVipKey = null, lastBuy = null;
+    function renderVipCard() {
+      const box = $('#pfVip'); if (!box) return;
+      const v = myVip(), raffle = raffleLine(), club = vipCfg().on === true;
+      box.innerHTML = (!club ? '' : v ? `<div class="rounded-2xl border p-4 text-left" style="border-color:${v.color}66;background:linear-gradient(135deg,${v.color}26,rgba(255,255,255,.02))">
+          <div class="flex items-center gap-3"><span class="text-4xl leading-none">${v.emoji}</span><div><p class="text-[11px] font-semibold uppercase tracking-widest text-muted">Tu nivel</p><p class="font-display text-2xl font-bold leading-tight" style="color:${v.color}">${v.name}</p></div></div>
+          ${v.pct ? `<p class="mt-3 text-sm font-semibold text-white">✨ ${v.pct}% de descuento automático${v.id === 'revendedor' ? ' en tus compras' : ' en toda la tienda'}</p>` : ''}
+          ${v.perks.length ? `<ul class="mt-2 space-y-1 text-sm text-neutral-300">${v.perks.map(x => `<li>✓ ${esc(x)}</li>`).join('')}</ul>` : ''}
+          <a href="#vip" class="mt-3 inline-block text-xs font-semibold text-neon underline">Ver todos los niveles</a></div>`
+        : `<a href="#vip" class="block rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4 text-left transition hover:bg-amber-400/10"><p class="font-semibold text-amber-300">👑 Club VIP</p><p class="mt-1 text-xs text-muted">${esc(vipCfg().teaser || 'Conoce los niveles de nuestro Club VIP. Toca para verlos.')}</p></a>`)
+        + (raffle ? `<a href="#sorteo" class="mt-3 block rounded-2xl border border-white/10 bg-white/[.03] px-4 py-3 text-left text-sm transition hover:border-neon/40">${raffle}</a>` : '');
+    }
+    function renderVipModal() {
+      const mine = myVip(), ids = VIP_ORDER.filter(id => vipInfo(id).show);
+      $('#vipBody').innerHTML = `<p class="whitespace-pre-line text-sm text-muted">${esc(vipCfg().intro || 'Premiamos a nuestros clientes más fieles. Nosotros asignamos los niveles.')}</p>
+        <ul class="mt-4 space-y-2.5">${ids.map(id => { const v = vipInfo(id), me = mine && mine.id === id; return `<li class="rounded-2xl border p-4" style="border-color:${me ? v.color : 'rgba(255,255,255,.1)'};background:${me ? v.color + '1f' : 'rgba(255,255,255,.03)'}">
+          <div class="flex items-center gap-3"><span class="text-3xl leading-none">${v.emoji}</span><div class="min-w-0 flex-1"><p class="font-display text-lg font-bold" style="color:${v.color}">${v.name}${me ? ' <span class="ml-1 rounded-full bg-white/10 px-2 py-0.5 align-middle text-[10px] font-bold text-white">TU NIVEL</span>' : ''}</p>
+          ${v.pct ? `<p class="text-xs text-muted">${v.pct}% de descuento automático</p>` : ''}</div></div>
+          ${v.perks.length ? `<ul class="mt-2 space-y-1 text-sm text-neutral-300">${v.perks.map(x => `<li>✓ ${esc(x)}</li>`).join('')}</ul>` : ''}
+</li>`; }).join('') || '<li class="py-6 text-center text-sm text-muted">Pronto anunciaremos los niveles.</li>'}</ul>`;
+    }
+
+    /* ---------- Oferta: cuenta regresiva arriba ---------- */
+    function left(ms) { ms = Math.max(0, ms); const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60, x = Math.floor(ms / 1e3) % 60, p = n => String(n).padStart(2, '0'); return (d ? d + 'd ' : '') + `${p(h)}h ${p(m)}m ${p(x)}s`; }
+    function renderSaleBanner() {
+      const el = $('#saleBanner'), sl = saleNow();
+      el.classList.toggle('hidden', !sl); if (!sl) return;
+      const where = Array.isArray(sl.cats) && sl.cats.length ? sl.cats.join(', ') : 'toda la tienda';
+      el.innerHTML = `🔥 <b>${+sl.pct}% OFF</b> en ${esc(where)}${+sl.until ? ` · termina en <b class="font-mono" data-saleleft>${left(+sl.until - Date.now())}</b>` : ''}`;
+    }
+    var DAY = 864e5;
+    function dayKeyVE(t) { return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Caracas' }).format(new Date(t)); }
+    setInterval(() => {
+      const sl = saleNow(), el = $('[data-saleleft]');
+      if (el && sl && +sl.until) el.textContent = left(+sl.until - Date.now());
+      if (!sl && !$('#saleBanner').classList.contains('hidden')) refreshCatalog();   // la oferta terminó: precios normales
+      const dl = $('[data-dailyleft]'); if (dl) dl.textContent = left(Date.parse(dayKeyVE(Date.now()) + 'T04:00:00Z') + DAY - Date.now());
+    }, 1000);
+
+    /* ---------- Producto del día ---------- */
+    function dailyPick() {
+      const d = settings().daily || {}; if (!d.mode || d.mode === 'off') return null;
+      const list = SHOWN().filter(p => p.stock > 0 && !(+p.giftValue > 0)); if (!list.length) return null;
+      if (d.mode === 'manual') { const p = list.find(x => x.id === d.productId); if (p) return p; }
+      const k = dayKeyVE(Date.now()); let h = 0; for (const c of k) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+      return list[h % list.length];
+    }
+    function dailyHTML() {
+      const p = dailyPick(); if (!p) return '';
+      return `<section><div class="mb-3 flex items-end justify-between gap-3"><h2 class="font-display text-xl font-extrabold uppercase leading-none tracking-tight text-neon sm:text-2xl">⭐ Producto del día</h2><span class="shrink-0 text-xs text-muted">Cambia en <b data-dailyleft class="font-mono text-white"></b></span></div>
+        <button type="button" data-detail="${esc(p.id)}" class="card flex w-full items-center gap-4 overflow-hidden rounded-2xl p-3 text-left">
+          <span class="relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-neon-blue/15 via-transparent to-neon/10 text-5xl">${p.img ? `<img src="${p.img}" alt="" class="absolute inset-0 h-full w-full object-cover">` : esc(p.icon)}</span>
+          <span class="min-w-0 flex-1"><span class="block text-[10px] font-semibold uppercase tracking-widest text-neon">${esc(p.cat)}</span><span class="mt-1 block font-semibold leading-snug">${esc(p.title)}</span><span class="mt-1 block">${priceBlock(p)}</span></span>
+          <span class="btn-primary shrink-0 rounded-xl px-3 py-2 text-xs font-semibold">Ver</span></button></section>`;
+    }
+
+    /* ---------- Avísame cuando haya stock ---------- */
+    function waitAsked(id) { return LOCAL.get('waitAsked', []).includes(baseId(id)); }
+    function notifyMe(id) {
+      const p = PRODUCTS.find(x => x.id === baseId(id)); if (!p) return;
+      if (!current) return openAuth('login', 'Inicia sesión para que te avisemos cuando llegue.');
+      if (waitAsked(p.id)) return toast('✓ Ya estás en la lista: te avisaremos por WhatsApp');
+      const w = { id: p.id + '_' + (current.uid || current.email).replace(/[^\w-]/g, '_'), productId: p.id, product: p.title, userId: current.uid || null, name: current.name, email: current.email, phone: current.phone || '', date: Date.now() };
+      DB.set('waitlist', [w, ...(DB.get('waitlist', []) || []).filter(x => x.id !== w.id)]);
+      LOCAL.set('waitAsked', [...LOCAL.get('waitAsked', []), p.id].slice(-60));
+      toast('🔔 ¡Listo! Te avisaremos por WhatsApp cuando haya stock'); renderProducts();
+      if ($('#productModal').classList.contains('flex')) openProduct(p.id);
+    }
+    document.addEventListener('click', e => { const b = e.target.closest('[data-notify]'); if (b) { e.preventDefault(); notifyMe(b.dataset.notify); } });
+
+    /* ---------- Confianza: entrega promedio y ventas recientes (los publica el panel) ---------- */
+    function feed() { const f = DB.get('feed', null); return f && !Array.isArray(f) ? f : {}; }
+    function socialOn(k) { return (settings().social || {})[k] !== false; }
+    function renderAvg() {
+      const f = feed(), el = $('#avgPill'), ok = socialOn('avg') && +f.avgMin > 0 && +f.avgN >= 3;
+      el.classList.toggle('hidden', !ok);
+      if (ok) el.textContent = `⚡ Entregamos en ${+f.avgMin < 60 ? Math.round(f.avgMin) + ' min' : (f.avgMin / 60).toFixed(1).replace('.0', '') + ' h'} en promedio (últimos ${f.avgN} pedidos)`;
+    }
+    (() => {
+      let i = 0;
+      const ago = t => { const m = Math.max(1, Math.round((Date.now() - t) / 6e4)); return m < 60 ? `hace ${m} min` : m < 1440 ? `hace ${Math.round(m / 60)} h` : 'ayer'; };
+      const show = () => {
+        const list = (feed().recent || []).filter(r => Date.now() - r.t < 2 * DAY), el = $('#socialPop');
+        if (!socialOn('recent') || !list.length || document.querySelector('.modal.flex') || document.hidden) return;
+        const r = list[i++ % list.length];
+        el.innerHTML = `<span class="font-semibold text-white">🛒 ${esc(r.n)}</span> compró <span class="font-semibold text-neon">${esc(r.p)}</span><span class="block text-[11px] text-muted">${ago(r.t)}</span>`;
+        el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 6000);
+      };
+      setTimeout(() => { show(); setInterval(show, 32000); }, 15000);
+    })();
+
+    /* ---------- Compartir mi compra ---------- */
+    $('#shareBuy').addEventListener('click', async () => {
+      const o = lastBuy; if (!o) return;
+      const url = o.items && o.items[0] ? productLink(o.items[0].id) : location.origin + location.pathname;
+      const text = `¡Acabo de comprar ${o.product} en ${settings().name}! 🔥 Compra tú también aquí:`;
+      if (navigator.share) { try { await navigator.share({ title: settings().name, text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+      try { await navigator.clipboard.writeText(text + ' ' + url); toast('📋 Mensaje copiado: pégalo en tu estado'); } catch (_) { toast(url); }
+    });
+
+    /* ---------- Sorteo del mes ---------- */
+    function monthKeyVE(t) { return dayKeyVE(t).slice(0, 7); }
+    function monthName(k) { return new Date(k + '-15T12:00:00').toLocaleDateString('es', { month: 'long', year: 'numeric' }); }
+    function raffleCfg() { const r = settings().raffle; return r && typeof r === 'object' ? r : {}; }
+    function myTickets() { return !current ? 0 : DB.get('orders', []).filter(o => isMine(o) && (o.status === 'Pagado' || o.status === 'Completado') && monthKeyVE(o.date) === monthKeyVE(Date.now())).length; }
+    function raffleLine() { const r = raffleCfg(); if (!r.on) return ''; const n = myTickets(); return `🎟️ Sorteo de ${monthName(monthKeyVE(Date.now()))}: tienes <b class="text-neon">${n} ticket${n === 1 ? '' : 's'}</b>${r.prize ? ` · Premio: <b>${esc(r.prize)}</b>` : ''}`; }
+    function renderRaffleLink() { $('#menuRaffle').classList.toggle('hidden', !raffleCfg().on && !ticketRaffles().length); $$('[data-vipnav]').forEach(x => x.classList.toggle('hidden', vipCfg().on !== true)); }
+    function renderRaffleModal() {
+      const r = raffleCfg(), n = myTickets(), wins = (r.winners || []).slice(0, 8), tr = ticketRaffles();
+      const open = tr.length ? `<p class="text-xs font-semibold uppercase tracking-widest text-muted">🎟️ Sorteos abiertos</p><ul class="mt-2 space-y-2.5">${tr.map(p => `<li><button type="button" data-raffleopen="${esc(p.id)}" class="flex w-full items-center gap-3 rounded-2xl border border-neon/30 bg-neon/5 p-3 text-left transition hover:bg-neon/10">
+          <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-neon-blue/15 text-2xl">${esc(p.icon || '🎟️')}</span>
+          <span class="min-w-0 flex-1"><span class="block font-semibold">${esc(p.raffle.prize || p.title)}</span><span class="block text-xs text-muted">📅 ${fmtDraw(p.raffle.drawAt)}</span></span>
+          <span class="shrink-0 text-right"><span class="block font-display font-bold text-neon">${money(p.price)}</span><span class="text-[11px] text-muted">por ticket</span></span></button></li>`).join('')}</ul>` : '';
+      const monthly = r.on ? `<div class="${tr.length ? 'mt-6 ' : ''}rounded-2xl border border-neon/30 bg-neon/5 p-5 text-center"><p class="text-xs font-semibold uppercase tracking-widest text-muted">Sorteo de ${monthName(monthKeyVE(Date.now()))}</p>
+          <p class="mt-2 font-display text-2xl font-bold">${r.prize ? esc(r.prize) : 'Premio sorpresa'}</p>
+          <p class="mt-3 text-sm">${current ? `Tienes <b class="text-neon">${n} ticket${n === 1 ? '' : 's'}</b> este mes` : 'Inicia sesión para ver tus tickets'}</p></div>
+        <ul class="mt-4 space-y-2 text-sm text-neutral-300"><li>🛒 Cada pedido pagado este mes = 1 ticket</li><li>🍀 Más compras, más oportunidades de ganar</li><li>📲 Anunciamos al ganador a fin de mes y le escribimos por WhatsApp</li></ul>` : '';
+      const winners = wins.length ? `<p class="mt-6 text-xs font-semibold uppercase tracking-widest text-muted">🏆 Ganadores</p><ul class="mt-2 space-y-2">${wins.map(w => `<li class="flex justify-between gap-3 rounded-xl border border-white/10 bg-white/[.03] px-4 py-2.5 text-sm"><span><b>${esc(w.name)}</b><span class="block text-xs text-muted">${w.ticket ? '🎟️ Ticket #' + esc(w.ticket) : esc(monthName(w.month))}</span></span><span class="text-right text-xs text-neon">${esc(w.prize || '')}</span></li>`).join('')}</ul>` : '';
+      $('#sorteoBody').innerHTML = (open + monthly + winners) || '<p class="py-6 text-center text-sm text-muted">No hay sorteos abiertos por ahora.</p>';
+    }
+    /* ---------- Sorteos con ticket pagado ---------- */
+    function ticketRaffles() { try { return SHOWN().filter(p => p.raffle && p.stock > 0); } catch (_) { return []; } }
+    function fmtDraw(t) { return t ? new Date(+t).toLocaleString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }) : 'Fecha por anunciar'; }
+    function raffleBoxHTML(p) {
+      if (!p.raffle) return '';
+      return `<div class="mt-5 rounded-2xl border border-neon/30 bg-neon/5 p-4 text-left text-sm">
+        <p class="font-semibold">🏆 Premio: <span class="text-neon">${esc(p.raffle.prize || p.title)}</span></p>
+        <p class="mt-1">📅 Sorteo: <b>${fmtDraw(p.raffle.drawAt)}</b></p>
+        ${+p.raffle.drawAt ? `<p class="mt-1 text-muted">⏳ Faltan <b class="font-mono text-white" data-drawleft="${+p.raffle.drawAt}">${left(+p.raffle.drawAt - Date.now())}</b></p>` : ''}
+        <p class="mt-2 text-xs text-muted">Tu número de ticket se genera apenas compras. Con Ncoins queda activo al instante; con otros pagos, al verificarlo. Puedes comprar varios para tener más oportunidades.</p></div>`;
+    }
+    function ticketsHTML(o, big) {
+      const its = (o.items || []).filter(i => Array.isArray(i.tickets) && i.tickets.length); if (!its.length) return '';
+      const ok = o.status === 'Pagado' || o.status === 'Completado', out = o.status === 'Rechazado' || o.status === 'Reembolsado';
+      return its.map(i => `<div class="${big ? 'mt-4' : 'mt-3'} rounded-2xl border ${out ? 'border-white/10 opacity-60' : 'border-neon/40 bg-neon/5'} p-3 text-left text-sm">
+        <p class="font-semibold">🎟️ ${i.tickets.length > 1 ? 'Tus tickets' : 'Tu ticket'}: ${i.tickets.map(t => `<span class="ml-1 inline-block rounded-lg bg-white/10 px-2 py-0.5 font-mono text-neon">#${esc(t)}</span>`).join('')}</p>
+        <p class="mt-1 text-xs text-muted">🏆 ${esc(i.prize || i.name)} · 📅 ${fmtDraw(i.drawAt)}</p>
+        <p class="mt-1 text-xs ${ok ? 'text-emerald-400' : out ? 'text-rose-300' : 'text-amber-300'}">${ok ? '✓ Activo: ya participas en el sorteo' : out ? 'Sin validez: el pago no fue aprobado' : '⏳ Se activa cuando verifiquemos tu pago'}</p></div>`).join('');
+    }
+    document.addEventListener('click', e => { const b = e.target.closest('[data-raffleopen]'); if (b) { closeModal('sorteoModal'); openProduct(b.dataset.raffleopen); } });
+    setInterval(() => { $$('[data-drawleft]').forEach(el => { el.textContent = left(+el.dataset.drawleft - Date.now()); }); }, 1000);
+
     /* ---------- Calificar pedidos entregados y pedir cancelación ---------- */
     const isMine = o => !!current && (o.userEmail === current.email || (current.uid && o.userId === current.uid));
     const reviewed = id => LOCAL.get('reviewed', []).includes(id) || (DB.get('reviews', []) || []).some(r => r.id === id);
     const cancelAsked = id => LOCAL.get('cancelAsked', []).includes(id);
     function orderExtras(o) {
       if (!isMine(o)) return '';
+      const tk = ticketsHTML(o); if (tk) return tk;
       if (o.status === 'Completado') return reviewed(o.id)
         ? '<p class="mt-3 text-center text-xs font-semibold text-amber-300">⭐ Gracias por tu reseña</p>'
         : `<button data-review="${esc(o.id)}" class="mt-3 w-full rounded-xl border border-amber-500/40 py-2.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10">⭐ Calificar mi compra</button>`;
@@ -3139,7 +3371,7 @@ const GAME_INFO = [
     input.addEventListener('input', e => renderSearch(e.target.value));
     $('#searchResults').addEventListener('click', e => { const b = e.target.closest('[data-add]'); if (b) addToCart(b.dataset.add); });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeSearch(); closeCart(); toggleMenu(false); ['cnModal', 'saldoConfirmModal', 'reportModal', 'authModal', 'profileModal', 'successModal', 'checkoutModal', 'walletModal', 'productModal', 'orderDetailModal', 'pkgSheet', 'gameModal', 'helpSheet', 'comprarModal', 'faqModal', 'garantiaModal', 'contactoModal', 'terminosModal', 'reviewModal'].forEach(closeModal);
+      if (e.key === 'Escape') { closeSearch(); closeCart(); toggleMenu(false); ['cnModal', 'saldoConfirmModal', 'reportModal', 'authModal', 'profileModal', 'successModal', 'checkoutModal', 'walletModal', 'productModal', 'orderDetailModal', 'pkgSheet', 'gameModal', 'helpSheet', 'comprarModal', 'faqModal', 'garantiaModal', 'contactoModal', 'terminosModal', 'reviewModal', 'vipModal', 'sorteoModal'].forEach(closeModal);
         if (ordersOpen && !anyOverlayOpen()) closeOrdersView(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
     });
@@ -3235,6 +3467,7 @@ const GAME_INFO = [
       }
       if (e.key === 'nradmin_settings' && !PUB) { setWaFloat(); renderSocial(); renderInfo(); refreshCatalog(); renderBanners(); renderClosedBanner(); applyLogo(); }
       if (e.key === 'nradmin_banners' && !PUB) renderBanners();
+      if (e.key === 'nradmin_feed') renderAvg();
       if (e.key === 'nradmin_reviews' && game.id && $('#gameModal').classList.contains('flex')) $('#gmReviews').innerHTML = reviewsHTML(game.id);
     });
 
@@ -3682,11 +3915,11 @@ const GAME_INFO = [
     (() => {   // los botones flotantes se apartan mientras el cliente baja por la página
       let t; addEventListener('scroll', () => { document.body.classList.add('fab-quiet'); clearTimeout(t); t = setTimeout(() => document.body.classList.remove('fab-quiet'), 650); }, { passive: true });
     })();
-    const HELP_SHEETS = ['comprar', 'faq', 'garantia', 'contacto', 'terminos'];
+    const HELP_SHEETS = ['comprar', 'faq', 'garantia', 'contacto', 'terminos', 'vip', 'sorteo'];
     document.addEventListener('click', e => {
       const a = e.target.closest('a[href^="#"]'); if (!a) return;
       const id = a.getAttribute('href').slice(1); if (!HELP_SHEETS.includes(id)) return;
-      e.preventDefault(); toggleMenu(false); openModal(id + 'Modal');
+      e.preventDefault(); toggleMenu(false); if (id === 'vip') renderVipModal(); if (id === 'sorteo') renderRaffleModal(); openModal(id + 'Modal');
     });
     function renderSocial() {
       const st = settings();
@@ -3728,6 +3961,7 @@ const GAME_INFO = [
       setWaFloat(); renderSocial(); renderInfo(); renderBanners();
       renderFilters(); renderProducts(); renderCart(); renderAccount(); renderMaintenance(); renderSanctionBanner(); applyLogo();
       saveSnap();
+      try { syncMethods(); renderSaleBanner(); renderAvg(); renderRaffleLink(); } catch (_) {}
       try { if (CLOUD && !sessionStorage.getItem('nr_visit')) { sessionStorage.setItem('nr_visit', '1'); NRCloud.track('visits'); } } catch (_) {}
       openFromLink();
     })();

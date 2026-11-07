@@ -282,8 +282,9 @@
         <a href="#" data-view="recargas" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="wallet" class="h-5 w-5"></i>Billetera / Saldo<span id="topupBadge" class="ml-auto rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-400">0</span></a>
         <a href="#" data-view="clientes" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="users" class="h-5 w-5"></i>Clientes<span id="newClientsBadge" class="ml-auto hidden min-w-[1.25rem] rounded-full bg-neon px-1.5 py-0.5 text-center text-[10px] font-bold text-ink shadow-glow"></span></a>
         <a href="#" data-view="giftcards" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="gift" class="h-5 w-5"></i>Gift Cards</a>
-        <a href="#" data-view="cupones" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="tag" class="h-5 w-5"></i>Cupones</a>
+        <a href="#" data-view="cupones" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="tag" class="h-5 w-5"></i>Ofertas y cupones</a>
         <a href="#" data-view="resenas" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="message-circle" class="h-5 w-5"></i>Reseñas<span id="reviewBadge" class="ml-auto hidden rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-400">0</span></a>
+        <a href="#" data-view="vip" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><span class="grid h-5 w-5 place-items-center text-base leading-none">👑</span>Club VIP y sorteo</a>
         <a href="#" data-view="vencimientos" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="calendar-clock" class="h-5 w-5"></i>Vencimientos<span id="svBadge" class="ml-auto hidden rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-400">0</span></a>
         <a href="#" data-view="finanzas" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="credit-card" class="h-5 w-5"></i>Finanzas / Ingresos</a>
         <a href="#" data-view="monitor" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="gauge" class="h-5 w-5"></i>Monitor Bs<span class="ml-auto rounded-full bg-neon/10 px-2 py-0.5 text-[10px] font-bold text-neon">PRIVADO</span></a>
@@ -381,6 +382,7 @@
           <!-- C. KPIs -->
           <div id="kpiGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"></div>
           <div id="statsBox" class="panel rounded-2xl p-5"></div>
+          <div class="grid gap-6 xl:grid-cols-2"><div id="lowBox" class="panel rounded-2xl p-5"></div><div id="waitBox" class="panel rounded-2xl p-5"></div></div>
 
           <!-- Gráficos -->
           <div class="grid gap-6 xl:grid-cols-3">
@@ -530,6 +532,7 @@
             </div></div>
             <div class="overflow-x-auto"><table class="tbl compact w-full"><thead><tr><th>Cliente</th><th>Correo / Celular</th><th>Saldo</th><th>Pedidos</th><th>Total gastado</th><th>Registro</th><th>Nivel</th><th class="text-right">Acción</th></tr></thead><tbody id="allClients"></tbody></table></div>
           </div>
+          <div id="blBox" class="panel rounded-2xl p-5"></div>
         </section>
 
         <!-- ========== GIFT CARDS ========== -->
@@ -557,7 +560,10 @@
 
         <!-- ========== CUPONES ========== -->
         <section data-panel="cupones" class="view hidden space-y-6">
-          <div><p class="text-sm text-muted">Promociones</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Cupones de descuento</h2></div>
+          <div><p class="text-sm text-muted">Promociones</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Ofertas y cupones</h2></div>
+          <div id="saleCard" class="panel rounded-2xl p-5"></div>
+          <div class="grid gap-6 xl:grid-cols-2"><div id="dailyBox" class="panel rounded-2xl p-5"></div><div id="socialBox" class="panel rounded-2xl p-5"></div></div>
+          <div id="comboBox" class="panel rounded-2xl p-5"></div>
           <div class="panel rounded-2xl p-5">
             <h3 class="font-semibold">Crear cupón</h3>
             <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -588,6 +594,15 @@
           </div>
         </section>
 
+        <!-- ========== CLUB VIP ========== -->
+        <section data-panel="vip" class="view hidden space-y-6">
+          <div><p class="text-sm text-muted">Fidelidad</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Club VIP y sorteo</h2></div>
+          <div id="vipCfgBox" class="panel rounded-2xl p-5"></div>
+          <div id="vipMembers" class="panel rounded-2xl p-5"></div>
+          <div id="tixBox" class="panel rounded-2xl p-5"></div>
+          <div id="raffleBox" class="panel rounded-2xl p-5"></div>
+        </section>
+
         <!-- ========== VENCIMIENTOS ========== -->
         <section data-panel="vencimientos" class="view hidden space-y-6">
           <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
@@ -613,6 +628,8 @@
         <section data-panel="finanzas" class="view hidden space-y-6">
           <div><p class="text-sm text-muted">Reportes</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Finanzas / Ingresos</h2></div>
           <div id="finKpis" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"></div>
+          <div id="closeBox" class="panel rounded-2xl p-5"></div>
+          <div id="profitBox" class="panel rounded-2xl p-5"></div>
           <div class="grid gap-6 xl:grid-cols-3">
             <div class="panel min-w-0 overflow-hidden rounded-2xl p-5 xl:col-span-2">
               <h3 class="font-semibold">Ingresos mensuales</h3>
@@ -683,6 +700,8 @@
         <!-- ========== CONFIGURACIÓN ========== -->
         <section data-panel="config" class="view hidden space-y-6">
           <div><p class="text-sm text-muted">Sistema</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Configuración del Sistema</h2></div>
+          <div id="payBox" class="panel rounded-2xl p-5"></div>
+          <div id="qrBox" class="panel rounded-2xl p-5"></div>
           <div class="grid gap-6 xl:grid-cols-3">
             <form id="settingsForm" class="panel space-y-5 rounded-2xl p-5 sm:p-6 xl:col-span-2">
               <h3 class="font-semibold">Datos de la tienda</h3>
@@ -1207,6 +1226,9 @@ window.NR_FIREBASE = {
       coupons:      { col: 'coupons',     id: 'code', sort: 'createdAt', del: true },
       reviews:      { col: 'reviews',     id: 'id',   sort: 'date', del: true },
       stats:        { col: 'stats',       id: 'day',  sort: 't' },
+      waitlist:     { col: 'waitlist',    id: 'id',   sort: 'date', del: true },
+      feed:         { doc: 'config/feed', pub: true },
+      priv:         { doc: 'private/panel' },
     };
 
     const cache = {}, ready = {}, known = {};      // known: última versión conocida de cada documento
@@ -1223,7 +1245,7 @@ window.NR_FIREBASE = {
     const emit = (key, oldValue) => { try { window.dispatchEvent(new StorageEvent('storage', { key: 'nradmin_' + key, oldValue: oldValue || null })); } catch (_) {} };
     const cloudError = (err, where) => {
       console.warn('[NR Cloud]', where, err);
-      if (/^leer (coupons|reviews|stats)$/.test(where)) return;   // funciones nuevas: si faltan sus reglas, fallan en silencio
+      if (/^leer (coupons|reviews|stats|waitlist|feed|priv)$/.test(where)) return;   // funciones nuevas: si faltan sus reglas, fallan en silencio
       try { window.dispatchEvent(new CustomEvent('nrcloud-error', { detail: { code: err && err.code, where } })); } catch (_) {}
     };
 
@@ -1339,10 +1361,11 @@ window.NR_FIREBASE = {
       pubUnsubs.push(listenCol('banners', query(collection(db, 'banners'), orderBy('order'))));
       pubUnsubs.push(listenDoc('settings', 'config/settings'));
       pubUnsubs.push(listenDoc('online', 'config/store'));
+      pubUnsubs.push(listenDoc('feed', 'config/feed'));
     }
     function stopOwn() {
       ownUnsubs.forEach(u => { try { u(); } catch (_) {} }); ownUnsubs = [];
-      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj', 'coupons', 'stats'].forEach(k => {
+      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj', 'coupons', 'stats', 'waitlist', 'priv'].forEach(k => {
         Object.keys(known).forEach(x => { if (x.startsWith(k + '/')) delete known[x]; });
         const had = (cache[k] || []).length; cache[k] = []; ready[k] = false; if (had) emit(k);
       });
@@ -1360,6 +1383,8 @@ window.NR_FIREBASE = {
         ownUnsubs.push(listenCol('coupons', collection(db, 'coupons')));
         ownUnsubs.push(listenCol('reviews', query(collection(db, 'reviews'), orderBy('date', 'desc'), limit(400))));
         ownUnsubs.push(listenCol('stats', query(collection(db, 'stats'), orderBy('t', 'desc'), limit(60))));
+        ownUnsubs.push(listenCol('waitlist', query(collection(db, 'waitlist'), orderBy('date', 'desc'), limit(300))));
+        ownUnsubs.push(listenDoc('priv', 'private/panel'));
         ready.clientNotifs = true; cache.clientNotifs = [];      // el panel solo envía avisos
       } else {
         const mine = c => query(collection(db, c), where('userId', '==', u.uid));
@@ -1375,6 +1400,7 @@ window.NR_FIREBASE = {
         ownUnsubs.push(listenCol('giftcards', query(collection(db, 'giftcards'), where('redeemedById', '==', u.uid)), 'r'));
         ready.reports = true; cache.reports = [];
         ready.coupons = true; cache.coupons = []; ready.stats = true; cache.stats = [];
+        ready.waitlist = true; cache.waitlist = []; ready.priv = true;
       }
     }
     function resync() { if (!user) return; stopOwn(); startOwn(user); }
@@ -1600,6 +1626,8 @@ window.NR_FIREBASE = {
     // Número para wa.me: convierte 0412-1234567 (Venezuela) a 584121234567
     const waNum = phone => { let d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('00')) d = d.slice(2); if (d.length === 11 && d.startsWith('0')) d = '58' + d.slice(1); return d.length >= 10 ? d : ''; };
     const METHODS = { saldo: '🟡 Ncoins', pagomovil: '📱 Pago Móvil', binance: '🔶 Binance Pay' };
+    const syncMethods = () => ((store.get('settings', {}) || {}).extraPays || []).forEach(m => { if (m && m.id && !['saldo', 'pagomovil', 'binance'].includes(m.id)) METHODS[m.id] = `${m.icon || '💳'} ${m.name || m.id}`; });
+    syncMethods();
     let topups = store.get('topups', []);
     const AVATAR_BG = ['linear-gradient(135deg,#0066FF,#00F0FF)', 'linear-gradient(135deg,#7C3AED,#0066FF)', 'linear-gradient(135deg,#059669,#00F0FF)',
                        'linear-gradient(135deg,#E11D48,#F59E0B)', 'linear-gradient(135deg,#F59E0B,#FDE047)', 'linear-gradient(135deg,#334155,#0F172A)'];
@@ -1800,7 +1828,8 @@ window.NR_FIREBASE = {
       if (name === 'clientes') { renderClients(); store.set('clientsSeenAt', Date.now()); renderNewClientsBadge(); }
       if (name === 'pedidos') renderOrders();
       if (name === 'productos') renderProducts();
-      if (name === 'cupones') renderCoupons();
+      if (name === 'cupones') { renderSale(); renderOfferExtras(); renderCoupons(); }
+      if (name === 'vip') { renderVip(); renderTix(); }
       if (name === 'resenas') renderReviews();
       $$('.view').forEach(v => v.classList.toggle('hidden', v.dataset.panel !== name));
       $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
@@ -2527,6 +2556,7 @@ window.NR_FIREBASE = {
         else if (u && status !== 'Reembolsado' && o.walletRefunded) { u.balance = +((u.balance || 0) - o.amount).toFixed(2); o.walletRefunded = false; store.set('users', list); }
       }
       o.status = status;
+      if (status === 'Completado' && !o.doneAt) o.doneAt = Date.now();   // para el tiempo de entrega promedio
       // La contraseña de la cuenta del cliente (recarga interna) no se guarda después de entregar o cancelar
       if (status === 'Completado' || isOut) o.items.forEach(i => { if (i.login && i.login.pass) i.login = { ...i.login, pass: null, passRemoved: Date.now() }; });
       applyStock(o);
@@ -2564,7 +2594,7 @@ window.NR_FIREBASE = {
     const STREAM_RE = /netflix|prime ?video|disney|hbo|crunchyroll|spotify|youtube|paramount|star ?\+|vix|apple ?tv|deezer|tidal|canva|chatgpt|iptv|magis|streaming/i;
     const isStream = i => {
       const p = prodOf(i.id) || {};
-      if (+i.giftValue > 0 || +p.giftValue > 0) return false;
+      if (+i.giftValue > 0 || +p.giftValue > 0 || i.tickets || p.raffle) return false;
       return (i.kind || kindOf(p.id ? p : { cat: i.cat })) === 'streaming' || String(i.cat || p.cat || '').toLowerCase().includes('stream') || !!i.manualDelivery || !!(i.delivery && i.delivery.length) || STREAM_RE.test(i.name || p.name || '');
     };
     const streamItems = o => o.items.filter(isStream);
@@ -2652,11 +2682,12 @@ window.NR_FIREBASE = {
       const wantsCancel = o.status === 'Pendiente' && store.get('reports', []).some(r => r.orderId === o.id && r.kind === 'cancel');
       const cancelBox = wantsCancel ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">✋ <b>El cliente pidió cancelar este pedido.</b> Si aún no lo procesas, acéptalo: el pedido pasa a Rechazado y se devuelve el stock.
           <button data-setstatus="Rechazado" data-oid="${esc(o.id)}" class="mt-2 block rounded-lg border border-amber-500/40 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/25">Aceptar cancelación</button></div>` : '';
-      $('#omBody').innerHTML = `${cancelBox}${capBox}${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
+      const blHit = blMatch(o), blBox = blHit ? `<div class="mb-4 rounded-2xl border border-rose-500/50 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">⛔ <b>Este cliente está en tu lista negra</b> (${esc(blHit.v)}): ${esc(blHit.note || 'sin motivo')}. Revisa muy bien antes de aprobar.</div>` : '';
+      $('#omBody').innerHTML = `${blBox}${cancelBox}${capBox}${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-2xl border border-white/10 p-4">
             <p class="text-xs uppercase tracking-widest text-muted">Cliente</p>
-            <div class="mt-3 flex items-center gap-3">${avatar(u, 'h-11 w-11')}<div class="min-w-0"><p class="font-semibold">${esc(u.name || o.client)}</p><p class="truncate text-xs text-muted">${esc(o.userEmail || '')}</p><p class="text-xs text-muted">${esc(o.phone || '')}</p></div></div>
+            <div class="mt-3 flex items-center gap-3">${avatar(u, 'h-11 w-11')}<div class="min-w-0"><p class="font-semibold">${esc(u.name || o.client)} ${u.vip ? vipBadge(u.vip) : ''}</p><p class="truncate text-xs text-muted">${esc(o.userEmail || '')}</p><p class="text-xs text-muted">${esc(o.phone || '')}</p></div></div>
             ${digits ? `<a href="https://wa.me/${digits}?text=${encodeURIComponent(`Hola ${u.name || ''}, te escribimos de ${getSettings().name} sobre tu pedido ${o.id}.`)}" target="_blank" rel="noopener" class="mt-4 inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10"><i data-lucide="message-circle" class="h-4 w-4"></i>Escribir al cliente</a>` : ''}
           </div>
           <div class="rounded-2xl border border-white/10 p-4">
@@ -2664,6 +2695,7 @@ window.NR_FIREBASE = {
             ${row('Método', METHODS[o.method] || '—')}
             ${o.ref ? row('Referencia', `<span class="font-mono">${esc(o.ref)}</span>`) : ''}
             ${row('Monto', `<b>${money(o.amount)}</b>${o.amountBs ? `<br><span class="text-xs text-muted">${esc(o.amountBs)}</span>` : ''}`)}
+            ${o.vip ? row('Nivel VIP', `${vipBadge(o.vip.level)} · −${+o.vip.pct}%`) : ''}
             ${o.coupon ? row('Cupón', `<span class="font-mono">${esc(o.coupon.code)}</span> · −${money(o.coupon.cut)}`) : ''}
             ${row('Fecha', fmtDate(o.date))}
             ${row('Estado', statusBadge(o.status))}
@@ -2673,7 +2705,7 @@ window.NR_FIREBASE = {
           <p class="mb-2 text-xs uppercase tracking-widest text-muted">Productos</p>
           <ul class="space-y-2">${o.items.map(i => `
             <li class="flex items-start justify-between gap-3 text-sm">
-              <div><p>${esc(i.name)} <span class="text-muted">×${i.qty}</span></p>${i.playerId ? `<p class="mt-0.5 text-xs">🎮 ID de jugador: <span class="select-all font-mono font-semibold text-neon">${esc(i.playerId)}</span></p>` : ''}${i.login ? (i.login.mode === 'gift' ? '<p class="mt-1 inline-flex rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">🎁 Quiere recibir una gift card</p>' : `<div class="mt-1.5 rounded-lg border border-amber-400/30 bg-amber-400/5 p-2 text-xs leading-relaxed"><p class="font-semibold text-amber-300">🔐 Recarga interna</p><p>📧 <span class="select-all font-mono">${esc(i.login.email || '')}</span></p>${i.login.pass ? `<p>🔑 <span class="select-all font-mono">${esc(i.login.pass)}</span></p>` : '<p class="text-muted">🔑 Contraseña borrada por seguridad</p>'}</div>`) : ''}
+              <div><p>${esc(i.name)} <span class="text-muted">×${i.qty}</span></p>${i.tickets ? `<p class="mt-1 text-xs">🎟️ ${i.tickets.map(t => `<span class="font-mono font-semibold text-neon">#${esc(t)}</span>`).join(' ')}</p>` : ''}${i.playerId ? `<p class="mt-0.5 text-xs">🎮 ID de jugador: <span class="select-all font-mono font-semibold text-neon">${esc(i.playerId)}</span></p>` : ''}${i.login ? (i.login.mode === 'gift' ? '<p class="mt-1 inline-flex rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">🎁 Quiere recibir una gift card</p>' : `<div class="mt-1.5 rounded-lg border border-amber-400/30 bg-amber-400/5 p-2 text-xs leading-relaxed"><p class="font-semibold text-amber-300">🔐 Recarga interna</p><p>📧 <span class="select-all font-mono">${esc(i.login.email || '')}</span></p>${i.login.pass ? `<p>🔑 <span class="select-all font-mono">${esc(i.login.pass)}</span></p>` : '<p class="text-muted">🔑 Contraseña borrada por seguridad</p>'}</div>`) : ''}
                 ${i.renew ? (() => { const sv = svOfRenew(i); return `<p class="mt-1 inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">🔁 Renovación${sv ? ' · vence ' + fmtDay(sv.end) : ''} · mismos datos</p>`; })() : ''}
                 ${isStream(i) ? (i.delivery && i.delivery.length ? i.delivery.map((d, k) => `<div class="mt-1.5 rounded-lg border border-neon/30 bg-neon/5 p-2 text-xs leading-relaxed">${i.delivery.length > 1 ? `<p class="font-semibold text-neon">Cuenta ${k + 1}</p>` : ''}<p>📧 <span class="select-all font-mono">${esc(d.email)}</span></p><p>🔒 <span class="select-all font-mono">${esc(d.pass)}</span></p>${d.profile ? `<p>👤 Perfil: ${esc(d.profile)}${d.pin ? ' · PIN ' + esc(d.pin) : ''}</p>` : d.pin ? `<p>PIN ${esc(d.pin)}</p>` : ''}${d.note ? `<p class="text-muted">📝 ${esc(d.note)}</p>` : ''}</div>`).join('') : o.status === 'Pagado' ? '<p class="mt-1 text-xs text-amber-300">🔑 Falta entregar los datos de acceso.</p>' : '') : ''}
                 ${i.giftValue ? (i.giftCodes && i.giftCodes.length ? i.giftCodes.map(code => { const c = giftByCode(code) || {}; return `<p class="mt-1 text-xs">🎁 <span class="select-all font-mono font-semibold ${c.status === 'Disponible' ? 'text-neon' : 'text-muted line-through'}">${esc(code)}</span> <span class="ml-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ring-1 ${GIFT_STATUS[c.status] || ''}">${esc(c.status || '')}</span></p>`; }).join('') : '<p class="mt-1 text-xs text-amber-300">🎁 El código se generará al aprobar el pago.</p>') : ''}</div>
@@ -2691,6 +2723,7 @@ window.NR_FIREBASE = {
           return (sv.length ? `<div class="mt-4 rounded-2xl border border-white/10 p-4"><p class="mb-2 text-xs uppercase tracking-widest text-muted">Vencimiento</p>${sv.map(x => `<p class="text-sm">📅 ${esc(x.product)}: ${fmtDay(x.start)} → <b>${fmtDay(x.end)}</b> <span class="ml-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${svState(x).cls}">${svState(x).label}</span></p>`).join('')}<button data-view="vencimientos" data-close="orderModal" class="mt-2 text-xs font-semibold text-neon hover:underline">Editar fechas en Vencimientos →</button></div>` : '')
             + (rs.length ? `<div class="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4"><p class="mb-2 text-xs uppercase tracking-widest text-amber-300">⚠️ Reportes del cliente</p>${rs.map(r => `<div class="border-t border-white/5 py-2 first:border-0 first:pt-0"><p class="text-sm font-semibold">${esc(r.problem)} <span class="font-normal text-muted">· ${esc(r.product)}</span></p>${r.details ? `<p class="text-xs text-neutral-300">${esc(r.details)}</p>` : ''}<p class="text-[11px] text-muted">${fmtDate(r.date)}</p></div>`).join('')}</div>` : '');
         })()}
+        ${qrHTML(o)}
         ${actions.length ? `<div class="mt-6 flex flex-wrap gap-2">${actions.join('')}</div>` : ''}`;
       openModal('orderModal'); icons();
       const capImg = $('#omBody [data-capload]');
@@ -2824,9 +2857,10 @@ window.NR_FIREBASE = {
           <td>${c.n}</td>
           <td class="font-semibold">${money(c.spent)}</td>
           <td class="text-muted">${fmtDate(c.createdAt)}</td>
-          <td>${sanctionOf(c) ? `<span class="rounded-full bg-rose-500/15 px-2.5 py-1 text-xs font-semibold text-rose-300 ring-1 ring-rose-500/30" title="${esc(sanctionOf(c).reason || '')}">${sanctionOf(c).ban ? '🚫 Baneado' : '⏸️ Hasta ' + new Date(sanctionOf(c).until).toLocaleDateString('es-VE', { day: '2-digit', month: 'short' })}</span>` : `<span class="rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${tier[1]}">${tier[0]}</span>`}</td>
+          <td>${sanctionOf(c) ? `<span class="rounded-full bg-rose-500/15 px-2.5 py-1 text-xs font-semibold text-rose-300 ring-1 ring-rose-500/30" title="${esc(sanctionOf(c).reason || '')}">${sanctionOf(c).ban ? '🚫 Baneado' : '⏸️ Hasta ' + new Date(sanctionOf(c).until).toLocaleDateString('es-VE', { day: '2-digit', month: 'short' })}</span>` : ''}${vipCell(c)}</td>
           <td class="text-right"><div class="inline-flex flex-wrap justify-end gap-1.5">
             <button data-adjust="${esc(c.email)}" class="inline-flex items-center gap-1.5 rounded-lg border border-neon/30 px-3 py-1.5 text-xs font-semibold text-neon hover:bg-neon/10"><i data-lucide="wallet" class="h-3.5 w-3.5"></i>Saldo</button>
+            <button data-bladd="${esc(c.email)}" title="Agregar a la lista negra" class="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted hover:border-rose-500/40 hover:text-rose-300">⛔</button>
             ${sanctionOf(c) ? `<button data-unsanction="${esc(c.email)}" class="rounded-lg border border-emerald-500/40 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10">✅ Quitar sanción</button>`
               : `<button data-sanction="${esc(c.email)}" class="rounded-lg border border-rose-500/40 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/10">⛔ Sancionar</button>`}
           </div></td>
@@ -2834,6 +2868,11 @@ window.NR_FIREBASE = {
       }).join('') || emptyRow(8, all.length ? 'No hay clientes que coincidan.' : 'Aún no hay clientes registrados. Aparecerán aquí cuando creen su cuenta en la tienda.');
     }
     $('#clientSearch').addEventListener('input', renderClients);
+    $('#allClients').addEventListener('change', e => { const s = e.target.closest('[data-vipset]'); if (s) setVip(s.dataset.vipset, s.value); });
+    $('#allClients').addEventListener('click', e => {
+      const b = e.target.closest('[data-vipup]'); if (b) setVip(b.dataset.vipup, b.dataset.lv);
+      const bl = e.target.closest('[data-bladd]'); if (bl) { const u = userByEmail(bl.dataset.bladd); if (u) blAdd([u.email, u.phone].filter(Boolean), prompt(`¿Por qué agregas a ${u.name} a la lista negra?`, 'Pago falso') || 'Sin motivo'); }
+    });
 
     /* ---------- Finanzas ---------- */
     function renderFinance() {
@@ -3686,6 +3725,12 @@ window.NR_FIREBASE = {
 
       if (bm && $('#balanceModal').classList.contains('flex')) renderBm();
       renderServices(); renderGiftCards(); renderCoupons(); renderReviews(); renderStats();
+      if (e.key === 'nradmin_settings' || e.key === 'nradmin_products') { syncMethods(); renderSale(); renderOfferExtras(); renderVip(); if (!payDraft) renderPays(); }
+      if (['nradmin_products', 'nradmin_waitlist', 'nradmin_orders'].includes(e.key)) { renderStockBoxes(); stockAlerts(); }
+      if (['nradmin_priv', 'nradmin_orders', 'nradmin_topups'].includes(e.key)) { renderProfit(); renderClose(); renderQR(); renderBL(); }
+      if (e.key === 'nradmin_users' || e.key === 'nradmin_orders') renderVip();
+      if (e.key === 'nradmin_orders' || e.key === 'nradmin_products') renderTix();
+      if (e.key === 'nradmin_waitlist') store.get('waitlist', []).filter(w => !seenWait.has(w.id)).forEach(w => { seenWait.add(w.id); liveAlert({ emoji: '🔔', title: 'Un cliente espera stock', label: 'Ver', text: `${w.name} quiere ${w.product} cuando haya stock.`, onOpen: () => showView('dashboard') }); });
       if (e.key === 'nradmin_reviews') store.get('reviews', []).filter(r => !seenRv.has(r.id)).forEach(r => { seenRv.add(r.id); if (!r.approved) liveAlert({
         emoji: '⭐', title: 'Nueva reseña por aprobar', label: 'Ver reseñas',
         text: `${r.name}: ${'★'.repeat(+r.stars || 0)}${r.text ? ' · ' + r.text.slice(0, 60) : ''}`, onOpen: () => showView('resenas'),
@@ -3693,6 +3738,492 @@ window.NR_FIREBASE = {
       if (e.key === 'nradmin_orders' || e.key === 'nradmin_topups') processIncoming();
       if (e.key === 'nradmin_settings') { renderClosed(); applyLogo(); }
     });
+
+    /* ---------- Datos privados del panel (costos, respuestas rápidas y lista negra) ---------- */
+    const priv = () => { const v = store.get('priv', null); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; };
+    const savePriv = patch => store.set('priv', { ...priv(), ...patch });
+    const storeURL = () => location.origin + location.pathname.replace(/[^/]*$/, '');
+    const shortN = n => { const w = String(n || 'Cliente').trim().split(/\s+/); return w[0] + (w[1] ? ' ' + w[1][0].toUpperCase() + '.' : ''); };
+    const monthKey = t => dayKey(t).slice(0, 7);
+    const monthLabel = k => new Date(k + '-15T12:00:00').toLocaleDateString('es', { month: 'long', year: 'numeric' });
+    const sw = on => `<span class="switch ${on ? 'on' : ''}"></span>`;
+
+    /* ---------- Club VIP: niveles, descuentos y beneficios (todo lo decides tú) ---------- */
+    const VIP_DEF = { bronce: ['🥉', 'Bronce', '#CD7F32'], plata: ['🥈', 'Plata', '#C0C0C0'], oro: ['🥇', 'Oro', '#FFD700'], diamante: ['💎', 'Diamante', '#4FD1FF'], revendedor: ['🏪', 'Revendedor', '#A78BFA'] };
+    const VIP_IDS = Object.keys(VIP_DEF), VIP_RANK = { bronce: 1, plata: 2, oro: 3, diamante: 4 };
+    const vipCfgP = () => { const v = (store.get('settings', {}) || {}).vip; return v && typeof v === 'object' ? v : {}; };
+    const vipLevel = id => { const L = (vipCfgP().levels || {})[id] || {}; return { pct: +L.pct || 0, min: +L.min || 0, perks: L.perks || '', name: L.name || VIP_DEF[id][1], emoji: L.emoji || VIP_DEF[id][0], show: L.show !== false }; };
+    const vName = id => VIP_DEF[id] ? `${vipLevel(id).emoji} ${vipLevel(id).name}` : '';
+    const vipPctOf = u => !u || !u.vip || vipCfgP().on !== true || !VIP_DEF[u.vip] ? 0 : Math.max(0, Math.min(90, vipLevel(u.vip).pct));
+    const vipBadge = id => VIP_DEF[id] ? `<span class="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 align-middle text-[11px] font-bold" style="color:${VIP_DEF[id][2]};background:${VIP_DEF[id][2]}1f;border:1px solid ${VIP_DEF[id][2]}59">${vName(id)}</span>` : '';
+    const spentOf = email => orders.filter(o => o.userEmail === email && validOrder(o)).reduce((s, o) => s + o.amount, 0);
+    function vipSuggest(u, spent) {
+      if (u.vip === 'revendedor') return null; let best = null;
+      ['bronce', 'plata', 'oro', 'diamante'].forEach(id => { const m = vipLevel(id).min; if (m > 0 && spent >= m) best = id; });
+      return best && VIP_RANK[best] > (VIP_RANK[u.vip] || 0) ? best : null;
+    }
+    function vipCell(c) {
+      const sug = vipSuggest(c, c.spent);
+      return `<select data-vipset="${esc(c.email)}" class="field mt-1 w-auto py-1.5 text-xs"><option value="">Sin nivel VIP</option>${VIP_IDS.map(id => `<option value="${id}" ${c.vip === id ? 'selected' : ''}>${vName(id)}</option>`).join('')}</select>
+        ${sug ? `<button data-vipup="${esc(c.email)}" data-lv="${sug}" class="mt-1 block text-[11px] font-semibold text-amber-300 hover:underline">⬆️ Sugerido: ${vipLevel(sug).name}</button>` : ''}`;
+    }
+    function setVip(email, id) {
+      const list = users(), u = list.find(x => x.email === email); if (!u) return;
+      if ((u.vip || '') === (id || '')) return;
+      u.vip = id || ''; store.set('users', list);
+      if (id && vipCfgP().on === true) { const L = vipLevel(id); pushClientNotif(email, { icon: L.emoji, title: `¡Ahora eres ${L.name}!`, text: `Subiste al nivel ${L.name} del Club VIP${L.pct ? ` y tienes ${L.pct}% de descuento automático en tus compras` : ''}. ¡Gracias por tu confianza! 💙` }); }
+      toast(id ? `${vName(id)}: ${u.name}${vipCfgP().on === true ? '' : ' (el Club VIP está apagado, aún no ve nada)'}` : `${u.name} quedó sin nivel VIP`, id ? 'ok' : 'warn');
+      renderClients(); renderVip();
+    }
+    function renderVip() {
+      if (!$('#vipCfgBox')) return;
+      const cfg = vipCfgP(), on = cfg.on === true, us = users();
+      const L1 = 'mb-1.5 block text-xs text-muted';
+      $('#vipCfgBox').innerHTML = `<div class="flex items-center justify-between gap-4"><div><h3 class="font-semibold">👑 Club VIP</h3><p class="mt-0.5 text-xs ${on ? 'text-emerald-400' : 'text-amber-400'}">${on ? 'Prendido: los clientes lo ven en la tienda' : 'Apagado: la tienda no muestra nada del Club VIP ni da descuentos VIP'}</p></div><button type="button" data-viptoggle aria-label="Prender o apagar el Club VIP">${sw(on)}</button></div>
+        <p class="mt-3 text-xs text-muted">Todo lo escribes tú: nombres, beneficios y descuento. Si dejas el descuento en 0, ese nivel no regala nada. Nada sale en la tienda hasta que guardes y prendas el club.</p>
+        <label class="mt-4 block"><span class="${L1}">Texto de presentación (lo ven en la hoja del Club VIP)</span><textarea id="vipIntro" rows="2" class="field resize-y text-sm" placeholder="Ej. Premiamos a nuestros clientes más fieles. Nosotros asignamos los niveles.">${esc(cfg.intro || '')}</textarea></label>
+        <label class="mt-3 block"><span class="${L1}">Texto corto en Mi perfil (para quien aún no tiene nivel)</span><input id="vipTeaser" maxlength="140" class="field text-sm" value="${esc(cfg.teaser || '')}" placeholder="Ej. Conoce los niveles de nuestro Club VIP." /></label>
+        <div class="mt-4 space-y-3">${VIP_IDS.map(id => { const L = vipLevel(id), d = VIP_DEF[id]; return `<div class="rounded-2xl border p-4" style="border-color:${d[2]}55;background:${d[2]}0f">
+          <div class="flex items-center justify-between gap-3"><p class="font-display text-lg font-bold" style="color:${d[2]}">${esc(L.emoji)} ${esc(L.name)}</p><label class="flex cursor-pointer items-center gap-2 text-xs text-muted"><input data-vshow="${id}" type="checkbox" ${L.show ? 'checked' : ''} class="h-4 w-4 accent-[#0066FF]" />Mostrar en la tienda</label></div>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <label class="block"><span class="${L1}">Nombre del nivel</span><input data-vname="${id}" maxlength="20" value="${esc(L.name)}" class="field py-2 text-sm" /></label>
+            <label class="block"><span class="${L1}">Emoji</span><input data-vemoji="${id}" maxlength="4" value="${esc(L.emoji)}" class="field py-2 text-sm" /></label>
+            <label class="block"><span class="${L1}">Descuento automático (%) · 0 = sin descuento</span><input data-vpct="${id}" type="number" min="0" max="90" step="1" value="${L.pct || ''}" placeholder="0" class="field py-2 text-sm" /></label>
+            ${id === 'revendedor' ? '<p class="self-end pb-2 text-xs text-muted">Para clientes que compran para revender. Lo asignas tú.</p>' : `<label class="block"><span class="${L1}">Gasto para sugerírtelo ($, opcional)</span><input data-vmin="${id}" type="number" min="0" step="1" value="${L.min || ''}" placeholder="Sin sugerencia" class="field py-2 text-sm" /></label>`}
+          </div>
+          <label class="mt-3 block"><span class="${L1}">Beneficios (uno por línea, opcional)</span><textarea data-vperks="${id}" rows="2" class="field resize-y text-sm" placeholder="Ej. Atención prioritaria por WhatsApp">${esc(L.perks)}</textarea></label></div>`; }).join('')}</div>
+        <button type="button" data-vipsave class="btn-primary mt-4 rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar Club VIP</button>`;
+      const withSpent = us.map(u => ({ ...u, spent: spentOf(u.email) }));
+      const members = withSpent.filter(u => VIP_DEF[u.vip]).sort((a, b) => (VIP_RANK[b.vip] || 5) - (VIP_RANK[a.vip] || 5) || b.spent - a.spent);
+      const sugs = withSpent.map(u => ({ u, s: vipSuggest(u, u.spent) })).filter(x => x.s);
+      const counts = VIP_IDS.map(id => `<div class="rounded-xl border border-white/5 bg-white/[.03] p-3 text-center"><p class="text-2xl leading-none">${esc(vipLevel(id).emoji)}</p><p class="mt-1 font-display text-xl font-bold">${members.filter(m => m.vip === id).length}</p><p class="text-[11px] text-muted">${esc(vipLevel(id).name)}</p></div>`).join('');
+      $('#vipMembers').innerHTML = `<h3 class="font-semibold">Miembros</h3><p class="mt-0.5 text-xs text-muted">Cambias el nivel de cada cliente aquí o en Clientes. El cliente recibe un aviso en la tienda.</p>
+        <div class="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-5">${counts}</div>
+        ${sugs.length ? `<div class="mt-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4"><p class="text-sm font-semibold text-amber-300">💡 Clientes que podrías subir de nivel</p><ul class="mt-2 space-y-2">${sugs.slice(0, 10).map(({ u, s }) => `<li class="flex flex-wrap items-center justify-between gap-2 text-sm"><span>${esc(u.name)} <span class="text-xs text-muted">· gastó ${money(u.spent)}</span> ${u.vip ? vipBadge(u.vip) : ''}</span><button data-vipup="${esc(u.email)}" data-lv="${s}" class="rounded-lg border border-amber-500/40 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/25">Subir a ${vName(s)}</button></li>`).join('')}</ul></div>` : ''}
+        <ul class="mt-5 space-y-2">${members.map(u => `<li class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/5 px-3 py-2.5"><span class="flex min-w-0 items-center gap-3">${avatar(u, 'h-9 w-9')}<span class="min-w-0"><span class="block truncate text-sm font-medium">${esc(u.name)}</span><span class="text-xs text-muted">Gastó ${money(u.spent)}</span></span></span>
+          <span class="flex items-center gap-2">${vipBadge(u.vip)}<select data-vipset="${esc(u.email)}" class="field w-auto py-1.5 text-xs"><option value="">Quitar nivel</option>${VIP_IDS.map(id => `<option value="${id}" ${u.vip === id ? 'selected' : ''}>${vName(id)}</option>`).join('')}</select></span></li>`).join('') || '<li class="py-6 text-center text-sm text-muted">Aún no hay miembros. Asigna niveles desde Clientes.</li>'}</ul>`;
+      renderRaffle();
+    }
+    $('#vipCfgBox') && document.addEventListener('click', e => {
+      if (e.target.closest('[data-viptoggle]')) { const st = store.get('settings', {}) || {}, v = { ...(st.vip || {}) }; v.on = v.on !== true; store.set('settings', { ...st, vip: v }); renderVip(); toast(v.on ? '👑 Club VIP activado en la tienda' : 'Club VIP apagado: nadie tiene descuento VIP', v.on ? 'ok' : 'warn'); }
+      if (e.target.closest('[data-vipsave]')) {
+        const levels = {};
+        for (const id of VIP_IDS) {
+          const pct = Math.round(+($(`[data-vpct="${id}"]`).value || 0)), mn = $(`[data-vmin="${id}"]`);
+          if (pct < 0 || pct > 90) return toast(`El descuento de ${VIP_DEF[id][1]} debe estar entre 0% y 90%`, 'warn');
+          levels[id] = { pct, min: mn ? Math.max(0, +mn.value || 0) : 0, perks: $(`[data-vperks="${id}"]`).value.trim().slice(0, 600),
+            name: $(`[data-vname="${id}"]`).value.trim().slice(0, 20) || VIP_DEF[id][1], emoji: $(`[data-vemoji="${id}"]`).value.trim().slice(0, 4) || VIP_DEF[id][0], show: $(`[data-vshow="${id}"]`).checked };
+        }
+        const st = store.get('settings', {}) || {}; store.set('settings', { ...st, vip: { ...(st.vip || {}), on: (st.vip || {}).on === true, intro: $('#vipIntro').value.trim().slice(0, 400), teaser: $('#vipTeaser').value.trim().slice(0, 140), levels } });
+        toast('👑 Niveles guardados'); renderVip(); renderClients();
+      }
+      const up = e.target.closest('#vipMembers [data-vipup]'); if (up) setVip(up.dataset.vipup, up.dataset.lv);
+    });
+    document.addEventListener('change', e => { const s = e.target.closest('#vipMembers [data-vipset]'); if (s) setVip(s.dataset.vipset, s.value); });
+
+    /* ---------- Sorteos con ticket pagado ---------- */
+    const tixDraft = { prize: '', from: '', price: '1', when: '', max: '', icon: '🎟️' };
+    const raffleProducts = () => products.filter(x => x.raffle);
+    const raffleEntries = id => { const out = []; orders.filter(o => validOrder(o)).forEach(o => o.items.forEach(i => { if (i.id === id) (i.tickets && i.tickets.length ? i.tickets : Array.from({ length: i.qty }, (_, k) => o.id.slice(-4) + k)).forEach(t => out.push({ t, o })); })); return out; };
+    const pendingTix = id => orders.filter(o => o.status === 'Pendiente').reduce((a, o) => a + o.items.filter(i => i.id === id).reduce((b, i) => b + i.qty, 0), 0);
+    const drawLabel = t => t ? new Date(+t).toLocaleString('es-VE', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'Sin fecha';
+    function renderTix() {
+      const box = $('#tixBox'); if (!box) return;
+      const L1 = 'mb-1.5 block text-xs text-muted', list = raffleProducts().sort((a, b) => (b.raffle.createdAt || 0) - (a.raffle.createdAt || 0));
+      const prizeOpts = products.filter(x => !x.raffle && !(+x.giftValue > 0)).flatMap(x => (x.packages || []).filter(k => k && k.label).length ? x.packages.filter(k => k && k.label).map(k => `${x.name} · ${k.label}`) : [x.name]);
+      box.innerHTML = `<h3 class="font-semibold">🎟️ Sorteos con ticket</h3><p class="mt-0.5 text-xs text-muted">Vendes tickets (ej. $1) para ganar un premio. El cliente recibe su número al instante y ve la fecha del sorteo. Con Ncoins el ticket queda activo de una vez; con Pago Móvil u otro, cuando apruebes el pago.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <label class="block sm:col-span-2"><span class="${L1}">Premio: elige un producto de tu tienda…</span><select id="txFrom" class="field text-sm"><option value="">— Escribirlo yo —</option>${prizeOpts.map(n => `<option ${tixDraft.from === n ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select></label>
+          <label class="block sm:col-span-2"><span class="${L1}">…o escríbelo (lo que ve el cliente)</span><input id="txPrize" maxlength="70" value="${esc(tixDraft.prize)}" class="field text-sm" placeholder="Ej. 1 pantalla de Netflix por 1 mes" /></label>
+          <label class="block"><span class="${L1}">Precio del ticket ($)</span><input id="txPrice" type="number" min="0.1" step="0.01" value="${esc(tixDraft.price)}" class="field text-sm" /></label>
+          <label class="block"><span class="${L1}">Fecha y hora del sorteo</span><input id="txWhen" type="datetime-local" value="${esc(tixDraft.when)}" class="field text-sm" /></label>
+          <label class="block"><span class="${L1}">Máximo de tickets (vacío = sin límite)</span><input id="txMax" type="number" min="1" step="1" value="${esc(tixDraft.max)}" class="field text-sm" placeholder="Ej. 50" /></label>
+          <label class="block"><span class="${L1}">Emoji</span><input id="txIcon" maxlength="4" value="${esc(tixDraft.icon)}" class="field text-sm" /></label>
+        </div>
+        <button type="button" data-txcreate class="btn-primary mt-4 rounded-xl px-4 py-2.5 text-sm font-semibold">🎟️ Crear sorteo</button>
+        ${list.length ? `<p class="mt-6 text-xs font-semibold uppercase tracking-widest text-muted">Tus sorteos</p><div class="mt-2 space-y-3">${list.map(x => { const ent = raffleEntries(x.id), pend = pendingTix(x.id), w = x.raffle.winner, past = +x.raffle.drawAt && Date.now() > +x.raffle.drawAt, people = new Set(ent.map(e => e.o.userEmail)).size; return `<div class="rounded-2xl border ${w ? 'border-emerald-500/40 bg-emerald-500/5' : past ? 'border-amber-500/40 bg-amber-500/5' : 'border-white/10'} p-4">
+          <div class="flex flex-wrap items-start justify-between gap-2"><div><p class="font-semibold">${esc(x.icon || '🎟️')} ${esc(x.raffle.prize)}</p><p class="text-xs text-muted">📅 ${drawLabel(x.raffle.drawAt)} · ${money(x.price)} por ticket${x.active ? '' : ' · oculto en la tienda'}</p></div>
+            <p class="text-right text-sm"><b class="text-neon">${ent.length}</b> ticket${ent.length === 1 ? '' : 's'} activos<br><span class="text-xs text-muted">${people} persona${people === 1 ? '' : 's'}${pend ? ` · ${pend} por verificar` : ''} · ${money(ent.length * x.price)}</span></p></div>
+          ${w ? `<div class="mt-3 rounded-xl bg-emerald-500/10 p-3 text-sm"><p class="font-semibold text-emerald-300">🏆 Ganó ${esc(w.name)} · ticket #${esc(w.ticket)}</p><p class="text-xs text-muted">${esc(w.email || '')} · ${esc(w.phone || '')} · pedido ${esc(w.orderId || '')}</p>${waNum(w.phone) ? `<a href="https://wa.me/${waNum(w.phone)}?text=${encodeURIComponent(`¡Hola ${String(w.name).split(' ')[0]}! 🎉 Tu ticket #${w.ticket} ganó el sorteo de ${getSettings().name}: ${x.raffle.prize}. ¡Felicidades! 🏆`)}" target="_blank" rel="noopener" class="mt-2 inline-flex rounded-lg border border-emerald-500/40 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10">Avisarle por WhatsApp</a>` : ''}</div>`
+            : `<div class="mt-3 flex flex-wrap gap-2"><button data-txdraw="${esc(x.id)}" ${ent.length ? '' : 'disabled'} class="btn-primary rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40">🎲 Sortear${past ? ' ahora' : ''}</button><button data-txtoggle="${esc(x.id)}" class="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:bg-white/5">${x.active ? 'Ocultar' : 'Mostrar'}</button>${pend ? '<span class="self-center text-[11px] text-amber-300">Aprueba los pagos pendientes antes de sortear</span>' : ''}</div>`}
+          ${!ent.length && !w ? `<button data-txdel="${esc(x.id)}" class="mt-2 text-xs text-muted underline hover:text-rose-300">Borrar este sorteo</button>` : ''}</div>`; }).join('')}</div>` : ''}`;
+    }
+    document.addEventListener('input', e => { const m = { txPrize: 'prize', txPrice: 'price', txWhen: 'when', txMax: 'max', txIcon: 'icon' }[e.target.id]; if (m) tixDraft[m] = e.target.value; });
+    document.addEventListener('change', e => { if (e.target.id === 'txFrom') { tixDraft.from = e.target.value; if (e.target.value) tixDraft.prize = e.target.value; renderTix(); } if (e.target.id === 'txWhen') tixDraft.when = e.target.value; });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#tixBox')) return;
+      if (e.target.closest('[data-txcreate]')) {
+        const prize = tixDraft.prize.trim(), price = +(+tixDraft.price).toFixed(2), when = tixDraft.when ? new Date(tixDraft.when).getTime() : 0, max = Math.floor(+tixDraft.max || 0);
+        if (!prize) return toast('Escribe o elige el premio', 'warn');
+        if (!(price > 0)) return toast('Escribe el precio del ticket', 'warn');
+        if (!when || when < Date.now() + 5 * 60000) return toast('Pon una fecha y hora del sorteo en el futuro', 'warn');
+        const id = 'P-R' + Date.now().toString(36).toUpperCase().slice(-6);
+        products = [{ id, icon: tixDraft.icon.trim() || '🎟️', name: `Ticket · Sorteo ${prize}`, cat: 'Sorteos', kind: 'otro', price, old: null, tag: '🎟️ Sorteo', stock: max || 9999, active: true, needsId: false,
+          desc: `Participa por ${prize}. El sorteo es el ${drawLabel(when)}. Tu número de ticket se genera al comprar.`, raffle: { prize, drawAt: when, createdAt: Date.now() } }, ...products];
+        store.set('products', products); Object.assign(tixDraft, { prize: '', from: '', price: '1', when: '', max: '' }); renderTix(); renderProducts();
+        toast('🎟️ Sorteo creado: ya se venden los tickets en la tienda');
+      }
+      const tg = e.target.closest('[data-txtoggle]'); if (tg) { const x = products.find(y => y.id === tg.dataset.txtoggle); if (x) { x.active = !x.active; store.set('products', products); renderTix(); renderProducts(); } }
+      const dl = e.target.closest('[data-txdel]'); if (dl) { if (!confirm('¿Borrar este sorteo?')) return; products = products.filter(y => y.id !== dl.dataset.txdel); store.set('products', products); renderTix(); renderProducts(); }
+      const dr = e.target.closest('[data-txdraw]');
+      if (dr) {
+        const x = products.find(y => y.id === dr.dataset.txdraw), ent = raffleEntries(x.id); if (!ent.length) return;
+        const pend = pendingTix(x.id);
+        if (!confirm(`¿Sortear "${x.raffle.prize}" entre ${ent.length} tickets activos?${pend ? `\n\n⚠️ Hay ${pend} ticket(s) con pago sin verificar: no participan.` : ''}${+x.raffle.drawAt > Date.now() ? '\n\n⚠️ Todavía no llega la fecha anunciada.' : ''}`)) return;
+        const r = new Uint32Array(1); crypto.getRandomValues(r); const win = ent[r[0] % ent.length], u = userByEmail(win.o.userEmail) || {};
+        x.raffle = { ...x.raffle, winner: { name: win.o.client, email: win.o.userEmail, phone: win.o.phone || u.phone || '', ticket: win.t, orderId: win.o.id, t: Date.now() } }; x.active = false;
+        store.set('products', products);
+        const st = store.get('settings', {}) || {}, rf = st.raffle && typeof st.raffle === 'object' ? st.raffle : {};
+        store.set('settings', { ...st, raffle: { ...rf, winners: [{ month: monthKey(Date.now()), name: shortN(win.o.client), prize: x.raffle.prize, ticket: win.t, t: Date.now() }, ...(rf.winners || [])].slice(0, 12) } });
+        pushClientNotif(win.o.userEmail, { icon: '🏆', title: '¡Tu ticket ganó!', text: `Tu ticket #${win.t} ganó el sorteo: ${x.raffle.prize}. Te escribiremos por WhatsApp. ¡Felicidades! 🎉` });
+        renderTix(); renderProducts(); toast(`🏆 Ganó ${win.o.client} con el ticket #${win.t}`);
+      }
+    });
+
+    /* ---------- Sorteo del mes ---------- */
+    const raffleP = () => { const r = (store.get('settings', {}) || {}).raffle; return r && typeof r === 'object' ? r : {}; };
+    let raffleMonth = null;
+    const rafflePeople = m => { const g = {}; orders.filter(o => validOrder(o) && monthKey(o.date) === m).forEach(o => { (g[o.userEmail] ||= { email: o.userEmail, name: o.client, phone: o.phone, n: 0 }).n++; }); return Object.values(g).sort((a, b) => b.n - a.n); };
+    function renderRaffle() {
+      const box = $('#raffleBox'); if (!box) return;
+      const r = raffleP(), now = monthKey(Date.now()), prev = monthKey(new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15).getTime());
+      raffleMonth = raffleMonth || now;
+      const ppl = rafflePeople(raffleMonth), total = ppl.reduce((a, x) => a + x.n, 0), last = priv().lastDraw;
+      box.innerHTML = `<div class="flex items-center justify-between gap-4"><div><h3 class="font-semibold">🎟️ Sorteo del mes</h3><p class="mt-0.5 text-xs text-muted">Cada pedido pagado = 1 ticket. Los clientes ven sus tickets y el premio en la tienda.</p></div><button type="button" data-rftoggle aria-label="Prender o apagar el sorteo">${sw(r.on)}</button></div>
+        <label class="mt-4 block max-w-md"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Premio</span><input id="rfPrize" class="field" maxlength="80" value="${esc(r.prize || '')}" placeholder="Ej. 10 Ncoins o 1060 diamantes de Free Fire" /></label>
+        <button type="button" data-rfsave class="mt-2 rounded-xl border border-neon/30 px-4 py-2 text-sm font-semibold text-neon hover:bg-neon/10">Guardar premio</button>
+        <div class="mt-5 flex flex-wrap gap-2">${[[now, 'Este mes'], [prev, 'Mes pasado']].map(([k, l]) => `<button type="button" data-rfmonth="${k}" class="rounded-xl px-3.5 py-2 text-sm font-semibold transition ${raffleMonth === k ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${l} · ${monthLabel(k)}</button>`).join('')}</div>
+        <p class="mt-4 text-sm">${ppl.length} participante${ppl.length === 1 ? '' : 's'} · ${total} ticket${total === 1 ? '' : 's'}</p>
+        <ul class="mt-2 max-h-60 space-y-1.5 overflow-y-auto">${ppl.slice(0, 50).map(x => `<li class="flex justify-between gap-3 rounded-lg bg-white/[.03] px-3 py-2 text-sm"><span class="truncate">${esc(x.name)}</span><span class="shrink-0 font-semibold">🎟️ ${x.n}</span></li>`).join('') || '<li class="py-4 text-center text-sm text-muted">Aún no hay pedidos pagados en ese mes.</li>'}</ul>
+        <button type="button" data-rfdraw ${ppl.length ? '' : 'disabled'} class="btn-primary mt-4 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-40">🎲 Sortear ahora</button>
+        ${last ? `<div class="mt-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm"><p class="font-semibold text-emerald-300">🏆 Último ganador: ${esc(last.name)} (${esc(monthLabel(last.month))})</p><p class="mt-1 text-xs text-muted">${esc(last.email)} · ${esc(last.phone || '')} · ${last.n} ticket${last.n === 1 ? '' : 's'}</p>
+          ${waNum(last.phone) ? `<a href="https://wa.me/${waNum(last.phone)}?text=${encodeURIComponent(`¡Hola ${last.name}! 🎉 Ganaste el sorteo de ${monthLabel(last.month)} de ${getSettings().name}: ${last.prize || 'premio sorpresa'}. ¡Felicidades! 🏆`)}" target="_blank" rel="noopener" class="mt-2 inline-flex rounded-lg border border-emerald-500/40 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10">Avisarle por WhatsApp</a>` : ''}</div>` : ''}`;
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#raffleBox')) return;
+      const st = () => store.get('settings', {}) || {};
+      if (e.target.closest('[data-rftoggle]')) { const r = { ...raffleP(), on: !raffleP().on }; store.set('settings', { ...st(), raffle: r }); renderRaffle(); toast(r.on ? '🎟️ Sorteo visible en la tienda' : 'Sorteo oculto en la tienda', r.on ? 'ok' : 'warn'); }
+      if (e.target.closest('[data-rfsave]')) { store.set('settings', { ...st(), raffle: { ...raffleP(), prize: $('#rfPrize').value.trim().slice(0, 80) } }); toast('Premio guardado'); }
+      const mb = e.target.closest('[data-rfmonth]'); if (mb) { raffleMonth = mb.dataset.rfmonth; renderRaffle(); }
+      if (e.target.closest('[data-rfdraw]')) {
+        const ppl = rafflePeople(raffleMonth), total = ppl.reduce((a, x) => a + x.n, 0); if (!total) return;
+        if (!confirm(`¿Sortear entre ${ppl.length} participantes (${total} tickets) de ${monthLabel(raffleMonth)}?`)) return;
+        const r = new Uint32Array(1); crypto.getRandomValues(r); let k = r[0] % total, win = ppl[0];
+        for (const x of ppl) { if (k < x.n) { win = x; break; } k -= x.n; }
+        const prize = $('#rfPrize').value.trim() || raffleP().prize || '';
+        savePriv({ lastDraw: { ...win, month: raffleMonth, prize, t: Date.now() } });
+        store.set('settings', { ...st(), raffle: { ...raffleP(), prize, winners: [{ month: raffleMonth, name: shortN(win.name), prize, t: Date.now() }, ...(raffleP().winners || [])].slice(0, 12) } });
+        pushClientNotif(win.email, { icon: '🏆', title: '¡Ganaste el sorteo del mes!', text: `Ganaste el sorteo de ${monthLabel(raffleMonth)}${prize ? ': ' + prize : ''}. Te escribiremos por WhatsApp. ¡Felicidades! 🎉` });
+        renderRaffle(); toast(`🏆 Ganó ${win.name} con ${win.n} ticket${win.n === 1 ? '' : 's'}`);
+      }
+    });
+
+    /* ---------- Producto del día, confianza y combos ---------- */
+    function renderOfferExtras() {
+      if (!$('#dailyBox')) return;
+      const st = store.get('settings', {}) || {}, d = st.daily || {}, so = st.social || {}, f = store.get('feed', null) || {};
+      const sellable = products.filter(x => x.active && !(+x.giftValue > 0));
+      $('#dailyBox').innerHTML = `<h3 class="font-semibold">⭐ Producto del día</h3><p class="mt-0.5 text-xs text-muted">Aparece arriba del catálogo con cuenta regresiva hasta medianoche.</p>
+        <div class="mt-4 flex flex-wrap gap-2">${[['off', 'Apagado'], ['auto', 'Automático'], ['manual', 'Lo elijo yo']].map(([k, l]) => `<button type="button" data-dmode="${k}" class="rounded-xl px-3.5 py-2 text-sm font-semibold transition ${(d.mode || 'off') === k ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${l}</button>`).join('')}</div>
+        ${d.mode === 'manual' ? `<select data-dprod class="field mt-3"><option value="">Elige un producto…</option>${sellable.map(x => `<option value="${esc(x.id)}" ${d.productId === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>` : d.mode === 'auto' ? '<p class="mt-3 text-xs text-muted">Cada día se elige uno distinto entre los que tienen stock.</p>' : ''}`;
+      $('#socialBox').innerHTML = `<h3 class="font-semibold">🤝 Confianza en la tienda</h3><p class="mt-0.5 text-xs text-muted">Se calculan con tus pedidos reales. Se actualizan mientras el panel esté abierto.</p>
+        <button type="button" data-social="recent" class="mt-4 flex w-full items-center justify-between gap-4 rounded-xl border border-white/5 p-3 text-left hover:border-neon/30"><span><span class="block text-sm font-medium">🛒 Ventas recientes</span><span class="text-xs text-muted">"María G. compró Free Fire hace 5 min" (solo primer nombre)</span></span>${sw(so.recent !== false)}</button>
+        <button type="button" data-social="avg" class="mt-2 flex w-full items-center justify-between gap-4 rounded-xl border border-white/5 p-3 text-left hover:border-neon/30"><span><span class="block text-sm font-medium">⚡ Tiempo de entrega promedio</span><span class="text-xs text-muted">${+f.avgN >= 3 ? `Ahora: ${Math.round(f.avgMin)} min (últimos ${f.avgN} pedidos)` : 'Se muestra cuando haya al menos 3 pedidos entregados con esta versión'}</span></span>${sw(so.avg !== false)}</button>`;
+      const singles = products.filter(x => x.active && !(+x.giftValue > 0) && !(x.packages || []).length && !(x.comboOf || []).length);
+      const combos = products.filter(x => (x.comboOf || []).length);
+      const pick = comboDraft.ids.map(id => products.find(x => x.id === id)).filter(Boolean), sum = pick.reduce((a, x) => a + +x.price, 0);
+      $('#comboBox').innerHTML = `<h3 class="font-semibold">🧩 Combos</h3><p class="mt-0.5 text-xs text-muted">Junta 2 o más productos con un precio menor. La tienda le muestra al cliente cuánto ahorra. Lo entregas como cualquier pedido.</p>
+        <div class="mt-4 flex max-h-56 flex-wrap gap-2 overflow-y-auto">${singles.map(x => `<button type="button" data-cpick="${esc(x.id)}" class="rounded-xl px-3 py-2 text-xs font-semibold transition ${comboDraft.ids.includes(x.id) ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${esc(x.icon || '')} ${esc(x.name)} · ${money(x.price)}</button>`).join('') || '<p class="text-sm text-muted">Necesitas productos sin paquetes para armar combos.</p>'}</div>
+        ${pick.length >= 2 ? `<div class="mt-4 grid gap-3 sm:grid-cols-3">
+          <label class="block sm:col-span-3"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Nombre del combo</span><input id="cbName" class="field" value="${esc(comboDraft.name || pick.map(x => x.name.split('·')[0].trim()).join(' + '))}" /></label>
+          <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Precio del combo ($)</span><input id="cbPrice" type="number" min="0.01" step="0.01" class="field" value="${comboDraft.price || (sum * 0.9).toFixed(2)}" /></label>
+          <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Stock</span><input id="cbStock" type="number" min="0" step="1" class="field" value="${comboDraft.stock || Math.min(...pick.map(x => +x.stock || 0))}" /></label>
+          <p class="self-end pb-2 text-sm">Por separado: <b>${money(sum)}</b></p></div>
+          <button type="button" data-cbcreate class="btn-primary mt-4 rounded-xl px-4 py-2.5 text-sm font-semibold">🧩 Crear combo</button>` : '<p class="mt-3 text-xs text-muted">Elige al menos 2 productos.</p>'}
+        ${combos.length ? `<p class="mt-6 text-xs font-semibold uppercase tracking-widest text-muted">Tus combos</p><ul class="mt-2 space-y-2">${combos.map(x => `<li class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/5 px-3 py-2.5 text-sm"><span>${esc(x.name)} · <b>${money(x.price)}</b> <span class="text-xs text-muted">· stock ${x.stock}${x.active ? '' : ' · oculto'}</span></span><span class="flex gap-2"><button data-cbtoggle="${esc(x.id)}" class="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:bg-white/5">${x.active ? 'Ocultar' : 'Mostrar'}</button><button data-cbdel="${esc(x.id)}" class="rounded-lg border border-rose-500/30 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/10">Borrar</button></span></li>`).join('')}</ul>` : ''}`;
+      ['#dailyBox', '#socialBox', '#comboBox'].forEach(id => { const el = $(id); el.innerHTML = el.innerHTML.replaceAll('mb-1.5 block text-sm font-medium text-neutral-300', 'mb-1.5 block text-sm font-medium text-neutral-300'); });
+    }
+    const comboDraft = { ids: [], name: '', price: '', stock: '' };
+    document.addEventListener('click', e => {
+      const st = () => store.get('settings', {}) || {};
+      const dm = e.target.closest('[data-dmode]'); if (dm) { store.set('settings', { ...st(), daily: { ...(st().daily || {}), mode: dm.dataset.dmode } }); renderOfferExtras(); toast(dm.dataset.dmode === 'off' ? 'Producto del día apagado' : '⭐ Producto del día activo'); }
+      const so = e.target.closest('#socialBox [data-social]'); if (so) { const k = so.dataset.social, cur = { ...(st().social || {}) }; cur[k] = cur[k] === false; store.set('settings', { ...st(), social: cur }); renderOfferExtras(); }
+      const cp = e.target.closest('[data-cpick]'); if (cp) { const id = cp.dataset.cpick; comboDraft.ids = comboDraft.ids.includes(id) ? comboDraft.ids.filter(x => x !== id) : [...comboDraft.ids, id]; comboDraft.name = ''; comboDraft.price = ''; comboDraft.stock = ''; renderOfferExtras(); }
+      if (e.target.closest('[data-cbcreate]')) {
+        const pick = comboDraft.ids.map(id => products.find(x => x.id === id)).filter(Boolean), name = $('#cbName').value.trim(), price = +(+$('#cbPrice').value).toFixed(2), stock = Math.max(0, Math.floor(+$('#cbStock').value || 0));
+        const sum = pick.reduce((a, x) => a + +x.price, 0);
+        if (!name) return toast('Ponle un nombre al combo', 'warn');
+        if (!(price > 0)) return toast('Escribe el precio del combo', 'warn');
+        if (price >= sum && !confirm(`El combo (${money(price)}) no es más barato que comprar por separado (${money(sum)}). ¿Crearlo igual?`)) return;
+        const id = 'P-C' + Date.now().toString(36).toUpperCase().slice(-6);
+        products = [{ id, icon: '🧩', name, cat: 'Combos', price, old: null, tag: 'Combo', stock, active: true, desc: 'Incluye: ' + pick.map(x => x.name).join(' + ') + '.', comboOf: pick.map(x => x.id) }, ...products];
+        store.set('products', products); comboDraft.ids = []; renderOfferExtras(); renderProducts(); toast(`🧩 Combo "${name}" creado y visible en la tienda`);
+      }
+      const ct = e.target.closest('[data-cbtoggle]'); if (ct) { const x = products.find(y => y.id === ct.dataset.cbtoggle); if (x) { x.active = !x.active; store.set('products', products); renderOfferExtras(); renderProducts(); } }
+      const cd = e.target.closest('[data-cbdel]'); if (cd) { if (!confirm('¿Borrar este combo de la tienda?')) return; products = products.filter(y => y.id !== cd.dataset.cbdel); store.set('products', products); renderOfferExtras(); renderProducts(); toast('Combo borrado', 'warn'); }
+    });
+    document.addEventListener('change', e => {
+      const dp = e.target.closest('[data-dprod]'); if (dp) { const st = store.get('settings', {}) || {}; store.set('settings', { ...st, daily: { ...(st.daily || {}), mode: 'manual', productId: dp.value } }); toast('⭐ Producto del día guardado'); }
+    });
+    document.addEventListener('input', e => { if (e.target.id === 'cbName') comboDraft.name = e.target.value; if (e.target.id === 'cbPrice') comboDraft.price = e.target.value; if (e.target.id === 'cbStock') comboDraft.stock = e.target.value; });
+
+    /* ---------- Ventas recientes y entrega promedio (se publican para la tienda) ---------- */
+    function publishFeed() {
+      if (CLOUD && !NRCloud.ready('orders')) return;
+      const done = orders.filter(o => o.status === 'Completado' && +o.doneAt > o.date).sort((a, b) => b.doneAt - a.doneAt).slice(0, 30);
+      const mins = done.map(o => (o.doneAt - o.date) / 6e4).filter(m => m < 1440).sort((a, b) => a - b);
+      const avgMin = mins.length ? +mins[Math.floor(mins.length / 2)].toFixed(1) : 0;
+      const recent = orders.filter(validOrder).sort((a, b) => b.date - a.date).slice(0, 12).map(o => ({ n: shortN(o.client), p: String(o.product || '').slice(0, 42), t: o.date }));
+      const cur = store.get('feed', null) || {};
+      if (JSON.stringify(cur.recent || []) === JSON.stringify(recent) && +cur.avgMin === avgMin && +cur.avgN === mins.length) return;
+      store.set('feed', { recent, avgMin, avgN: mins.length, t: Date.now() });
+    }
+
+    /* ---------- Stock bajo y clientes esperando ---------- */
+    const lowN = () => Math.max(1, +prefs.lowStockN || 5);
+    const seenWait = new Set((store.get('waitlist', []) || []).map(w => w.id)), stockSeen = new Set();
+    function renderStockBoxes() {
+      if (!$('#lowBox')) return;
+      const low = products.filter(x => x.active && !(+x.giftValue > 0) && x.stock != null && +x.stock <= lowN()).sort((a, b) => a.stock - b.stock);
+      $('#lowBox').innerHTML = `<div class="flex items-center justify-between gap-3"><div><h3 class="font-semibold">📦 Stock bajo</h3><p class="text-xs text-muted">Productos con ${lowN()} o menos unidades</p></div>
+        <label class="flex items-center gap-2 text-xs text-muted">Avisar con <input id="lowN" type="number" min="1" step="1" value="${lowN()}" class="field w-16 py-1.5 text-center text-sm" /></label></div>
+        <ul class="mt-4 space-y-2">${low.slice(0, 12).map(x => `<li class="flex items-center justify-between gap-3 rounded-xl border border-white/5 px-3 py-2.5 text-sm"><span class="truncate">${esc(x.icon || '')} ${esc(x.name)}</span><span class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ${+x.stock <= 0 ? 'bg-rose-500/15 text-rose-300 ring-rose-500/30' : 'bg-amber-500/15 text-amber-300 ring-amber-500/30'}">${+x.stock <= 0 ? 'Agotado' : x.stock + ' u'}</span></li>`).join('') || '<li class="py-6 text-center text-sm text-muted">✅ Todo tu inventario está bien.</li>'}</ul>`;
+      const groups = {}; (store.get('waitlist', []) || []).forEach(w => (groups[w.productId] ||= []).push(w));
+      const msg = (w, x) => `Hola ${String(w.name || '').split(' ')[0]} 👋 ¡Ya llegó *${x ? x.name : w.product}* a ${getSettings().name}! Entra y cómpralo antes de que se agote: ${storeURL()}?p=${encodeURIComponent(w.productId)}`;
+      $('#waitBox').innerHTML = `<h3 class="font-semibold">🔔 Clientes esperando stock</h3><p class="text-xs text-muted">Tocaron "Avísame" en un producto agotado</p>
+        <div class="mt-4 space-y-3">${Object.entries(groups).map(([pid, ws]) => { const x = products.find(y => y.id === pid), has = x && +x.stock > 0; return `<div class="rounded-2xl border ${has ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-white/10'} p-3">
+          <div class="flex items-center justify-between gap-2 text-sm"><b class="truncate">${esc(x ? x.name : ws[0].product)}</b><span class="shrink-0 text-xs ${has ? 'font-semibold text-emerald-300' : 'text-muted'}">${has ? '✅ ¡Ya hay stock!' : 'Sin stock'} · ${ws.length} esperando</span></div>
+          <ul class="mt-2 space-y-1.5">${ws.map(w => `<li class="flex items-center justify-between gap-2 text-xs"><span class="truncate">${esc(w.name)} <span class="text-muted">${esc(w.phone || '')}</span></span><span class="flex shrink-0 gap-1.5">${waNum(w.phone) ? `<a href="https://wa.me/${waNum(w.phone)}?text=${encodeURIComponent(msg(w, x))}" target="_blank" rel="noopener" class="rounded-lg border border-emerald-500/40 px-2.5 py-1 font-semibold text-emerald-300 hover:bg-emerald-500/10">Avisar</a>` : ''}<button data-wdone="${esc(w.id)}" class="rounded-lg border border-white/10 px-2.5 py-1 text-muted hover:text-white">Listo</button></span></li>`).join('')}</ul></div>`; }).join('') || '<p class="py-6 text-center text-sm text-muted">Nadie está esperando por ahora.</p>'}</div>`;
+    }
+    function stockAlerts() {
+      (store.get('waitlist', []) || []).forEach(w => { const x = products.find(y => y.id === w.productId); if (x && +x.stock > 0 && !stockSeen.has('w' + x.id)) { stockSeen.add('w' + x.id); const n = store.get('waitlist', []).filter(y => y.productId === x.id).length; liveAlert({ emoji: '🔔', title: `Ya hay stock de ${x.name}`, label: 'Avisar', text: `${n} cliente${n === 1 ? '' : 's'} esperan este producto. Avísales por WhatsApp.`, onOpen: () => showView('dashboard') }); } });
+      products.filter(x => x.active && !(+x.giftValue > 0) && x.stock != null && +x.stock <= lowN()).forEach(x => { const k = 'l' + x.id + ':' + (+x.stock <= 0 ? 0 : 1); if (!stockSeen.has(k)) { stockSeen.add(k); liveAlert({ emoji: '📦', title: +x.stock <= 0 ? 'Producto agotado' : 'Stock bajo', label: 'Ver', text: `${x.name}: ${+x.stock <= 0 ? 'sin unidades' : 'quedan ' + x.stock}.`, onOpen: () => showView('dashboard') }); } });
+    }
+    // lo que ya estaba así al abrir el panel no genera aviso
+    (store.get('waitlist', []) || []).forEach(w => { const x = products.find(y => y.id === w.productId); if (x && +x.stock > 0) stockSeen.add('w' + x.id); });
+    products.filter(x => x.active && !(+x.giftValue > 0) && x.stock != null && +x.stock <= lowN()).forEach(x => stockSeen.add('l' + x.id + ':' + (+x.stock <= 0 ? 0 : 1)));
+    document.addEventListener('click', e => { const b = e.target.closest('[data-wdone]'); if (b) { store.set('waitlist', (store.get('waitlist', []) || []).filter(w => w.id !== b.dataset.wdone)); renderStockBoxes(); } });
+    document.addEventListener('change', e => { if (e.target.id === 'lowN') { prefs.lowStockN = Math.max(1, Math.floor(+e.target.value || 5)); store.set('prefs', prefs); renderStockBoxes(); } });
+
+    /* ---------- Ganancia real (lo que te cuesta cada producto; solo lo ves tú) ---------- */
+    const costs = () => priv().costs || {};
+    const costOf = id => { const c = costs()[id]; return c === undefined || c === '' || c === null ? null : +c; };
+    function orderCost(o) { let t = 0; for (const i of o.items) { const c = costOf(i.id); if (c == null) return null; t += c * i.qty; } return t; }
+    let costQ = '';
+    function renderProfit() {
+      const box = $('#profitBox'); if (!box) return;
+      const valid = orders.filter(validOrder), known = valid.map(o => ({ o, c: orderCost(o) })).filter(x => x.c != null), m0 = monthStart(0);
+      const sum = (l, f) => l.reduce((a, x) => a + f(x), 0), mo = known.filter(x => x.o.date >= m0);
+      const profM = sum(mo, x => x.o.amount - x.c), profT = sum(known, x => x.o.amount - x.c), revK = sum(known, x => x.o.amount);
+      const rows = []; products.forEach(x => { const ks = (x.packages || []).filter(k => k && k.label); if (ks.length) ks.forEach(k => rows.push({ id: x.id + '~' + k.id, name: `${x.name} · ${k.label}`, price: +k.price })); else rows.push({ id: x.id, name: x.name, price: +x.price }); });
+      const shown = rows.filter(r => !costQ || r.name.toLowerCase().includes(costQ));
+      const kpi = (l, v, n) => `<div class="rounded-xl border border-white/5 bg-white/[.03] p-3"><p class="text-xs text-muted">${l}</p><p class="mt-1 font-display text-xl font-bold">${v}</p>${n ? `<p class="text-[11px] text-muted">${n}</p>` : ''}</div>`;
+      box.innerHTML = `<h3 class="font-semibold">💹 Ganancia real</h3><p class="mt-0.5 text-xs text-muted">Escribe lo que te cuesta cada producto. Solo se ve en el panel, nunca en la tienda.</p>
+        <div class="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-4">${kpi('Ganancia del mes', money(profM))}${kpi('Ganancia total', money(profT))}${kpi('Margen', revK ? (profT / revK * 100).toFixed(1) + '%' : '—')}${kpi('Pedidos sin costo', valid.length - known.length, 'Agrega el costo de sus productos')}</div>
+        <input id="costQ" type="search" placeholder="Buscar producto…" value="${esc(costQ)}" class="field mt-5 sm:max-w-sm" />
+        <div class="mt-3 max-h-96 overflow-y-auto"><table class="tbl compact w-full"><thead><tr><th>Producto</th><th>Precio</th><th>Te cuesta</th><th>Ganas</th></tr></thead><tbody>${shown.map(r => { const c = costOf(r.id); return `<tr><td class="text-sm">${esc(r.name)}</td><td>${money(r.price)}</td><td><input data-cost="${esc(r.id)}" type="number" min="0" step="0.01" value="${c == null ? '' : c}" placeholder="—" class="field w-24 py-1.5 text-sm" /></td><td class="font-semibold ${c == null ? 'text-muted' : r.price - c >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${c == null ? '—' : money(r.price - c) + ` <span class="text-[11px] font-normal text-muted">${r.price ? ((r.price - c) / r.price * 100).toFixed(0) + '%' : ''}</span>`}</td></tr>`; }).join('')}</tbody></table></div>
+        <button type="button" data-costsave class="btn-primary mt-4 rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar costos</button>`;
+    }
+    document.addEventListener('input', e => { if (e.target.id === 'costQ') { costQ = e.target.value.trim().toLowerCase(); const pos = e.target.selectionStart; renderProfit(); const n = $('#costQ'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('[data-costsave]')) return;
+      const c = { ...costs() }; $$('[data-cost]').forEach(inp => { const v = inp.value.trim(); if (v === '') delete c[inp.dataset.cost]; else c[inp.dataset.cost] = +(+v).toFixed(2); });
+      savePriv({ costs: c }); renderProfit(); toast('💹 Costos guardados');
+    });
+
+    /* ---------- Cierre del día ---------- */
+    let closeDay = null;
+    const bsNum = v => { if (v == null || v === '') return 0; if (typeof v === 'number') return v; const s = String(v).replace(/[^\d,.-]/g, ''); return +(s.includes(',') ? s.replace(/\./g, '').replace(',', '.') : s) || 0; };
+    function closeData(day) {
+      const inDay = t => dayKey(t) === day, by = {};
+      const add = (m, usd, bs) => { const k = by[m] ||= { n: 0, usd: 0, bs: 0 }; k.n++; k.usd += usd; k.bs += bs; };
+      const os = orders.filter(o => inDay(o.date) && validOrder(o)); os.forEach(o => add(o.method, +o.amount || 0, bsNum(o.amountBs)));
+      const ts = store.get('topups', []).filter(t => inDay(t.date) && t.status === 'Aprobada'); ts.forEach(t => add('rec:' + t.method, +t.amount || 0, bsNum(t.amountBs)));
+      const pend = orders.filter(o => inDay(o.date) && o.status === 'Pendiente').length, refunds = orders.filter(o => o.status === 'Reembolsado' && inDay(o.refundDate || o.date));
+      const prof = os.map(orderCost); return { by, os, ts, pend, refunds, profit: prof.every(x => x != null) && os.length ? os.reduce((a, o, k) => a + o.amount - prof[k], 0) : null };
+    }
+    const mName = m => m.startsWith('rec:') ? 'Recargas Ncoins · ' + (METHODS[m.slice(4)] || m.slice(4)) : (METHODS[m] || m);
+    function renderClose() {
+      const box = $('#closeBox'); if (!box) return;
+      closeDay = closeDay || dayKey(Date.now());
+      const d = closeData(closeDay), ent = Object.entries(d.by), cash = ent.filter(([m]) => m !== 'saldo');
+      const totUsd = cash.reduce((a, [, v]) => a + v.usd, 0), totBs = cash.reduce((a, [, v]) => a + v.bs, 0);
+      box.innerHTML = `<div class="flex flex-wrap items-center justify-between gap-3"><div><h3 class="font-semibold">🧾 Cierre del día</h3><p class="text-xs text-muted">Lo que entró por cada método, para cuadrar con tu banco y Binance</p></div><input id="closeDay" type="date" value="${closeDay}" class="field w-auto py-2" /></div>
+        <div class="mt-4 overflow-x-auto"><table class="tbl compact w-full"><thead><tr><th>Método</th><th>Pedidos</th><th>USD</th><th>Bs</th></tr></thead><tbody>${ent.map(([m, v]) => `<tr><td class="text-sm">${esc(mName(m))}</td><td>${v.n}</td><td class="font-semibold">${money(v.usd)}</td><td>${v.bs ? 'Bs ' + v.bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'}</td></tr>`).join('') || emptyRow(4, 'No hubo ventas pagadas ese día.')}</tbody></table></div>
+        <div class="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-4">${[['Dinero que entró', money(totUsd)], ['En bolívares', totBs ? 'Bs ' + totBs.toLocaleString('es-VE', { maximumFractionDigits: 2 }) : '—'], ['Ganancia', d.profit == null ? '—' : money(d.profit)], ['Pendientes por revisar', d.pend]].map(([l, v]) => `<div class="rounded-xl border border-white/5 bg-white/[.03] p-3"><p class="text-xs text-muted">${l}</p><p class="mt-1 font-display text-lg font-bold">${v}</p></div>`).join('')}</div>
+        <p class="mt-2 text-[11px] text-muted">Las compras con Ncoins no son dinero nuevo (ya entró cuando el cliente recargó), por eso no suman en "Dinero que entró".</p>
+        <button type="button" data-closecopy class="mt-4 rounded-xl border border-neon/30 px-4 py-2.5 text-sm font-semibold text-neon hover:bg-neon/10">📋 Copiar resumen</button>`;
+    }
+    document.addEventListener('change', e => { if (e.target.id === 'closeDay' && e.target.value) { closeDay = e.target.value; renderClose(); } });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('[data-closecopy]')) return;
+      const d = closeData(closeDay), lines = Object.entries(d.by).map(([m, v]) => `• ${mName(m).replace(/^\S+\s/, '')}: ${v.n} · ${money(v.usd)}${v.bs ? ' · Bs ' + v.bs.toLocaleString('es-VE', { maximumFractionDigits: 2 }) : ''}`);
+      const txt = `🧾 Cierre ${closeDay} · ${getSettings().name}\n${lines.join('\n') || 'Sin ventas'}\nPendientes: ${d.pend}${d.profit != null ? `\nGanancia: ${money(d.profit)}` : ''}`;
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast('📋 Resumen copiado'), () => alert(txt));
+    });
+
+    /* ---------- Respuestas rápidas de WhatsApp ---------- */
+    const QR_DEFAULT = [
+      { t: '✅ Pago recibido', x: 'Hola {nombre} 👋 Recibimos tu pago del pedido {pedido} ({producto}). Ya lo estamos procesando ⚡' },
+      { t: '🎉 Pedido entregado', x: '¡Listo {nombre}! Tu pedido {pedido} ({producto}) ya fue entregado ✅ Gracias por comprar en {tienda} 💙' },
+      { t: '📷 Falta el capture', x: 'Hola {nombre}, para procesar tu pedido {pedido} necesitamos el capture del pago 📷 ¿Nos lo envías por aquí?' },
+      { t: '🔎 Referencia no aparece', x: 'Hola {nombre}, no encontramos el pago con la referencia {referencia} del pedido {pedido}. ¿Puedes revisarla y enviarnos el capture?' },
+      { t: '⏳ En proceso', x: 'Hola {nombre} 👋 Tu pedido {pedido} está en proceso. En unos minutos te lo entregamos ⚡' },
+    ];
+    const qrList = () => Array.isArray(priv().templates) && priv().templates.length ? priv().templates : QR_DEFAULT;
+    const qrFill = (x, o) => x.replace(/\{nombre\}/g, String(o.client || '').split(' ')[0]).replace(/\{pedido\}/g, o.id).replace(/\{producto\}/g, o.product || '').replace(/\{monto\}/g, money(o.amount)).replace(/\{referencia\}/g, o.ref || '—').replace(/\{tienda\}/g, getSettings().name);
+    function qrHTML(o) {
+      const d = waNum(o.phone); if (!d) return '';
+      return `<div class="mt-4 rounded-2xl border border-white/10 p-4"><p class="mb-2 text-xs uppercase tracking-widest text-muted">💬 Respuestas rápidas</p><div class="flex flex-wrap gap-2">${qrList().map(q => `<a href="https://wa.me/${d}?text=${encodeURIComponent(qrFill(q.x, o))}" target="_blank" rel="noopener" class="rounded-lg border border-emerald-500/40 px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10">${esc(q.t)}</a>`).join('')}</div></div>`;
+    }
+    let qrDraft = null;
+    function renderQR() {
+      const box = $('#qrBox'); if (!box) return;
+      qrDraft = qrDraft || qrList().map(q => ({ ...q }));
+      box.innerHTML = `<h3 class="font-semibold">💬 Respuestas rápidas de WhatsApp</h3><p class="mt-0.5 text-xs text-muted">Aparecen en cada pedido: un toque y se abre WhatsApp con el mensaje listo. Puedes usar {nombre}, {pedido}, {producto}, {monto}, {referencia} y {tienda}.</p>
+        <div class="mt-4 space-y-3">${qrDraft.map((q, k) => `<div class="rounded-xl border border-white/5 p-3"><div class="flex gap-2"><input data-qrt="${k}" value="${esc(q.t)}" maxlength="30" class="field py-2 text-sm" placeholder="Título del botón" /><button data-qrdel="${k}" class="shrink-0 rounded-lg px-2 text-muted hover:text-rose-300" title="Borrar"><i data-lucide="trash-2" class="h-4 w-4"></i></button></div><textarea data-qrx="${k}" rows="2" class="field mt-2 resize-y text-sm">${esc(q.x)}</textarea></div>`).join('')}</div>
+        <div class="mt-4 flex flex-wrap gap-2"><button data-qradd class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-semibold text-neutral-200 hover:bg-white/5">+ Agregar respuesta</button><button data-qrsave class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar respuestas</button></div>`;
+      icons();
+    }
+    document.addEventListener('input', e => { const t = e.target.dataset || {}; if (t.qrt !== undefined) qrDraft[+t.qrt].t = e.target.value; if (t.qrx !== undefined) qrDraft[+t.qrx].x = e.target.value; });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#qrBox')) return;
+      const d = e.target.closest('[data-qrdel]'); if (d) { qrDraft.splice(+d.dataset.qrdel, 1); renderQR(); }
+      if (e.target.closest('[data-qradd]')) { qrDraft.push({ t: 'Nuevo mensaje', x: 'Hola {nombre} 👋 ' }); renderQR(); }
+      if (e.target.closest('[data-qrsave]')) { savePriv({ templates: qrDraft.filter(q => q.t.trim() && q.x.trim()) }); qrDraft = null; renderQR(); toast('💬 Respuestas guardadas'); }
+    });
+
+    /* ---------- Métodos de pago extra ---------- */
+    const PAY_PRESETS = [
+      { id: 'zelle', name: 'Zelle', icon: '💵', cur: 'USD', info: 'Correo: tucorreo@gmail.com\nTitular: Tu nombre' },
+      { id: 'zinli', name: 'Zinli', icon: '💳', cur: 'USD', info: 'Correo: tucorreo@gmail.com\nTitular: Tu nombre' },
+      { id: 'transfer', name: 'Transferencia', icon: '🏦', cur: 'BS', info: 'Banco: Banesco (0134)\nCuenta: 0134-0000-00-0000000000\nCédula: V-00.000.000\nTitular: Tu nombre' },
+      { id: 'paypal', name: 'PayPal', icon: '🅿️', cur: 'USD', info: 'Correo: tucorreo@gmail.com' },
+      { id: 'efectivo', name: 'Efectivo $', icon: '💵', cur: 'USD', info: 'Coordina la entrega por WhatsApp' },
+    ];
+    let payDraft = null;
+    function renderPays() {
+      const box = $('#payBox'); if (!box) return;
+      payDraft = payDraft || ((store.get('settings', {}) || {}).extraPays || []).map(m => ({ on: true, ...m }));
+      const used = payDraft.map(m => m.id);
+      box.innerHTML = `<h3 class="font-semibold">💳 Otros métodos de pago</h3><p class="mt-0.5 text-xs text-muted">Aparecen junto a Pago Móvil y Binance. El cliente paga, pone la referencia y el capture, y tú lo verificas igual que siempre.</p>
+        <div class="mt-4 flex flex-wrap gap-2">${PAY_PRESETS.filter(x => !used.includes(x.id)).map(x => `<button data-payadd="${x.id}" class="rounded-xl border border-white/10 px-3 py-2 text-sm font-semibold text-neutral-200 hover:border-neon/40">+ ${x.icon} ${x.name}</button>`).join('')}</div>
+        <div class="mt-4 space-y-3">${payDraft.map((m, k) => `<div class="rounded-2xl border ${m.on !== false ? 'border-neon/30' : 'border-white/10 opacity-70'} p-4">
+          <div class="flex items-center justify-between gap-3"><p class="font-semibold">${esc(m.icon || '💳')} ${esc(m.name)}</p><span class="flex items-center gap-2"><button data-paytog="${k}" aria-label="Activar o pausar">${sw(m.on !== false)}</button><button data-paydel="${k}" class="rounded-lg p-1.5 text-muted hover:text-rose-300" title="Quitar"><i data-lucide="trash-2" class="h-4 w-4"></i></button></span></div>
+          <div class="mt-3 grid gap-3 sm:grid-cols-3"><label class="block"><span class="mb-1.5 block text-xs text-muted">Nombre</span><input data-payf="name" data-k="${k}" value="${esc(m.name)}" maxlength="24" class="field py-2 text-sm" /></label>
+            <label class="block"><span class="mb-1.5 block text-xs text-muted">Icono</span><input data-payf="icon" data-k="${k}" value="${esc(m.icon || '')}" maxlength="4" class="field py-2 text-sm" /></label>
+            <label class="block"><span class="mb-1.5 block text-xs text-muted">Se paga en</span><select data-payf="cur" data-k="${k}" class="field py-2 text-sm"><option value="USD" ${m.cur !== 'BS' ? 'selected' : ''}>Dólares ($)</option><option value="BS" ${m.cur === 'BS' ? 'selected' : ''}>Bolívares (Bs)</option></select></label></div>
+          <label class="mt-3 block"><span class="mb-1.5 block text-xs text-muted">Datos que verá el cliente (uno por línea, "Título: dato")</span><textarea data-payf="info" data-k="${k}" rows="3" class="field resize-y text-sm">${esc(m.info || '')}</textarea></label></div>`).join('') || '<p class="text-sm text-muted">Toca uno de arriba para agregarlo.</p>'}</div>
+        <button data-paysave class="btn-primary mt-4 rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar métodos de pago</button>`;
+      icons();
+    }
+    document.addEventListener('input', e => { const f = e.target.dataset && e.target.dataset.payf; if (f && payDraft) payDraft[+e.target.dataset.k][f] = e.target.value; });
+    document.addEventListener('change', e => { const f = e.target.dataset && e.target.dataset.payf; if (f && payDraft) payDraft[+e.target.dataset.k][f] = e.target.value; });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#payBox')) return;
+      const a = e.target.closest('[data-payadd]'); if (a) { payDraft.push({ ...PAY_PRESETS.find(x => x.id === a.dataset.payadd), on: true }); renderPays(); }
+      const t = e.target.closest('[data-paytog]'); if (t) { const m = payDraft[+t.dataset.paytog]; m.on = m.on === false; renderPays(); }
+      const d = e.target.closest('[data-paydel]'); if (d) { payDraft.splice(+d.dataset.paydel, 1); renderPays(); }
+      if (e.target.closest('[data-paysave]')) {
+        const list = payDraft.map(m => ({ id: m.id, name: String(m.name || '').trim().slice(0, 24), icon: String(m.icon || '💳').trim().slice(0, 4), cur: m.cur === 'BS' ? 'BS' : 'USD', info: String(m.info || '').trim().slice(0, 400), on: m.on !== false }));
+        if (list.some(m => !m.name)) return toast('Cada método necesita un nombre', 'warn');
+        store.set('settings', { ...(store.get('settings', {}) || {}), extraPays: list }); payDraft = null; syncMethods(); renderPays(); toast('💳 Métodos de pago guardados');
+      }
+    });
+
+    /* ---------- Lista negra ---------- */
+    const blList = () => Array.isArray(priv().blacklist) ? priv().blacklist : [];
+    const blNorm = v => { v = String(v || '').trim().toLowerCase(); if (v.includes('@')) return v; const d = v.replace(/\D/g, ''); return d.length >= 7 ? d.slice(-10) : v; };
+    function blMatch(o) {
+      const keys = [o.userEmail, o.phone, o.ref].filter(Boolean).map(blNorm), u = userByEmail(o.userEmail); if (u && u.phone) keys.push(blNorm(u.phone));
+      return blList().find(b => keys.includes(blNorm(b.v))) || null;
+    }
+    function blAdd(vals, note) {
+      const cur = blList(), add = vals.map(v => String(v).trim()).filter(v => v && !cur.some(b => blNorm(b.v) === blNorm(v))).map(v => ({ v, note: String(note || '').slice(0, 120), t: Date.now() }));
+      if (!add.length) return toast('Ya estaba en la lista negra', 'warn');
+      savePriv({ blacklist: [...add, ...cur].slice(0, 500) }); renderBL(); toast(`⛔ Agregado a la lista negra: ${add.map(b => b.v).join(', ')}`, 'warn');
+    }
+    function renderBL() {
+      const box = $('#blBox'); if (!box) return;
+      box.innerHTML = `<h3 class="font-semibold">⛔ Lista negra</h3><p class="mt-0.5 text-xs text-muted">Teléfonos, correos o referencias de estafadores. Si vuelven a comprar, el panel te avisa en rojo.</p>
+        <div class="mt-4 grid gap-2 sm:grid-cols-[1fr_1fr_auto]"><input id="blV" class="field" placeholder="Teléfono, correo o referencia" /><input id="blNote" class="field" placeholder="Motivo (ej. capture falso)" /><button data-bladd2 class="rounded-xl border border-rose-500/40 px-4 py-2.5 text-sm font-semibold text-rose-300 hover:bg-rose-500/10">Agregar</button></div>
+        <ul class="mt-4 space-y-2">${blList().map((b, k) => `<li class="flex items-center justify-between gap-3 rounded-xl border border-white/5 px-3 py-2.5 text-sm"><span class="min-w-0"><span class="block truncate font-mono">${esc(b.v)}</span><span class="text-xs text-muted">${esc(b.note || '')} · ${fmtDay(b.t)}</span></span><button data-bldel="${k}" class="shrink-0 rounded-lg px-2 py-1 text-xs text-muted hover:text-white">Quitar</button></li>`).join('') || '<li class="py-4 text-center text-sm text-muted">Tu lista negra está vacía.</li>'}</ul>`;
+    }
+    document.addEventListener('click', e => {
+      if (e.target.closest('[data-bladd2]')) { const v = $('#blV').value.trim(); if (!v) return toast('Escribe un teléfono, correo o referencia', 'warn'); blAdd([v], $('#blNote').value.trim()); }
+      const d = e.target.closest('[data-bldel]'); if (d) { const l = [...blList()]; l.splice(+d.dataset.bldel, 1); savePriv({ blacklist: l }); renderBL(); toast('Quitado de la lista negra'); }
+    });
+    const blSeen = new Set();
+    function checkBlacklist() {
+      if (!blList().length) return;
+      [...orders.filter(o => o.status === 'Pendiente' || o.status === 'Pagado'), ...store.get('topups', []).filter(t => t.status === 'Pendiente')].forEach(o => {
+        if (blSeen.has(o.id)) return; blSeen.add(o.id); const hit = blMatch(o); if (!hit) return;
+        liveAlert({ emoji: '⛔', title: 'Compra de la lista negra', label: 'Ver', text: `${o.client || ''} (${hit.v}) hizo ${o.id}. Motivo: ${hit.note || '—'}`, onOpen: () => { if (o.items) { showView('pedidos'); openOrder(o.id); } else showView('billetera'); } });
+      });
+    }
+
+    /* ---------- Oferta general (toda la tienda o por categorías) ---------- */
+    const SALE_PCTS = [10, 15, 20, 25, 30, 40, 50];
+    const saleCfg = () => { const st = store.get('settings', {}) || {}; return { pct: 10, cats: [], until: 0, on: false, ...(st.sale || {}) }; };
+    const saleLive = sl => sl.on && +sl.pct > 0 && (!+sl.until || Date.now() <= +sl.until);
+    let saleDraft = null;
+    // % de oferta que tenía una categoría en un momento dado (para revisar montos de pedidos viejos)
+    function salePctAt(t, cat) {
+      const st = store.get('settings', {}) || {}, sl = st.sale || {}, M = 3 * 60000;
+      const wins = [...(sl.on ? [{ pct: sl.pct, cats: sl.cats, from: sl.since || 0, to: +sl.until || Infinity }] : []), ...(Array.isArray(st.saleLog) ? st.saleLog : [])];
+      const w = wins.find(x => t >= (x.from || 0) - M && t <= (x.to || Infinity) + M && (!x.cats || !x.cats.length || x.cats.includes(cat)));
+      return w ? +w.pct || 0 : 0;
+    }
+    function saveSale(on) {
+      const st = store.get('settings', {}) || {}, cur = st.sale || {}, now = Date.now(), d = saleDraft;
+      const log = Array.isArray(st.saleLog) ? st.saleLog.slice(0, 11) : [];
+      if (cur.on) log.unshift({ pct: +cur.pct, cats: cur.cats || [], from: cur.since || 0, to: +cur.until ? Math.min(now, +cur.until) : now });
+      const sale = { on, pct: +d.pct, cats: d.cats, until: d.until || 0, ...(on ? { since: now } : {}) };
+      store.set('settings', { ...st, sale, saleLog: log.slice(0, 12) });
+      saleDraft = null; renderSale();
+      toast(on ? `🔥 Oferta de ${+d.pct}% activa en ${d.cats.length ? d.cats.join(', ') : 'toda la tienda'}` : 'Oferta apagada: los precios volvieron a la normalidad', on ? 'ok' : 'warn');
+    }
+    function renderSale() {
+      const box = $('#saleCard'); if (!box) return;
+      const sl = saleCfg(), live = saleLive(sl), expired = sl.on && !live;
+      if (!saleDraft) saleDraft = { pct: +sl.pct || 10, cats: [...(sl.cats || [])], until: +sl.until || 0 };
+      const d = saleDraft, cats = [...new Set(products.filter(x => !(+x.giftValue > 0)).map(x => x.cat).filter(Boolean))];
+      const changed = live && (+d.pct !== +sl.pct || d.cats.join('|') !== (sl.cats || []).join('|') || (d.until || 0) !== (+sl.until || 0));
+      const chip = (on, attr, label) => `<button type="button" ${attr} class="rounded-xl px-3.5 py-2 text-sm font-semibold transition ${on ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${label}</button>`;
+      const sample = products.find(x => x.active && !(+x.giftValue > 0) && (!d.cats.length || d.cats.includes(x.cat)));
+      box.innerHTML = `
+        <div class="flex items-center justify-between gap-4">
+          <div><h3 class="font-semibold">🔥 Oferta en la tienda</h3>
+            <p class="mt-0.5 text-xs ${live ? 'text-emerald-400' : expired ? 'text-amber-400' : 'text-muted'}">${live ? `Activa: ${+sl.pct}% de descuento en ${(sl.cats || []).length ? sl.cats.join(', ') : 'toda la tienda'}${+sl.until ? ' · hasta el ' + fmtDay(+sl.until) : ''}` : expired ? 'La oferta ya venció: los precios volvieron a la normalidad' : 'Apagada: los clientes ven los precios normales'}</p></div>
+          <button type="button" data-sale="${live ? 'off' : 'on'}" aria-label="${live ? 'Apagar oferta' : 'Prender oferta'}" class="shrink-0"><span class="switch ${live ? 'on' : ''}"></span></button>
+        </div>
+        <p class="mt-5 text-sm font-medium text-neutral-300">Descuento</p>
+        <div class="mt-2 flex flex-wrap gap-2">${SALE_PCTS.map(v => chip(+d.pct === v, `data-salepct="${v}"`, v + '%')).join('')}
+          <label class="flex items-center gap-1.5 rounded-xl border border-white/10 px-3 text-sm text-muted">Otro <input id="salePct" type="number" min="1" max="90" step="1" value="${SALE_PCTS.includes(+d.pct) ? '' : +d.pct}" class="w-14 bg-transparent py-2 text-white outline-none" placeholder="35" />%</label></div>
+        <p class="mt-5 text-sm font-medium text-neutral-300">¿Dónde aplica?</p>
+        <div class="mt-2 flex flex-wrap gap-2">${chip(!d.cats.length, 'data-salecat=""', 'Toda la tienda')}${cats.map(c => chip(d.cats.includes(c), `data-salecat="${esc(c)}"`, esc(c))).join('')}</div>
+        <label class="mt-5 block max-w-xs"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Termina (opcional)</span><input id="saleUntil" type="date" class="field" value="${d.until ? toInputDate(d.until) : ''}" /></label>
+        ${sample ? `<p class="mt-4 rounded-xl border border-white/5 bg-white/[.03] px-4 py-3 text-sm">Ejemplo: <b>${esc(sample.name)}</b> <span class="text-muted line-through">${money(sample.price)}</span> → <b class="text-neon">${money(+(sample.price * (1 - d.pct / 100)).toFixed(2))}</b></p>` : ''}
+        <p class="mt-3 text-xs text-muted">No aplica a gift cards. Los precios en Bs también bajan. Se puede combinar con cupones.</p>
+        <div class="mt-4 flex flex-wrap gap-2">${live ? (changed ? '<button type="button" data-sale="on" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar cambios</button>' : '') + '<button type="button" data-sale="off" class="rounded-xl border border-red-500/30 px-4 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-500/10">Apagar oferta</button>'
+          : '<button type="button" data-sale="on" class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold">🔥 Activar oferta</button>'}</div>`;
+    }
+    $('#saleCard').addEventListener('click', e => {
+      const pc = e.target.closest('[data-salepct]'), ct = e.target.closest('[data-salecat]'), act = e.target.closest('[data-sale]');
+      if (pc) { saleDraft.pct = +pc.dataset.salepct; renderSale(); }
+      if (ct) { const c = ct.dataset.salecat; saleDraft.cats = !c ? [] : saleDraft.cats.includes(c) ? saleDraft.cats.filter(x => x !== c) : [...saleDraft.cats, c]; renderSale(); }
+      if (act) {
+        if (act.dataset.sale === 'off') { if (confirm('¿Apagar la oferta? Los precios vuelven a la normalidad en la tienda.')) saveSale(false); return; }
+        if (!(saleDraft.pct >= 1 && saleDraft.pct <= 90)) return toast('Elige un descuento entre 1% y 90%', 'warn');
+        if (saleDraft.until && saleDraft.until < Date.now()) return toast('La fecha de fin ya pasó', 'warn');
+        if (confirm(`¿Activar ${saleDraft.pct}% de descuento en ${saleDraft.cats.length ? saleDraft.cats.join(', ') : 'toda la tienda'}?`)) saveSale(true);
+      }
+    });
+    $('#saleCard').addEventListener('input', e => {
+      if (e.target.id === 'salePct') { const v = Math.round(+e.target.value); if (v >= 1 && v <= 90) { saleDraft.pct = v; const pos = e.target.selectionStart; renderSale(); const n = $('#salePct'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } }
+      if (e.target.id === 'saleUntil') { saleDraft.until = e.target.value ? fromInputDate(e.target.value) + DAYMS - 1 : 0; }
+    });
+    $('#saleCard').addEventListener('change', e => { if (e.target.id === 'saleUntil') renderSale(); });
 
     /* ---------- Cupones de descuento ---------- */
     const coupons = () => (store.get('coupons', []) || []).filter(Boolean);
@@ -3890,13 +4421,16 @@ window.NR_FIREBASE = {
     // Si el pedido trae cupón, el descuento se calcula con el cupón guardado aquí (no con lo que diga el cliente)
     const expectedAmount = o => {
       let full = 0, base = 0;
-      o.items.forEach(i => { const k = pkgOf(i.id), p = prodOf(i.id), v = (k ? +k.price : p ? +p.price : +i.price || 0) * i.qty; full += v; if (!(+i.giftValue > 0 || +((p || {}).giftValue) > 0)) base += v; });
+      const vpct = o.vip ? Math.min(+o.vip.pct || 0, vipPctOf(userByEmail(o.userEmail))) : 0;
+      o.items.forEach(i => { const k = pkgOf(i.id), p = prodOf(i.id), gift = +i.giftValue > 0 || +((p || {}).giftValue) > 0 || !!((p || {}).raffle) || !!i.tickets, pct = gift ? 0 : salePctAt(o.date, i.cat || (p || {}).cat), u = k ? +k.price : p ? +p.price : +i.price || 0;
+        let x = pct ? +(u * (1 - pct / 100)).toFixed(2) : u; if (vpct && !gift) x = +(x * (1 - vpct / 100)).toFixed(2);
+        const v = x * i.qty; full += v; if (!gift) base += v; });
       const c = o.coupon && coupons().find(x => x.code === o.coupon.code);
       return +(full - (c ? cutOf(c, base) : 0)).toFixed(2);
     };
     const priceShort = o => !!o.priceAlert || (+o.amount || 0) + 0.01 < expectedAmount(o);
     function processIncoming() {
-      checkDupRefs(); syncCouponUses();
+      checkDupRefs(); syncCouponUses(); checkBlacklist(); publishFeed(); stockAlerts();
       clearTimeout(optTimer); optTimer = setTimeout(optimizeImages, 2500);
       if (!CLOUD) return;
       let changedOrders = false, changedProducts = false;
@@ -3940,7 +4474,7 @@ window.NR_FIREBASE = {
     /* ---------- Render inicial ---------- */
     function renderAll() {
       renderGreeting(); renderStore(); renderNotifs(); renderKpis(); renderChart(); renderDonut();
-      renderProducts(); renderOrders(); renderClients(); renderFinance(); renderPrefs(); renderTopups(); monLoad(); renderBannersAdmin(); renderServices(); renderGiftCards(); renderCoupons(); renderReviews(); renderStats(); renderSec(); renderPubState(); icons();
+      renderProducts(); renderOrders(); renderClients(); renderFinance(); renderPrefs(); renderTopups(); monLoad(); renderBannersAdmin(); renderServices(); renderGiftCards(); renderSale(); renderCoupons(); renderReviews(); renderStats(); renderOfferExtras(); renderVip(); renderStockBoxes(); renderProfit(); renderClose(); renderQR(); renderBL(); renderPays(); renderTix(); renderSec(); renderPubState(); icons();
       setTimeout(checkDueAlerts, 1500);
     }
 
