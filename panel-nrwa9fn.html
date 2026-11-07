@@ -282,6 +282,8 @@
         <a href="#" data-view="recargas" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="wallet" class="h-5 w-5"></i>Billetera / Saldo<span id="topupBadge" class="ml-auto rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-400">0</span></a>
         <a href="#" data-view="clientes" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="users" class="h-5 w-5"></i>Clientes<span id="newClientsBadge" class="ml-auto hidden min-w-[1.25rem] rounded-full bg-neon px-1.5 py-0.5 text-center text-[10px] font-bold text-ink shadow-glow"></span></a>
         <a href="#" data-view="giftcards" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="gift" class="h-5 w-5"></i>Gift Cards</a>
+        <a href="#" data-view="cupones" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="tag" class="h-5 w-5"></i>Cupones</a>
+        <a href="#" data-view="resenas" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="message-circle" class="h-5 w-5"></i>Reseñas<span id="reviewBadge" class="ml-auto hidden rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-400">0</span></a>
         <a href="#" data-view="vencimientos" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="calendar-clock" class="h-5 w-5"></i>Vencimientos<span id="svBadge" class="ml-auto hidden rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-400">0</span></a>
         <a href="#" data-view="finanzas" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="credit-card" class="h-5 w-5"></i>Finanzas / Ingresos</a>
         <a href="#" data-view="monitor" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="gauge" class="h-5 w-5"></i>Monitor Bs<span class="ml-auto rounded-full bg-neon/10 px-2 py-0.5 text-[10px] font-bold text-neon">PRIVADO</span></a>
@@ -378,6 +380,7 @@
 
           <!-- C. KPIs -->
           <div id="kpiGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"></div>
+          <div id="statsBox" class="panel rounded-2xl p-5"></div>
 
           <!-- Gráficos -->
           <div class="grid gap-6 xl:grid-cols-3">
@@ -473,7 +476,8 @@
         <section data-panel="pedidos" class="view hidden space-y-6">
           <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div><p class="text-sm text-muted">Ventas</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Pedidos / Ventas</h2></div>
-            <button data-action="clean-orders" class="flex items-center justify-center gap-2 rounded-xl border border-rose-500/40 px-4 py-2.5 text-sm font-semibold text-rose-300 hover:bg-rose-500/10"><i data-lucide="trash-2" class="h-4 w-4"></i>Limpiar pedidos</button>
+            <div class="flex flex-wrap gap-2"><button data-export="orders" class="flex items-center justify-center gap-2 rounded-xl border border-neon/30 px-4 py-2.5 text-sm font-semibold text-neon transition hover:bg-neon/10"><i data-lucide="download" class="h-4 w-4"></i>Exportar a Excel</button>
+            <button data-action="clean-orders" class="flex items-center justify-center gap-2 rounded-xl border border-rose-500/40 px-4 py-2.5 text-sm font-semibold text-rose-300 hover:bg-rose-500/10"><i data-lucide="trash-2" class="h-4 w-4"></i>Limpiar pedidos</button></div>
           </div>
           <div class="panel overflow-hidden rounded-2xl">
             <div class="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">
@@ -490,7 +494,7 @@
 
         <!-- ========== RECARGAS DE SALDO ========== -->
         <section data-panel="recargas" class="view hidden space-y-6">
-          <div><p class="text-sm text-muted">Billetera NR</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Billetera y saldo de clientes</h2></div>
+          <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p class="text-sm text-muted">Billetera NR</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Billetera y saldo de clientes</h2></div><button data-export="topups" class="flex items-center justify-center gap-2 rounded-xl border border-neon/30 px-4 py-2.5 text-sm font-semibold text-neon transition hover:bg-neon/10"><i data-lucide="download" class="h-4 w-4"></i>Exportar a Excel</button></div>
           <div id="topupKpis" class="grid gap-4 sm:grid-cols-3"></div>
           <div class="panel overflow-hidden rounded-2xl">
             <div class="p-5"><div id="topupTabs" class="flex flex-wrap gap-2"></div></div>
@@ -518,7 +522,7 @@
 
         <!-- ========== CLIENTES ========== -->
         <section data-panel="clientes" class="view hidden space-y-6">
-          <div><p class="text-sm text-muted">Cuentas registradas en la tienda</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Clientes</h2></div>
+          <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-end"><div><p class="text-sm text-muted">Cuentas registradas en la tienda</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Clientes</h2></div><button data-export="clients" class="flex items-center justify-center gap-2 rounded-xl border border-neon/30 px-4 py-2.5 text-sm font-semibold text-neon transition hover:bg-neon/10"><i data-lucide="download" class="h-4 w-4"></i>Exportar a Excel</button></div>
           <div class="panel overflow-hidden rounded-2xl">
             <div class="p-5"><div class="relative sm:max-w-sm">
               <i data-lucide="search" class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"></i>
@@ -548,6 +552,39 @@
             </div>
             <div class="overflow-x-auto"><table class="tbl compact w-full"><thead><tr><th>Código</th><th>Monto</th><th>Comprada por</th><th>Pedido / fecha</th><th>Estado</th><th>Canjeada por</th><th class="text-right">Acciones</th></tr></thead><tbody id="gcTable"></tbody></table></div>
             <p class="border-t border-white/5 px-5 py-3 text-xs text-muted">Cada código se genera solo al <b>aprobar el pago</b> de una Gift Card NR (o al instante si la pagan con saldo) y se puede canjear <b>una sola vez</b>.</p>
+          </div>
+        </section>
+
+        <!-- ========== CUPONES ========== -->
+        <section data-panel="cupones" class="view hidden space-y-6">
+          <div><p class="text-sm text-muted">Promociones</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Cupones de descuento</h2></div>
+          <div class="panel rounded-2xl p-5">
+            <h3 class="font-semibold">Crear cupón</h3>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Código</span><input id="cpCode" class="field font-mono uppercase" maxlength="20" autocomplete="off" placeholder="NR10" /></label>
+              <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Tipo de descuento</span><select id="cpType" class="field"><option value="pct">Porcentaje (%)</option><option value="fix">Monto fijo ($)</option></select></label>
+              <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Valor</span><input id="cpValue" type="number" min="0" step="0.01" class="field" placeholder="10" /></label>
+              <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Compra mínima ($)</span><input id="cpMin" type="number" min="0" step="0.01" class="field" placeholder="0" /></label>
+              <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Usos máximos (vacío = sin límite)</span><input id="cpMax" type="number" min="1" step="1" class="field" placeholder="50" /></label>
+              <label class="block"><span class="mb-1.5 block text-sm font-medium text-neutral-300">Vence (opcional)</span><input id="cpUntil" type="date" class="field" /></label>
+            </div>
+            <label class="mt-4 flex cursor-pointer items-center gap-2 text-sm text-neutral-300"><input id="cpOne" type="checkbox" checked class="h-4 w-4 rounded border-white/20 bg-transparent accent-[#0066FF]" />Cada cliente lo puede usar una sola vez</label>
+            <p class="mt-2 text-xs text-muted">El descuento no aplica a gift cards ni a compras de Ncoins.</p>
+            <p id="cpError" class="mt-4 hidden rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300"></p>
+            <button id="cpCreate" class="btn-primary mt-4 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"><i data-lucide="plus" class="h-4 w-4"></i>Crear cupón</button>
+          </div>
+          <div class="panel overflow-hidden rounded-2xl">
+            <div class="overflow-x-auto"><table class="tbl w-full"><thead><tr><th>Código</th><th>Descuento</th><th>Mínimo</th><th>Usos</th><th>Vence</th><th>Estado</th><th class="text-right">Acciones</th></tr></thead><tbody id="cpTable"></tbody></table></div>
+          </div>
+        </section>
+
+        <!-- ========== RESEÑAS ========== -->
+        <section data-panel="resenas" class="view hidden space-y-6">
+          <div><p class="text-sm text-muted">Lo que opinan tus clientes</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Reseñas</h2></div>
+          <div id="rvKpis" class="grid gap-4 sm:grid-cols-3"></div>
+          <div class="panel overflow-hidden rounded-2xl">
+            <div class="p-5"><div id="rvTabs" class="flex flex-wrap gap-2"></div><p class="mt-3 text-xs text-muted">Las reseñas nuevas esperan tu aprobación. Solo las publicadas se ven en la tienda.</p></div>
+            <ul id="rvList" class="space-y-3 px-5 pb-5"></ul>
           </div>
         </section>
 
@@ -1167,6 +1204,9 @@ window.NR_FIREBASE = {
       clientNotifs: { col: 'notifs',      id: 'id',   sort: 'date' },
       reports:      { col: 'reports',     id: 'id',   sort: 'date' },
       walletAdj:    { col: 'adjustments', id: 'id',   sort: 'date' },
+      coupons:      { col: 'coupons',     id: 'code', sort: 'createdAt', del: true },
+      reviews:      { col: 'reviews',     id: 'id',   sort: 'date', del: true },
+      stats:        { col: 'stats',       id: 'day',  sort: 't' },
     };
 
     const cache = {}, ready = {}, known = {};      // known: última versión conocida de cada documento
@@ -1183,6 +1223,7 @@ window.NR_FIREBASE = {
     const emit = (key, oldValue) => { try { window.dispatchEvent(new StorageEvent('storage', { key: 'nradmin_' + key, oldValue: oldValue || null })); } catch (_) {} };
     const cloudError = (err, where) => {
       console.warn('[NR Cloud]', where, err);
+      if (/^leer (coupons|reviews|stats)$/.test(where)) return;   // funciones nuevas: si faltan sus reglas, fallan en silencio
       try { window.dispatchEvent(new CustomEvent('nrcloud-error', { detail: { code: err && err.code, where } })); } catch (_) {}
     };
 
@@ -1291,15 +1332,17 @@ window.NR_FIREBASE = {
       }, err => { cloudError(err, 'leer ' + key); ready[key] = true; });
     }
     function startPublic() {
-      const { collection, query, orderBy } = fb.fs;
+      const { collection, query, orderBy, where, limit } = fb.fs;
       pubUnsubs.push(listenCol('products', collection(db, 'products')));
+      // Reseñas aprobadas: las ve todo el mundo (el panel lee todas aparte)
+      if (scope !== 'admin') pubUnsubs.push(listenCol('reviews', query(collection(db, 'reviews'), where('approved', '==', true), limit(80))));
       pubUnsubs.push(listenCol('banners', query(collection(db, 'banners'), orderBy('order'))));
       pubUnsubs.push(listenDoc('settings', 'config/settings'));
       pubUnsubs.push(listenDoc('online', 'config/store'));
     }
     function stopOwn() {
       ownUnsubs.forEach(u => { try { u(); } catch (_) {} }); ownUnsubs = [];
-      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj'].forEach(k => {
+      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj', 'coupons', 'stats'].forEach(k => {
         Object.keys(known).forEach(x => { if (x.startsWith(k + '/')) delete known[x]; });
         const had = (cache[k] || []).length; cache[k] = []; ready[k] = false; if (had) emit(k);
       });
@@ -1308,12 +1351,15 @@ window.NR_FIREBASE = {
       const { collection, query, where, orderBy, limit, doc } = fb.fs;
       if (isAdmin()) {
         ownUnsubs.push(listenCol('users', collection(db, 'users')));
-        ownUnsubs.push(listenCol('orders', query(collection(db, 'orders'), orderBy('date', 'desc'), limit(800))));
+        ownUnsubs.push(listenCol('orders', query(collection(db, 'orders'), orderBy('date', 'desc'), limit(2500))));
         ownUnsubs.push(listenCol('topups', query(collection(db, 'topups'), orderBy('date', 'desc'), limit(400))));
         ownUnsubs.push(listenCol('giftcards', collection(db, 'giftcards')));
         ownUnsubs.push(listenCol('services', collection(db, 'services')));
         ownUnsubs.push(listenCol('reports', query(collection(db, 'reports'), orderBy('date', 'desc'), limit(300))));
         ownUnsubs.push(listenCol('walletAdj', query(collection(db, 'adjustments'), orderBy('date', 'desc'), limit(400))));
+        ownUnsubs.push(listenCol('coupons', collection(db, 'coupons')));
+        ownUnsubs.push(listenCol('reviews', query(collection(db, 'reviews'), orderBy('date', 'desc'), limit(400))));
+        ownUnsubs.push(listenCol('stats', query(collection(db, 'stats'), orderBy('t', 'desc'), limit(60))));
         ready.clientNotifs = true; cache.clientNotifs = [];      // el panel solo envía avisos
       } else {
         const mine = c => query(collection(db, c), where('userId', '==', u.uid));
@@ -1328,6 +1374,7 @@ window.NR_FIREBASE = {
         ownUnsubs.push(listenCol('giftcards', query(collection(db, 'giftcards'), where('buyerId', '==', u.uid)), 'b'));
         ownUnsubs.push(listenCol('giftcards', query(collection(db, 'giftcards'), where('redeemedById', '==', u.uid)), 'r'));
         ready.reports = true; cache.reports = [];
+        ready.coupons = true; cache.coupons = []; ready.stats = true; cache.stats = [];
       }
     }
     function resync() { if (!user) return; stopOwn(); startOwn(user); }
@@ -1355,7 +1402,7 @@ window.NR_FIREBASE = {
       await new Promise(resolve => {
         a.onAuthStateChanged(auth, u => {
           const changed = (u && u.uid) !== (user && user.uid);
-          user = u ? { uid: u.uid, email: String(u.email || '').toLowerCase() } : null;
+          user = u ? { uid: u.uid, email: String(u.email || '').toLowerCase(), verified: !!u.emailVerified } : null;
           if (changed || first) { stopOwn(); if (user) startOwn(user); }
           authCbs.forEach(cb => { try { cb(user); } catch (_) {} });
           if (first) { first = false; resolve(); }
@@ -1420,6 +1467,23 @@ window.NR_FIREBASE = {
       },
       isFirstRun: () => firstRun,
       remove: path => commit([{ type: 'del', path }], 'borrar'),
+      // Verificación del correo del cliente
+      async sendVerify() { if (auth && auth.currentUser) await fb.auth.sendEmailVerification(auth.currentUser); },
+      async reloadUser() {
+        const cu = auth && auth.currentUser; if (!cu) return false;
+        await cu.reload(); if (cu.emailVerified) await cu.getIdToken(true);
+        if (user) user.verified = !!auth.currentUser.emailVerified;
+        return !!(user && user.verified);
+      },
+      // Contador de visitas: un documento por día (hora de Venezuela) con sumas
+      track(field, id) {
+        try {
+          if (!fb || !db) return;
+          const f = fb.fs, day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Caracas' }).format(new Date()), inc = f.increment(1);
+          const data = { day, t: Date.parse(day + 'T04:00:00Z'), ...(id ? { [field]: { [String(id).replace(/[.\/~]/g, '_')]: inc } } : { [field]: inc }) };
+          f.setDoc(f.doc(db, 'stats', day), data, { merge: true }).catch(() => {});
+        } catch (_) {}
+      },
     };
   })();
   </script>
@@ -1736,6 +1800,8 @@ window.NR_FIREBASE = {
       if (name === 'clientes') { renderClients(); store.set('clientsSeenAt', Date.now()); renderNewClientsBadge(); }
       if (name === 'pedidos') renderOrders();
       if (name === 'productos') renderProducts();
+      if (name === 'cupones') renderCoupons();
+      if (name === 'resenas') renderReviews();
       $$('.view').forEach(v => v.classList.toggle('hidden', v.dataset.panel !== name));
       $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
       const panel = $(`[data-panel="${name}"]`); panel.classList.remove('fade-in'); void panel.offsetWidth; panel.classList.add('fade-in');
@@ -2445,7 +2511,12 @@ window.NR_FIREBASE = {
       o.items.forEach(i => { const p = prodOf(i.id); if (p) p.stock = Math.max(0, (p.stock || 0) + (hold ? -i.qty : i.qty)); });
       o.stockApplied = hold; return true;
     }
+    // Todo lo que cambia un pedido (saldo, stock, gift cards, avisos) se guarda junto: todo o nada
     function setOrderStatus(o, status, opts = {}) {
+      if (!CLOUD) return setOrderStatusRaw(o, status, opts);
+      NRCloud.group(() => setOrderStatusRaw(o, status, opts)).catch(e => console.warn(e));
+    }
+    function setOrderStatusRaw(o, status, opts = {}) {
       if (o.status === status) return;
       if (applyRenewals(o)) saveOrders();
       if (status === 'Completado' && !opts.skipDelivery && needsDelivery(o)) { renderOrders(); return openDelivery(o, 'complete'); }
@@ -2456,6 +2527,8 @@ window.NR_FIREBASE = {
         else if (u && status !== 'Reembolsado' && o.walletRefunded) { u.balance = +((u.balance || 0) - o.amount).toFixed(2); o.walletRefunded = false; store.set('users', list); }
       }
       o.status = status;
+      // La contraseña de la cuenta del cliente (recarga interna) no se guarda después de entregar o cancelar
+      if (status === 'Completado' || isOut) o.items.forEach(i => { if (i.login && i.login.pass) i.login = { ...i.login, pass: null, passRemoved: Date.now() }; });
       applyStock(o);
       if (status === 'Completado') {
         const ren = ensureServices(o) || []; renderServices();
@@ -2468,7 +2541,8 @@ window.NR_FIREBASE = {
         pushClientNotif(o.userEmail, { icon: '✅', title: same ? `Suscripción activa por ${d0[0]} días` : 'Suscripciones activas',
           text: `${its.map((i, k) => i.name + (same ? '' : ` (${d0[k]} días)`)).join(', ')}. Tus datos de acceso ya están en tu pedido ${o.id}.`, action: { type: 'order', orderId: o.id } });
       }
-      if (status === 'Pagado' || status === 'Completado') { const g = makeGiftCards(o); if (g.length) toast(`🎁 ${g.length} gift card${g.length === 1 ? ' generada' : 's generadas'}: ${g.map(c => c.code).join(', ')}`); }
+      if ((status === 'Pagado' || status === 'Completado') && !o.giftGenerated && priceShort(o) && !confirm(`⚠️ El pedido ${o.id} pagó ${money(o.amount)} pero los productos valen ${money(expectedAmount(o))}.\n\n¿Generar la gift card de todos modos?`)) toast('No se generó la gift card: el monto no cuadra', 'warn');
+      else if (status === 'Pagado' || status === 'Completado') { const g = makeGiftCards(o); if (g.length) toast(`🎁 ${g.length} gift card${g.length === 1 ? ' generada' : 's generadas'}: ${g.map(c => c.code).join(', ')}`); }
       if (isOut) voidGiftCards(o);
       saveOrders(); saveProducts();
       renderOrders(); renderProducts(); renderKpis(); renderChart(); renderDonut(); renderClients(); renderFinance(); icons();
@@ -2575,7 +2649,10 @@ window.NR_FIREBASE = {
       const capBox = o.dupCap ? `<div class="mb-4 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">🖼️ <b>Capture repetido:</b> es la misma imagen de comprobante que ${esc(o.dupCap)}. Revisa antes de aprobar.</div>` : '';
       const dupBox = o.dupRef ? `<div class="mb-4 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">🔁 <b>Referencia repetida:</b> ${esc(o.dupRef)} ya usó este número de referencia. Puede ser un capture enviado dos veces.
           ${osn ? `<p class="mt-2 font-semibold">Cliente ya sancionado (${osn.ban ? 'baneado' : 'suspendido'}).</p>` : `<button data-sanction="${esc(o.userEmail)}" data-reason="Capture o referencia repetida" class="mt-2 rounded-lg border border-rose-400/50 px-3 py-1.5 text-xs font-semibold text-rose-200 hover:bg-rose-500/20">⏸️ Suspender a este cliente</button>`}</div>` : '';
-      $('#omBody').innerHTML = `${capBox}${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
+      const wantsCancel = o.status === 'Pendiente' && store.get('reports', []).some(r => r.orderId === o.id && r.kind === 'cancel');
+      const cancelBox = wantsCancel ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">✋ <b>El cliente pidió cancelar este pedido.</b> Si aún no lo procesas, acéptalo: el pedido pasa a Rechazado y se devuelve el stock.
+          <button data-setstatus="Rechazado" data-oid="${esc(o.id)}" class="mt-2 block rounded-lg border border-amber-500/40 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/25">Aceptar cancelación</button></div>` : '';
+      $('#omBody').innerHTML = `${cancelBox}${capBox}${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-2xl border border-white/10 p-4">
             <p class="text-xs uppercase tracking-widest text-muted">Cliente</p>
@@ -2587,6 +2664,7 @@ window.NR_FIREBASE = {
             ${row('Método', METHODS[o.method] || '—')}
             ${o.ref ? row('Referencia', `<span class="font-mono">${esc(o.ref)}</span>`) : ''}
             ${row('Monto', `<b>${money(o.amount)}</b>${o.amountBs ? `<br><span class="text-xs text-muted">${esc(o.amountBs)}</span>` : ''}`)}
+            ${o.coupon ? row('Cupón', `<span class="font-mono">${esc(o.coupon.code)}</span> · −${money(o.coupon.cut)}`) : ''}
             ${row('Fecha', fmtDate(o.date))}
             ${row('Estado', statusBadge(o.status))}
           </div>
@@ -2595,7 +2673,7 @@ window.NR_FIREBASE = {
           <p class="mb-2 text-xs uppercase tracking-widest text-muted">Productos</p>
           <ul class="space-y-2">${o.items.map(i => `
             <li class="flex items-start justify-between gap-3 text-sm">
-              <div><p>${esc(i.name)} <span class="text-muted">×${i.qty}</span></p>${i.playerId ? `<p class="mt-0.5 text-xs">🎮 ID de jugador: <span class="select-all font-mono font-semibold text-neon">${esc(i.playerId)}</span></p>` : ''}${i.login ? (i.login.mode === 'gift' ? '<p class="mt-1 inline-flex rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">🎁 Quiere recibir una gift card</p>' : `<div class="mt-1.5 rounded-lg border border-amber-400/30 bg-amber-400/5 p-2 text-xs leading-relaxed"><p class="font-semibold text-amber-300">🔐 Recarga interna</p><p>📧 <span class="select-all font-mono">${esc(i.login.email || '')}</span></p><p>🔑 <span class="select-all font-mono">${esc(i.login.pass || '')}</span></p></div>`) : ''}
+              <div><p>${esc(i.name)} <span class="text-muted">×${i.qty}</span></p>${i.playerId ? `<p class="mt-0.5 text-xs">🎮 ID de jugador: <span class="select-all font-mono font-semibold text-neon">${esc(i.playerId)}</span></p>` : ''}${i.login ? (i.login.mode === 'gift' ? '<p class="mt-1 inline-flex rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">🎁 Quiere recibir una gift card</p>' : `<div class="mt-1.5 rounded-lg border border-amber-400/30 bg-amber-400/5 p-2 text-xs leading-relaxed"><p class="font-semibold text-amber-300">🔐 Recarga interna</p><p>📧 <span class="select-all font-mono">${esc(i.login.email || '')}</span></p>${i.login.pass ? `<p>🔑 <span class="select-all font-mono">${esc(i.login.pass)}</span></p>` : '<p class="text-muted">🔑 Contraseña borrada por seguridad</p>'}</div>`) : ''}
                 ${i.renew ? (() => { const sv = svOfRenew(i); return `<p class="mt-1 inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">🔁 Renovación${sv ? ' · vence ' + fmtDay(sv.end) : ''} · mismos datos</p>`; })() : ''}
                 ${isStream(i) ? (i.delivery && i.delivery.length ? i.delivery.map((d, k) => `<div class="mt-1.5 rounded-lg border border-neon/30 bg-neon/5 p-2 text-xs leading-relaxed">${i.delivery.length > 1 ? `<p class="font-semibold text-neon">Cuenta ${k + 1}</p>` : ''}<p>📧 <span class="select-all font-mono">${esc(d.email)}</span></p><p>🔒 <span class="select-all font-mono">${esc(d.pass)}</span></p>${d.profile ? `<p>👤 Perfil: ${esc(d.profile)}${d.pin ? ' · PIN ' + esc(d.pin) : ''}</p>` : d.pin ? `<p>PIN ${esc(d.pin)}</p>` : ''}${d.note ? `<p class="text-muted">📝 ${esc(d.note)}</p>` : ''}</div>`).join('') : o.status === 'Pagado' ? '<p class="mt-1 text-xs text-amber-300">🔑 Falta entregar los datos de acceso.</p>' : '') : ''}
                 ${i.giftValue ? (i.giftCodes && i.giftCodes.length ? i.giftCodes.map(code => { const c = giftByCode(code) || {}; return `<p class="mt-1 text-xs">🎁 <span class="select-all font-mono font-semibold ${c.status === 'Disponible' ? 'text-neon' : 'text-muted line-through'}">${esc(code)}</span> <span class="ml-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ring-1 ${GIFT_STATUS[c.status] || ''}">${esc(c.status || '')}</span></p>`; }).join('') : '<p class="mt-1 text-xs text-amber-300">🎁 El código se generará al aprobar el pago.</p>') : ''}</div>
@@ -2670,14 +2748,14 @@ window.NR_FIREBASE = {
       const b = e.target.closest('[data-topup]'); if (!b) return;
       topups = store.get('topups', []);
       const t = topups.find(x => x.id === b.dataset.topup); if (!t || t.status !== 'Pendiente') return;
-      if (b.dataset.tact === 'Aprobada') {
-        const list = users(), u = list.find(x => x.email === t.userEmail);
-        if (!u) return toast('No se encontró la cuenta del cliente', 'err');
-        u.balance = +((u.balance || 0) + t.amount).toFixed(2);
-        store.set('users', list);
-      }
-      t.status = b.dataset.tact; t.reviewed = Date.now();
-      store.set('topups', topups);
+      const list = users(), u = list.find(x => (t.userId && x.uid === t.userId) || x.email === t.userEmail);
+      if (b.dataset.tact === 'Aprobada' && !u) return toast('No se encontró la cuenta del cliente', 'err');
+      const save = () => {
+        if (b.dataset.tact === 'Aprobada') { u.balance = +((u.balance || 0) + t.amount).toFixed(2); store.set('users', list); }
+        t.status = b.dataset.tact; t.reviewed = Date.now();
+        store.set('topups', topups);
+      };
+      if (CLOUD) NRCloud.group(save).catch(e => console.warn(e)); else save();
       renderTopups(); renderClients();
       toast(t.status === 'Aprobada' ? `Recarga ${t.id} aprobada · +${money(t.amount)} al saldo de ${t.client}` : `Recarga ${t.id} rechazada`, t.status === 'Aprobada' ? 'ok' : 'warn');
     });
@@ -2798,10 +2876,6 @@ window.NR_FIREBASE = {
     const PREF_LABELS = {
       sound: ['🔔 Sonido de aviso', 'Suena al llegar un pedido, recarga o reporte'],
       desktop: ['🖥️ Notificaciones del navegador', 'Te avisa aunque estés en otra pestaña'],
-      email: ['Notificaciones por correo', 'Recibe un aviso por cada venta'],
-      lowStock: ['Alertas de stock bajo', 'Aviso cuando queden menos de 10'],
-      autoDelivery: ['Entrega automática', 'Enviar códigos al confirmar el pago'],
-      twoFactor: ['Verificación en 2 pasos', 'Mayor seguridad para el acceso'],
     };
     function renderPrefs() {
       $('#prefList').innerHTML = Object.entries(PREF_LABELS).map(([k, [t, s]]) => `
@@ -3380,11 +3454,16 @@ window.NR_FIREBASE = {
       if (next < 0) return err(`No puedes quitar más de lo que tiene (${money(cur)}).`);
       if (next === cur) return err('El saldo quedaría igual.');
       const list = users(), u = list.find(x => x.email === bm.email);
-      u.balance = next;
-      if (!store.set('users', list)) return err('No se pudo guardar el ajuste.');
-      const adj = store.get('walletAdj', []);
-      adj.unshift({ id: 'AJ-' + Date.now().toString(36).toUpperCase(), userId: u.uid || null, userEmail: u.email, client: u.name, mode: bm.mode, amount: v, before: cur, after: next, reason: $('#bmReason').value.trim(), date: Date.now() });
-      store.set('walletAdj', adj.slice(0, 300));
+      const save = () => {
+        u.balance = next;
+        if (!store.set('users', list)) return false;
+        const adj = store.get('walletAdj', []);
+        adj.unshift({ id: 'AJ-' + Date.now().toString(36).toUpperCase(), userId: u.uid || null, userEmail: u.email, client: u.name, mode: bm.mode, amount: v, before: cur, after: next, reason: $('#bmReason').value.trim(), date: Date.now() });
+        store.set('walletAdj', adj.slice(0, 300));
+        return true;
+      };
+      if (CLOUD) NRCloud.group(save).catch(e => console.warn(e));
+      else if (!save()) return err('No se pudo guardar el ajuste.');
       closeModal('balanceModal'); renderClients(); renderTopups(); renderKpis(); icons();
       toast(`Saldo de ${u.name}: ${money(cur)} → ${money(next)}`);
     });
@@ -3592,7 +3671,7 @@ window.NR_FIREBASE = {
         text: `${t.client} quiere recargar ${money(t.amount)}`, onOpen: () => showView('recargas'),
       }));
       if (loggedIn && e.key === 'nradmin_reports') store.get('reports', []).filter(r => !seenReports.has(r.id)).forEach(r => { seenReports.add(r.id); liveAlert({
-        emoji: '⚠️', title: 'Reporte de problema', label: 'Ver pedido',
+        emoji: r.kind === 'cancel' ? '✋' : '⚠️', title: r.kind === 'cancel' ? 'Solicitud de cancelación' : 'Reporte de problema', label: 'Ver pedido',
         text: `${r.orderId} · ${r.client}: ${r.problem}`, onOpen: () => { showView('pedidos'); openOrder(r.orderId); },
       }); });
       if (e.key === 'nradmin_users') {
@@ -3606,9 +3685,138 @@ window.NR_FIREBASE = {
       renderProducts(); renderOrders(); renderKpis(); renderChart(); renderDonut(); renderClients(); renderFinance(); renderTopups(); renderNotifs(); icons();
 
       if (bm && $('#balanceModal').classList.contains('flex')) renderBm();
-      renderServices(); renderGiftCards();
+      renderServices(); renderGiftCards(); renderCoupons(); renderReviews(); renderStats();
+      if (e.key === 'nradmin_reviews') store.get('reviews', []).filter(r => !seenRv.has(r.id)).forEach(r => { seenRv.add(r.id); if (!r.approved) liveAlert({
+        emoji: '⭐', title: 'Nueva reseña por aprobar', label: 'Ver reseñas',
+        text: `${r.name}: ${'★'.repeat(+r.stars || 0)}${r.text ? ' · ' + r.text.slice(0, 60) : ''}`, onOpen: () => showView('resenas'),
+      }); });
       if (e.key === 'nradmin_orders' || e.key === 'nradmin_topups') processIncoming();
       if (e.key === 'nradmin_settings') { renderClosed(); applyLogo(); }
+    });
+
+    /* ---------- Cupones de descuento ---------- */
+    const coupons = () => (store.get('coupons', []) || []).filter(Boolean);
+    const cutOf = (c, base) => !c || !(base > 0) || base + 1e-9 < (+c.min || 0) ? 0 : +Math.max(0, Math.min(base - 0.01, c.type === 'pct' ? base * (+c.value || 0) / 100 : (+c.value || 0))).toFixed(2);
+    const cpLabel = c => c.type === 'pct' ? `${+c.value}%` : money(c.value);
+    function cpState(c) {
+      if (c.active === false) return ['Pausado', 'bg-white/5 text-neutral-400 ring-white/10'];
+      if (+c.until && Date.now() > +c.until) return ['Vencido', 'bg-rose-500/15 text-rose-400 ring-rose-500/30'];
+      if (+c.maxUses && (+c.used || 0) >= +c.maxUses) return ['Agotado', 'bg-amber-500/15 text-amber-400 ring-amber-500/30'];
+      return ['Activo', 'bg-emerald-500/15 text-emerald-400 ring-emerald-500/30'];
+    }
+    function renderCoupons() {
+      const list = coupons().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      $('#cpTable').innerHTML = list.map(c => { const [st, cls] = cpState(c); return `<tr>
+        <td class="font-mono text-sm font-bold text-neon">${esc(c.code)}</td>
+        <td class="font-semibold">${cpLabel(c)}</td>
+        <td>${+c.min ? money(c.min) : '<span class="text-muted">—</span>'}</td>
+        <td>${+c.used || 0}${+c.maxUses ? ' / ' + c.maxUses : ''}${c.onePerClient !== false ? '<p class="text-[11px] text-muted">1 por cliente</p>' : ''}</td>
+        <td class="text-muted">${+c.until ? fmtDay(+c.until) : 'Sin fecha'}</td>
+        <td><span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${cls}"><span class="h-1.5 w-1.5 rounded-full bg-current"></span>${st}</span></td>
+        <td class="text-right"><button data-cptoggle="${esc(c.code)}" class="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-neon hover:bg-neon/10">${c.active === false ? 'Activar' : 'Pausar'}</button>
+          <button data-cpcopy="${esc(c.code)}" class="rounded-lg p-2 text-muted hover:text-white" title="Copiar"><i data-lucide="copy" class="h-4 w-4"></i></button>
+          <button data-cpdel="${esc(c.code)}" class="rounded-lg p-2 text-muted hover:bg-red-500/15 hover:text-red-400" title="Borrar"><i data-lucide="trash-2" class="h-4 w-4"></i></button></td>
+      </tr>`; }).join('') || emptyRow(7, 'Aún no tienes cupones. Crea el primero arriba y compártelo con tus clientes.');
+      icons();
+    }
+    $('#cpCreate').addEventListener('click', () => {
+      const err = m => { $('#cpError').textContent = m; $('#cpError').classList.remove('hidden'); };
+      const code = $('#cpCode').value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20), type = $('#cpType').value, value = +$('#cpValue').value;
+      const min = +$('#cpMin').value || 0, maxUses = Math.floor(+$('#cpMax').value) || 0, until = $('#cpUntil').value ? fromInputDate($('#cpUntil').value) + DAYMS - 1 : 0;
+      if (code.length < 3) return err('El código debe tener al menos 3 letras o números.');
+      if (coupons().some(c => c.code === code)) return err('Ya existe un cupón con ese código.');
+      if (!(value > 0)) return err('Escribe el valor del descuento.');
+      if (type === 'pct' && value > 90) return err('El porcentaje máximo es 90%.');
+      if (until && until < Date.now()) return err('La fecha de vencimiento ya pasó.');
+      store.set('coupons', [{ code, type, value: +value.toFixed(2), min: +min.toFixed(2), maxUses, until, onePerClient: $('#cpOne').checked, active: true, used: 0, createdAt: Date.now() }, ...coupons()]);
+      ['#cpCode', '#cpValue', '#cpMin', '#cpMax', '#cpUntil'].forEach(x => $(x).value = ''); $('#cpError').classList.add('hidden');
+      renderCoupons(); toast(`🏷️ Cupón ${code} creado`);
+    });
+    $('#cpTable').addEventListener('click', e => {
+      const t = e.target.closest('[data-cptoggle]'), d = e.target.closest('[data-cpdel]'), cp = e.target.closest('[data-cpcopy]');
+      if (cp) { const v = cp.dataset.cpcopy; (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => toast('Código copiado: ' + v), () => toast(v)); }
+      if (t) { const list = coupons(), c = list.find(x => x.code === t.dataset.cptoggle); if (c) { c.active = c.active === false; store.set('coupons', list); renderCoupons(); toast(`Cupón ${c.code} ${c.active ? 'activado' : 'pausado'}`, c.active ? 'ok' : 'warn'); } }
+      if (d) { if (!confirm(`¿Borrar el cupón ${d.dataset.cpdel}? Los pedidos que ya lo usaron no cambian.`)) return; store.set('coupons', coupons().filter(x => x.code !== d.dataset.cpdel)); renderCoupons(); toast('Cupón borrado', 'warn'); }
+    });
+    // Cuenta cuántos pedidos activos usaron cada cupón (la tienda lo usa para saber si se agotó)
+    function syncCouponUses() {
+      const list = coupons(); if (!list.length) return;
+      const n = {}; orders.forEach(o => { if (o.coupon && !RELEASED.includes(o.status)) n[o.coupon.code] = (n[o.coupon.code] || 0) + 1; });
+      let ch = false; list.forEach(c => { const u = n[c.code] || 0; if ((+c.used || 0) !== u) { c.used = u; ch = true; } });
+      if (ch) { store.set('coupons', list); renderCoupons(); }
+    }
+
+    /* ---------- Reseñas ---------- */
+    const reviews = () => (store.get('reviews', []) || []).filter(Boolean);
+    const seenRv = new Set(reviews().map(r => r.id));
+    let rvFilter = 'Por aprobar';
+    const rvStars = n => `<span style="color:#FBBF24">${'★'.repeat(+n || 0)}</span><span class="text-muted">${'★'.repeat(5 - (+n || 0))}</span>`;
+    function renderReviews() {
+      const all = reviews().sort((a, b) => b.date - a.date), pend = all.filter(r => !r.approved), pub = all.filter(r => r.approved);
+      $('#reviewBadge').textContent = pend.length; $('#reviewBadge').classList.toggle('hidden', !pend.length);
+      const avg = pub.length ? pub.reduce((a, r) => a + (+r.stars || 0), 0) / pub.length : 0;
+      $('#rvKpis').innerHTML = [['Calificación promedio', pub.length ? avg.toFixed(1) + ' ★' : '—', 'Solo reseñas publicadas'], ['Publicadas', pub.length, 'Se ven en la tienda'], ['Por aprobar', pend.length, 'Esperan tu revisión']]
+        .map(([l, v, n]) => `<div class="kpi rounded-2xl p-5"><p class="text-sm text-muted">${l}</p><p class="mt-2 font-display text-2xl font-bold">${v}</p><p class="mt-1 text-xs text-muted">${n}</p></div>`).join('');
+      const tabs = { 'Por aprobar': pend, Publicadas: pub, Todas: all };
+      $('#rvTabs').innerHTML = Object.entries(tabs).map(([k, l]) => `<button data-rvf="${k}" class="rounded-xl px-3.5 py-2 text-sm font-medium transition ${k === rvFilter ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${k} <span class="ml-1 opacity-70">${l.length}</span></button>`).join('');
+      $('#rvList').innerHTML = tabs[rvFilter].map(r => `<li class="rounded-2xl border ${r.approved ? 'border-white/10' : 'border-amber-500/40 bg-amber-500/5'} p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2"><p class="font-semibold">${esc(r.name || 'Cliente')} <span class="ml-1 text-sm">${rvStars(r.stars)}</span></p><p class="text-xs text-muted">${fmtDate(r.date)} · <span class="font-mono">${esc(r.orderId || '')}</span></p></div>
+        <p class="mt-1 text-xs text-neon">${esc(r.product || '')}</p>
+        ${r.text ? `<p class="mt-2 text-sm text-neutral-300">${esc(r.text)}</p>` : '<p class="mt-2 text-sm text-muted">Sin comentario</p>'}
+        <div class="mt-3 flex flex-wrap gap-2">${r.approved ? `<button data-rvact="hide" data-rvid="${esc(r.id)}" class="rounded-lg border border-white/15 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:bg-white/5">Ocultar</button>` : `<button data-rvact="approve" data-rvid="${esc(r.id)}" class="btn-primary rounded-lg px-3 py-1.5 text-xs font-semibold">✓ Publicar</button>`}
+          <button data-rvact="del" data-rvid="${esc(r.id)}" class="rounded-lg border border-rose-500/30 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-500/10">Borrar</button></div>
+      </li>`).join('') || `<li class="py-10 text-center text-sm text-muted">${rvFilter === 'Por aprobar' ? 'No hay reseñas por aprobar.' : 'Aún no hay reseñas aquí. Los clientes pueden calificar cuando marcas un pedido como entregado.'}</li>`;
+    }
+    $('#rvTabs').addEventListener('click', e => { const b = e.target.closest('[data-rvf]'); if (b) { rvFilter = b.dataset.rvf; renderReviews(); } });
+    $('#rvList').addEventListener('click', e => {
+      const b = e.target.closest('[data-rvact]'); if (!b) return;
+      const list = reviews(), r = list.find(x => x.id === b.dataset.rvid); if (!r) return;
+      if (b.dataset.rvact === 'del') { if (!confirm('¿Borrar esta reseña?')) return; store.set('reviews', list.filter(x => x !== r)); toast('Reseña borrada', 'warn'); }
+      else { r.approved = b.dataset.rvact === 'approve'; store.set('reviews', list); toast(r.approved ? '⭐ Reseña publicada en la tienda' : 'Reseña ocultada', r.approved ? 'ok' : 'warn'); }
+      renderReviews();
+    });
+
+    /* ---------- Visitas a la tienda ---------- */
+    const dayKey = t => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Caracas' }).format(new Date(t));
+    function renderStats() {
+      const box = $('#statsBox'); if (!box) return;
+      const byDay = Object.fromEntries((store.get('stats', []) || []).map(s => [s.day, s]));
+      const days = n => Array.from({ length: n }, (_, i) => dayKey(Date.now() - (n - 1 - i) * DAYMS));
+      const sumV = list => list.reduce((a, d) => a + (+(byDay[d] || {}).visits || 0), 0);
+      const d14 = days(14), d30 = days(30), today = sumV(days(1)), w = sumV(days(7)), m = sumV(d30);
+      const ord30 = orders.filter(o => o.date >= Date.now() - 30 * DAYMS).length;
+      const views = {}; d30.forEach(d => Object.entries((byDay[d] || {}).views || {}).forEach(([id, n]) => { views[id] = (views[id] || 0) + (+n || 0); }));
+      const top = Object.entries(views).sort((a, b) => b[1] - a[1]).slice(0, 5), topMax = top.length ? top[0][1] : 1;
+      const vals = d14.map(d => +(byDay[d] || {}).visits || 0), mx = Math.max(...vals, 1);
+      const kpi = (l, v) => `<div class="rounded-xl border border-white/5 bg-white/[.03] p-3"><p class="text-xs text-muted">${l}</p><p class="mt-1 font-display text-xl font-bold">${v}</p></div>`;
+      box.innerHTML = `<div class="flex flex-wrap items-center justify-between gap-2"><div><h3 class="font-semibold">Visitas a la tienda</h3><p class="text-xs text-muted">Personas que abrieron la tienda (una vez por visita)</p></div><i data-lucide="eye" class="h-5 w-5 text-neon"></i></div>
+        ${m ? `<div class="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-4">${kpi('Hoy', today.toLocaleString('es'))}${kpi('Últimos 7 días', w.toLocaleString('es'))}${kpi('Últimos 30 días', m.toLocaleString('es'))}${kpi('Pedidos por cada 100 visitas', (ord30 / m * 100).toFixed(1))}</div>
+        <div class="mt-5 flex items-end gap-1.5" style="height:96px">${vals.map((v, i) => `<div class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1" title="${d14[i]}: ${v} visitas"><span class="text-[10px] text-muted">${v || ''}</span><div class="w-full rounded-t-lg ${i === vals.length - 1 ? 'bg-gradient-to-t from-neon-blue to-neon' : 'bg-neon-blue/30'}" style="height:${Math.max(v / mx * 70, v ? 4 : 2)}%"></div></div>`).join('')}</div>
+        <p class="mt-1 text-[11px] text-muted">Últimos 14 días</p>
+        ${top.length ? `<p class="mt-5 text-xs font-semibold uppercase tracking-widest text-muted">Productos más vistos (30 días)</p><ul class="mt-3 space-y-3">${top.map(([id, n]) => { const pr = products.find(x => x.id.replace(/[.\/~]/g, '_') === id); return `<li><div class="flex items-center justify-between gap-3 text-sm"><span class="truncate">${esc(pr ? pr.name : id)}</span><span class="shrink-0 font-semibold">${n} vista${n === 1 ? '' : 's'}</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-white/5"><div class="h-full rounded-full bg-gradient-to-r from-neon-blue to-neon" style="width:${n / topMax * 100}%"></div></div></li>`; }).join('')}</ul>` : ''}`
+        : '<p class="mt-4 rounded-xl border border-white/5 bg-white/[.03] p-4 text-sm text-muted">Aún no hay visitas registradas. Se empiezan a contar desde que subas esta versión (y agregues la regla de "stats" en Firebase).</p>'}`;
+      icons();
+    }
+
+    /* ---------- Exportar a Excel (archivo .csv que Excel abre directo) ---------- */
+    function downloadCSV(name, head, rows) {
+      const q = v => { const s = String(v ?? ''); return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+      const csv = '﻿' + [head, ...rows].map(r => r.map(q).join(';')).join('\r\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a'); a.href = url; a.download = `${name}-${dayKey(Date.now())}.csv`; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      toast(`📥 Descargado: ${rows.length} fila${rows.length === 1 ? '' : 's'}. Ábrelo con Excel o Google Sheets`);
+    }
+    const num = n => (+n || 0).toFixed(2).replace('.', ',');
+    const fecha = t => t ? new Date(t).toLocaleString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-export]'); if (!b) return;
+      if (b.dataset.export === 'orders') downloadCSV('pedidos', ['Código', 'Fecha', 'Cliente', 'Correo', 'Teléfono', 'Productos', 'Método', 'Referencia', 'Monto USD', 'Monto Bs', 'Cupón', 'Descuento USD', 'Estado'],
+        orders.map(o => [o.id, fecha(o.date), o.client, o.userEmail, o.phone, o.product, (METHODS[o.method] || '').replace(/^\S+\s/, ''), o.ref || '', num(o.amount), o.amountBs || '', o.coupon ? o.coupon.code : '', o.coupon ? num(o.coupon.cut) : '', o.status]));
+      if (b.dataset.export === 'clients') downloadCSV('clientes', ['Nombre', 'Correo', 'Teléfono', 'Saldo Ncoins', 'Pedidos', 'Total gastado USD', 'Registro', 'Estado'],
+        users().map(u => { const mine = orders.filter(o => o.userEmail === u.email), sc = sanctionOf(u); return [u.name, u.email, u.phone, num(u.balance), mine.length, num(mine.filter(validOrder).reduce((s, o) => s + o.amount, 0)), fecha(u.createdAt), sc ? (sc.ban ? 'Baneado' : 'Suspendido') : 'Activo']; }));
+      if (b.dataset.export === 'topups') downloadCSV('recargas-ncoins', ['Código', 'Fecha', 'Cliente', 'Correo', 'Teléfono', 'Ncoins', 'Monto Bs', 'Método', 'Referencia', 'Estado'],
+        store.get('topups', []).map(t => [t.id, fecha(t.date), t.client, t.userEmail, t.phone, num(t.amount), t.amountBs || '', (METHODS[t.method] || '').replace(/^\S+\s/, ''), t.ref || '', t.status]));
     });
 
     /* ---------- Borrar pedidos ---------- */
@@ -3678,14 +3886,23 @@ window.NR_FIREBASE = {
       });
       if (chO) saveOrders(); if (chT) store.set('topups', tops);
     }
+    // Lo que deberían costar los productos del pedido según el catálogo actual
+    // Si el pedido trae cupón, el descuento se calcula con el cupón guardado aquí (no con lo que diga el cliente)
+    const expectedAmount = o => {
+      let full = 0, base = 0;
+      o.items.forEach(i => { const k = pkgOf(i.id), p = prodOf(i.id), v = (k ? +k.price : p ? +p.price : +i.price || 0) * i.qty; full += v; if (!(+i.giftValue > 0 || +((p || {}).giftValue) > 0)) base += v; });
+      const c = o.coupon && coupons().find(x => x.code === o.coupon.code);
+      return +(full - (c ? cutOf(c, base) : 0)).toFixed(2);
+    };
+    const priceShort = o => !!o.priceAlert || (+o.amount || 0) + 0.01 < expectedAmount(o);
     function processIncoming() {
-      checkDupRefs();
+      checkDupRefs(); syncCouponUses();
       clearTimeout(optTimer); optTimer = setTimeout(optimizeImages, 2500);
       if (!CLOUD) return;
       let changedOrders = false, changedProducts = false;
       orders.forEach(o => {
         if (o.priceChecked === undefined && Date.now() - o.date < 864e5) {   // verifica que el cliente no haya alterado los precios
-          const expected = o.items.reduce((a, i) => { const k = pkgOf(i.id), p = prodOf(i.id); return a + (k ? +k.price : p ? +p.price : +i.price || 0) * i.qty; }, 0);
+          const expected = expectedAmount(o);
           o.priceChecked = true; changedOrders = true;
           if (o.amount + 0.01 < expected) {
             o.priceAlert = `Pagó ${money(o.amount)} pero los productos valen ${money(expected)}`;
@@ -3695,6 +3912,10 @@ window.NR_FIREBASE = {
         if (applyStock(o)) { changedOrders = true; changedProducts = true; }
         if (applyRenewals(o)) changedOrders = true;
         if ((o.status === 'Pagado' || o.status === 'Completado') && !o.giftGenerated && o.items.some(i => +i.giftValue > 0 || +((prodOf(i.id) || {}).giftValue) > 0)) {
+          if (priceShort(o)) {   // monto menor al precio: la gift card NO se genera sola, la decides tú
+            if (!o.giftHeld) { o.giftHeld = true; changedOrders = true; liveAlert({ emoji: '🎁', title: 'Gift card retenida', label: 'Ver pedido', text: `${o.id} · ${o.client}: el monto pagado no cuadra con el precio. Revísalo antes de entregar.`, onOpen: () => { showView('pedidos'); openOrder(o.id); } }); }
+            return;
+          }
           const g = makeGiftCards(o);
           if (g.length) {
             changedOrders = true;
@@ -3719,7 +3940,7 @@ window.NR_FIREBASE = {
     /* ---------- Render inicial ---------- */
     function renderAll() {
       renderGreeting(); renderStore(); renderNotifs(); renderKpis(); renderChart(); renderDonut();
-      renderProducts(); renderOrders(); renderClients(); renderFinance(); renderPrefs(); renderTopups(); monLoad(); renderBannersAdmin(); renderServices(); renderGiftCards(); renderSec(); renderPubState(); icons();
+      renderProducts(); renderOrders(); renderClients(); renderFinance(); renderPrefs(); renderTopups(); monLoad(); renderBannersAdmin(); renderServices(); renderGiftCards(); renderCoupons(); renderReviews(); renderStats(); renderSec(); renderPubState(); icons();
       setTimeout(checkDueAlerts, 1500);
     }
 
@@ -3780,7 +4001,7 @@ window.NR_FIREBASE = {
       if (!NRCloud.isAdmin()) { await NRCloud.signOut(); showLoader(false); return err('Esta cuenta no es de administrador. Usa el correo configurado en firebase-config.js.'); }
       if (started) return; started = true;
       showLoader(true, 'Cargando tu tienda…');
-      await NRCloud.whenReady(['products', 'banners', 'settings', 'online', 'users', 'orders', 'topups', 'giftcards', 'services', 'reports', 'walletAdj'], 20000);
+      await NRCloud.whenReady(['products', 'banners', 'settings', 'online', 'users', 'orders', 'topups', 'giftcards', 'services', 'reports', 'walletAdj', 'coupons', 'reviews', 'stats'], 20000);
       showLoader(false);
       window.NRAdminMain();
     }

@@ -294,6 +294,7 @@
           <li><a href="#faq"      class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">❓</span>Preguntas frecuentes</a></li>
           <li><a href="#garantia" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">🛡️</span>Garantía y condiciones</a></li>
           <li><a href="#contacto" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">🕒</span>Horario y contacto</a></li>
+          <li><a href="#terminos" class="mobile-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-muted hover:bg-white/5 hover:text-white"><span class="w-6 text-center">📄</span>Términos y privacidad</a></li>
           <li class="pt-2"><button id="mobileAccess" class="mobile-link btn-primary block w-full rounded-xl px-4 py-3 text-center font-semibold">Iniciar sesión</button></li>
         </ul>
       </div>
@@ -302,6 +303,7 @@
       🛠️ Estamos en mantenimiento. Las compras están pausadas temporalmente.
     </div>
     <button type="button" id="closedBanner" class="hidden w-full border-b border-indigo-400/20 bg-[#151a3d] px-4 py-2 text-center text-xs font-medium leading-snug text-indigo-100"><span class="nr-clamp line-clamp-2"></span></button>
+    <div id="verifyBanner" class="hidden w-full border-b border-amber-500/20 bg-[#2a2310] px-4 py-2 text-center text-xs font-medium leading-snug text-amber-300"></div>
     <button type="button" id="sanctionBanner" class="hidden w-full border-b border-rose-500/30 bg-[#2a1220] px-4 py-2 text-center text-xs font-medium leading-snug text-rose-200"><span class="nr-clamp line-clamp-2"></span></button>
   </header>
 
@@ -397,7 +399,7 @@
 
   <footer class="border-t border-white/10 bg-ink-900">
     <div class="mx-auto max-w-7xl px-4 py-6 text-center text-xs text-muted sm:px-6 lg:px-8">
-      <nav class="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm"><a href="#comprar" class="hover:text-neon">Cómo comprar</a><a href="#faq" class="hover:text-neon">Preguntas</a><a href="#garantia" class="hover:text-neon">Garantía</a><a href="#contacto" class="hover:text-neon">Horario y contacto</a></nav>
+      <nav class="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm"><a href="#comprar" class="hover:text-neon">Cómo comprar</a><a href="#faq" class="hover:text-neon">Preguntas</a><a href="#garantia" class="hover:text-neon">Garantía</a><a href="#contacto" class="hover:text-neon">Horario y contacto</a><a href="#terminos" class="hover:text-neon">Términos y privacidad</a></nav>
       <p>© <span id="year"></span> NR Digital. Todos los derechos reservados.</p>
     </div>
   </footer>
@@ -570,6 +572,30 @@
   </div>
 
 
+  <div id="terminosModal" class="modal fixed inset-0 z-[88] hidden items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-label="Términos y privacidad">
+    <div class="glass flex max-h-[88vh] w-full flex-col rounded-t-3xl shadow-glow-lg sm:max-w-lg sm:rounded-3xl">
+      <div class="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+        <div class="min-w-0"><p class="text-[11px] font-semibold uppercase tracking-widest text-neon">Reglas claras</p><h3 class="font-display text-lg font-bold">Términos y privacidad</h3></div>
+        <button type="button" data-close="terminosModal" aria-label="Cerrar" class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/5 text-muted hover:bg-white/10 hover:text-white"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="overflow-y-auto overscroll-contain px-5 py-5"><ul class="space-y-2.5"><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">🛒</span><span><span class="block text-sm font-semibold">El servicio</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">NR Digital vende productos digitales: recargas de juegos, cuentas y perfiles de streaming, gift cards y Ncoins. Los precios se muestran en dólares y en bolívares, y pueden cambiar sin aviso; el que vale es el que ves al hacer tu pedido.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">💳</span><span><span class="block text-sm font-semibold">Pagos y verificación</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">Pagas por Pago Móvil, Binance Pay o con tus Ncoins. Cada pago se revisa a mano antes de entregar. Una referencia o un comprobante solo se puede usar una vez: usar uno falso o repetido causa la suspensión o el bloqueo de la cuenta.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">⚡</span><span><span class="block text-sm font-semibold">Entregas</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">Entregamos dentro de nuestro horario de atención, después de verificar el pago. Las recargas se envían al ID que escribiste: revísalo bien, porque una recarga enviada a un ID equivocado no se puede revertir.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">↩️</span><span><span class="block text-sm font-semibold">Cancelaciones y reembolsos</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">Puedes pedir que cancelemos un pedido mientras siga "en verificación". Si no podemos entregar tu pedido, te devolvemos el monto en Ncoins. Las recargas ya entregadas y los códigos ya canjeados no tienen devolución.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">🏷️</span><span><span class="block text-sm font-semibold">Cupones, Ncoins y gift cards</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">1 Ncoin = $1 y solo se usa dentro de la tienda; no se cambia por dinero. Los cupones tienen las condiciones que indique cada promoción y no se aplican a gift cards ni a compras de Ncoins. Cada gift card se canjea una sola vez.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">👤</span><span><span class="block text-sm font-semibold">Tu cuenta</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">Eres responsable de tu contraseña y de lo que se haga con tu cuenta. Podemos suspender o bloquear cuentas que usen pagos falsos, abusen del soporte o intenten engañar al sistema.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">🔐</span><span><span class="block text-sm font-semibold">Tus datos (privacidad)</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">Guardamos tu nombre, correo, celular, tus pedidos y los comprobantes de pago solo para procesar tus compras, darte soporte y evitar fraudes. No vendemos ni compartimos tus datos con nadie. En la recarga interna (como Roblox), la contraseña que nos das se borra automáticamente al entregar o cancelar el pedido; igual te recomendamos cambiarla después.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">🗑️</span><span><span class="block text-sm font-semibold">Borrar tus datos</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">Si quieres que borremos tu cuenta y tus datos, escríbenos por WhatsApp desde el número que registraste.</span></span></li><li class="flex gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4"><span class="text-xl">📝</span><span><span class="block text-sm font-semibold">Cambios</span><span class="mt-0.5 block text-sm leading-relaxed text-muted">Podemos actualizar estas condiciones. Si seguimos usando la tienda después de un cambio, se entiende que aceptas la versión nueva.</span></span></li></ul><p class="mt-4 text-center text-xs text-muted">Última actualización: noviembre de 2026</p></div>
+    </div>
+  </div>
+
+  <div id="reviewModal" class="modal fixed inset-0 z-[88] hidden items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4">
+    <div class="glass max-h-[92vh] w-full overflow-y-auto rounded-t-3xl p-5 shadow-glow-lg sm:max-w-md sm:rounded-3xl sm:p-6">
+      <div class="flex items-start justify-between gap-3">
+        <div><h3 class="font-display text-xl font-bold">⭐ Califica tu compra</h3><p id="rvWhat" class="mt-0.5 text-sm text-muted"></p></div>
+        <button data-close="reviewModal" aria-label="Cerrar" class="rounded-lg p-1.5 text-muted hover:text-white"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg></button>
+      </div>
+      <div id="rvStars" class="mt-5 flex justify-center gap-2"></div>
+      <label class="mt-5 block text-sm"><span class="mb-1.5 block text-neutral-300">Cuéntanos tu experiencia (opcional)</span>
+        <textarea id="rvText" rows="3" maxlength="280" class="inp resize-none" placeholder="Ej. Me llegó rapidísimo, excelente atención"></textarea></label>
+      <p class="mt-2 text-xs text-muted">Se publica con tu primer nombre después de que la revisemos.</p>
+      <button id="rvSend" class="btn-primary mt-5 w-full rounded-xl py-3.5 font-semibold">Enviar reseña</button>
+    </div>
+  </div>
+
   <!-- =====================================================
        OVERLAY DE BÚSQUEDA
   ====================================================== -->
@@ -643,7 +669,7 @@
         <label class="block text-sm"><span class="mb-1.5 block text-neutral-300">Correo electrónico</span>
           <input id="reEmail" type="email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false" class="inp" placeholder="tu@correo.com" /></label>
         <label class="block text-sm"><span class="mb-1.5 block text-neutral-300">Número de celular</span>
-          <input id="rePhone" type="tel" autocomplete="tel" inputmode="tel" class="inp" placeholder="+51 900 000 000" /></label>
+          <input id="rePhone" type="tel" autocomplete="tel" inputmode="tel" class="inp" placeholder="Ej. 0412-1234567" /></label>
         <div class="grid gap-4 sm:grid-cols-2">
           <label class="block text-sm"><span class="mb-1.5 block text-neutral-300">Contraseña</span>
             <span class="relative block"><input id="rePass" type="password" autocomplete="new-password" autocapitalize="none" class="inp pr-16" placeholder="Mín. 6 caracteres" />
@@ -652,6 +678,7 @@
             <input id="rePass2" type="password" autocomplete="new-password" autocapitalize="none" class="inp" placeholder="••••••••" /></label>
         </div>
         <p id="reError" class="form-error hidden rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300"></p>
+        <p class="text-center text-xs text-muted">Al crear tu cuenta aceptas los <a href="#terminos" class="font-semibold text-neon hover:underline">Términos y la Política de privacidad</a>.</p>
         <button type="submit" class="btn-primary w-full rounded-xl py-3.5 font-semibold">Crear mi cuenta</button>
       </form>
     </div>
@@ -692,6 +719,16 @@
         <p id="pfError" class="form-error hidden rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300"></p>
         <button type="submit" class="btn-primary w-full rounded-xl py-3.5 font-semibold">Guardar cambios</button>
       </form>
+      <details id="pwBox" class="faq group mt-5 hidden rounded-2xl border border-white/10 bg-white/[.03]">
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-semibold">🔒 Cambiar contraseña<svg class="h-4 w-4 shrink-0 text-neon transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="space-y-3 px-4 pb-4">
+          <label class="block text-sm"><span class="mb-1.5 block text-neutral-300">Contraseña actual</span><input id="pwOld" type="password" autocomplete="current-password" class="inp" /></label>
+          <label class="block text-sm"><span class="mb-1.5 block text-neutral-300">Nueva contraseña</span><input id="pwNew" type="password" autocomplete="new-password" class="inp" placeholder="Mín. 6 caracteres" /></label>
+          <label class="block text-sm"><span class="mb-1.5 block text-neutral-300">Repetir nueva contraseña</span><input id="pwNew2" type="password" autocomplete="new-password" class="inp" /></label>
+          <p id="pwError" class="form-error hidden rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300"></p>
+          <button type="button" id="pwSave" class="btn-outline w-full rounded-xl py-3 text-sm font-semibold">Cambiar contraseña</button>
+        </div>
+      </details>
     </div>
   </div>
 
@@ -725,12 +762,13 @@
   <!-- MODAL · JUEGO CON PAQUETES -->
   <div id="gameModal" class="modal fixed inset-0 z-[85] hidden items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4">
     <div class="glass max-h-[94vh] w-full overflow-y-auto rounded-t-3xl shadow-glow-lg sm:max-w-lg sm:rounded-3xl">
-      <div class="relative flex items-center gap-4 border-b border-white/10 bg-gradient-to-br from-neon-blue/15 via-transparent to-neon/10 p-5 pr-14 sm:rounded-t-3xl sm:p-6 sm:pr-14">
+      <div class="relative flex items-center gap-4 border-b border-white/10 bg-gradient-to-br from-neon-blue/15 via-transparent to-neon/10 p-5 pr-14 sm:rounded-t-3xl sm:p-6 sm:pr-14" style="padding-right:6.5rem">
         <div id="gmMedia" class="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-ink-800 ring-1 ring-neon/30 shadow-glow"></div>
         <div class="min-w-0">
           <p id="gmCat" class="text-xs font-semibold uppercase tracking-widest text-neon"></p>
           <h3 id="gmTitle" class="mt-1 font-display text-xl font-bold leading-tight sm:text-2xl"></h3>
         </div>
+        <button type="button" id="gmShare" aria-label="Compartir" class="absolute top-3 grid h-9 w-9 place-items-center rounded-full bg-black/50 text-white hover:bg-black/80" style="right:3.25rem"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
         <button data-close="gameModal" aria-label="Cerrar" class="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-black/50 text-white hover:bg-black/80">✕</button>
       </div>
       <div class="space-y-4 p-5 sm:p-6">
@@ -738,6 +776,7 @@
           <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 font-display text-base font-bold text-neon">Descripción<svg class="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div id="gmDesc" class="px-4 pb-4 text-center text-sm leading-relaxed text-neutral-300"></div>
         </details>
+        <div id="gmReviews"></div>
         <section id="gmIdBox" class="rounded-2xl border border-white/10 bg-white/[.03] p-4">
           <div class="flex items-center gap-3"><span class="grid h-8 w-8 place-items-center rounded-lg bg-neon-blue font-display text-sm font-bold shadow-glow">1</span><h4 class="font-semibold">Información del jugador</h4></div>
           <label class="mt-4 block text-sm"><span id="gmIdLabel" class="mb-1.5 block text-neutral-200">Ingresa tu ID de jugador <span class="text-neon">*</span></span>
@@ -777,6 +816,7 @@
           <div id="gmMethods" class="mt-4 space-y-2.5"></div>
           <div id="gmPay" class="gm-payx mt-4 hidden"></div>
         </section>
+        <div id="gmCoupon"></div>
         <p id="gmError" class="hidden rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300"></p>
         <div class="flex items-end justify-between rounded-2xl border border-neon/20 bg-neon-blue/10 px-4 py-3">
           <span class="text-sm text-neutral-300">Total</span>
@@ -818,6 +858,7 @@
       </div>
       <ul id="coItems" class="mt-5 space-y-3"></ul>
       <div class="mt-4 flex items-center justify-between border-t border-white/10 pt-4"><span class="text-muted">Total</span><span id="coTotal" class="font-display text-2xl font-bold"></span></div>
+      <div id="coCoupon" class="mt-4"></div>
       <p class="mt-6 text-sm font-semibold">Método de pago</p>
       <div id="coPay" class="mt-3"></div>
       <p id="coError" class="form-error mt-4 hidden rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-300"></p>
@@ -1125,6 +1166,9 @@ window.NR_FIREBASE = {
       clientNotifs: { col: 'notifs',      id: 'id',   sort: 'date' },
       reports:      { col: 'reports',     id: 'id',   sort: 'date' },
       walletAdj:    { col: 'adjustments', id: 'id',   sort: 'date' },
+      coupons:      { col: 'coupons',     id: 'code', sort: 'createdAt', del: true },
+      reviews:      { col: 'reviews',     id: 'id',   sort: 'date', del: true },
+      stats:        { col: 'stats',       id: 'day',  sort: 't' },
     };
 
     const cache = {}, ready = {}, known = {};      // known: última versión conocida de cada documento
@@ -1141,6 +1185,7 @@ window.NR_FIREBASE = {
     const emit = (key, oldValue) => { try { window.dispatchEvent(new StorageEvent('storage', { key: 'nradmin_' + key, oldValue: oldValue || null })); } catch (_) {} };
     const cloudError = (err, where) => {
       console.warn('[NR Cloud]', where, err);
+      if (/^leer (coupons|reviews|stats)$/.test(where)) return;   // funciones nuevas: si faltan sus reglas, fallan en silencio
       try { window.dispatchEvent(new CustomEvent('nrcloud-error', { detail: { code: err && err.code, where } })); } catch (_) {}
     };
 
@@ -1249,15 +1294,17 @@ window.NR_FIREBASE = {
       }, err => { cloudError(err, 'leer ' + key); ready[key] = true; });
     }
     function startPublic() {
-      const { collection, query, orderBy } = fb.fs;
+      const { collection, query, orderBy, where, limit } = fb.fs;
       pubUnsubs.push(listenCol('products', collection(db, 'products')));
+      // Reseñas aprobadas: las ve todo el mundo (el panel lee todas aparte)
+      if (scope !== 'admin') pubUnsubs.push(listenCol('reviews', query(collection(db, 'reviews'), where('approved', '==', true), limit(80))));
       pubUnsubs.push(listenCol('banners', query(collection(db, 'banners'), orderBy('order'))));
       pubUnsubs.push(listenDoc('settings', 'config/settings'));
       pubUnsubs.push(listenDoc('online', 'config/store'));
     }
     function stopOwn() {
       ownUnsubs.forEach(u => { try { u(); } catch (_) {} }); ownUnsubs = [];
-      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj'].forEach(k => {
+      ['users', 'orders', 'topups', 'giftcards', 'services', 'clientNotifs', 'reports', 'walletAdj', 'coupons', 'stats'].forEach(k => {
         Object.keys(known).forEach(x => { if (x.startsWith(k + '/')) delete known[x]; });
         const had = (cache[k] || []).length; cache[k] = []; ready[k] = false; if (had) emit(k);
       });
@@ -1266,12 +1313,15 @@ window.NR_FIREBASE = {
       const { collection, query, where, orderBy, limit, doc } = fb.fs;
       if (isAdmin()) {
         ownUnsubs.push(listenCol('users', collection(db, 'users')));
-        ownUnsubs.push(listenCol('orders', query(collection(db, 'orders'), orderBy('date', 'desc'), limit(800))));
+        ownUnsubs.push(listenCol('orders', query(collection(db, 'orders'), orderBy('date', 'desc'), limit(2500))));
         ownUnsubs.push(listenCol('topups', query(collection(db, 'topups'), orderBy('date', 'desc'), limit(400))));
         ownUnsubs.push(listenCol('giftcards', collection(db, 'giftcards')));
         ownUnsubs.push(listenCol('services', collection(db, 'services')));
         ownUnsubs.push(listenCol('reports', query(collection(db, 'reports'), orderBy('date', 'desc'), limit(300))));
         ownUnsubs.push(listenCol('walletAdj', query(collection(db, 'adjustments'), orderBy('date', 'desc'), limit(400))));
+        ownUnsubs.push(listenCol('coupons', collection(db, 'coupons')));
+        ownUnsubs.push(listenCol('reviews', query(collection(db, 'reviews'), orderBy('date', 'desc'), limit(400))));
+        ownUnsubs.push(listenCol('stats', query(collection(db, 'stats'), orderBy('t', 'desc'), limit(60))));
         ready.clientNotifs = true; cache.clientNotifs = [];      // el panel solo envía avisos
       } else {
         const mine = c => query(collection(db, c), where('userId', '==', u.uid));
@@ -1286,6 +1336,7 @@ window.NR_FIREBASE = {
         ownUnsubs.push(listenCol('giftcards', query(collection(db, 'giftcards'), where('buyerId', '==', u.uid)), 'b'));
         ownUnsubs.push(listenCol('giftcards', query(collection(db, 'giftcards'), where('redeemedById', '==', u.uid)), 'r'));
         ready.reports = true; cache.reports = [];
+        ready.coupons = true; cache.coupons = []; ready.stats = true; cache.stats = [];
       }
     }
     function resync() { if (!user) return; stopOwn(); startOwn(user); }
@@ -1313,7 +1364,7 @@ window.NR_FIREBASE = {
       await new Promise(resolve => {
         a.onAuthStateChanged(auth, u => {
           const changed = (u && u.uid) !== (user && user.uid);
-          user = u ? { uid: u.uid, email: String(u.email || '').toLowerCase() } : null;
+          user = u ? { uid: u.uid, email: String(u.email || '').toLowerCase(), verified: !!u.emailVerified } : null;
           if (changed || first) { stopOwn(); if (user) startOwn(user); }
           authCbs.forEach(cb => { try { cb(user); } catch (_) {} });
           if (first) { first = false; resolve(); }
@@ -1378,6 +1429,23 @@ window.NR_FIREBASE = {
       },
       isFirstRun: () => firstRun,
       remove: path => commit([{ type: 'del', path }], 'borrar'),
+      // Verificación del correo del cliente
+      async sendVerify() { if (auth && auth.currentUser) await fb.auth.sendEmailVerification(auth.currentUser); },
+      async reloadUser() {
+        const cu = auth && auth.currentUser; if (!cu) return false;
+        await cu.reload(); if (cu.emailVerified) await cu.getIdToken(true);
+        if (user) user.verified = !!auth.currentUser.emailVerified;
+        return !!(user && user.verified);
+      },
+      // Contador de visitas: un documento por día (hora de Venezuela) con sumas
+      track(field, id) {
+        try {
+          if (!fb || !db) return;
+          const f = fb.fs, day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Caracas' }).format(new Date()), inc = f.increment(1);
+          const data = { day, t: Date.parse(day + 'T04:00:00Z'), ...(id ? { [field]: { [String(id).replace(/[.\/~]/g, '_')]: inc } } : { [field]: inc }) };
+          f.setDoc(f.doc(db, 'stats', day), data, { merge: true }).catch(() => {});
+        } catch (_) {}
+      },
     };
   })();
   </script>
@@ -1509,6 +1577,13 @@ window.NR_FIREBASE = {
     const bsOf = items => { let t = 0; for (const it of items) { const u = unitBs(it.p); if (u == null) return null; t += u * it.qty; } return Math.round(t * 100) / 100; };
     const cartBs = () => bsOf(cart.map(i => ({ p: PRODUCTS.find(x => x.id === i.id), qty: i.qty })).filter(x => x.p));
     const METHODS = { saldo: 'Ncoins', pagomovil: 'Pago Móvil', binance: 'Binance Pay' };
+    /* ---------- Cupones de descuento ---------- */
+    // El descuento nunca aplica a gift cards (se canjean por saldo) ni a compras de Ncoins
+    const cutOf = (c, base) => !c || !(base > 0) || base + 1e-9 < (+c.min || 0) ? 0 : +Math.max(0, Math.min(base - 0.01, c.type === 'pct' ? base * (+c.value || 0) / 100 : (+c.value || 0))).toFixed(2);
+    let coupon = null;   // cupón aplicado: { code, type, value, min, onePerClient }
+    const SHARE_SVG = '<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>';
+    const STAR = (on, cls = 'text-lg') => `<span class="${cls}" style="color:${on ? '#FBBF24' : 'rgba(255,255,255,.18)'}">★</span>`;
+    const starsHTML = (n, cls) => [1, 2, 3, 4, 5].map(i => STAR(i <= Math.round(n), cls)).join('');
     const NCOIN = cls => `<svg viewBox="0 0 48 48" class="${cls}" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="url(#ncG)" stroke="#9A5F06" stroke-width="1.5"/><circle cx="24" cy="24" r="17" fill="none" stroke="#FFF4C8" stroke-opacity=".75" stroke-width="1.6"/><path d="M17 33V15h3.6l7.5 11.1V15H31.4v18h-3.6l-7.5-11.1V33z" fill="#7C4A00"/><path d="M11 17a14 14 0 0 1 9-7" stroke="#fff" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>`;
     const NC = v => (+(v) || 0).toFixed(2) + ' Ncoins';
     const METHOD_ICON = { saldo: NCOIN('mx-auto h-7 w-7'), pagomovil: '📱', binance: '<span class="bn-logo mx-auto block h-7 w-7" role="img" aria-label="Binance"></span>' };
@@ -1711,7 +1786,7 @@ window.NR_FIREBASE = {
 
     function renderAccount() {
       const logged = !!current;
-      try { renderSanctionBanner(); } catch (_) {}
+      try { renderSanctionBanner(); renderVerify(); } catch (_) {}
       $('#accessBtn').classList.toggle('sm:inline-flex', !logged);
       $('#userWrap').classList.toggle('md:block', logged);
       $('#mobileAccess').textContent = logged ? 'Mi perfil' : 'Iniciar sesión';
@@ -1818,8 +1893,9 @@ window.NR_FIREBASE = {
           const au = await NRCloud.signUp(email, pass);
           const u = { uid: au.uid, name, email, phone, avatar: '', color: 0, balance: 0, createdAt: Date.now() };
           DB.set('users', [u]); await NRCloud.flush();
+          try { await NRCloud.sendVerify(); } catch (_) {}
           $('#registerForm').reset();
-          signIn(await cloudProfile(au, u), `🎉 Bienvenido a ${settings().name}, ${name.split(' ')[0]}`);
+          signIn(await cloudProfile(au, u), `🎉 Bienvenido, ${name.split(' ')[0]}. Revisa tu correo para confirmarlo`);
         } catch (e) { showErr('#reError', NRCloud.authMsg(e)); }
         busy('#registerForm', false); return;
       }
@@ -1870,6 +1946,31 @@ window.NR_FIREBASE = {
       e.target.value = '';
     });
     $('#pfRemove').addEventListener('click', () => { draft.avatar = ''; renderPicker(); });
+    if (CLOUD) $('#pwBox').classList.remove('hidden');
+    $('#pwSave').addEventListener('click', async () => {
+      const old = $('#pwOld').value, n1 = $('#pwNew').value, n2 = $('#pwNew2').value;
+      if (!old) return showErr('#pwError', 'Escribe tu contraseña actual.');
+      if (n1.length < 6) return showErr('#pwError', 'La nueva contraseña debe tener al menos 6 caracteres.');
+      if (n1 !== n2) return showErr('#pwError', 'Las contraseñas nuevas no coinciden.');
+      const b = $('#pwSave'); b.disabled = true; b.textContent = 'Cambiando…';
+      try { await NRCloud.changePassword(old, n1); ['#pwOld', '#pwNew', '#pwNew2'].forEach(x => $(x).value = ''); $('#pwError').classList.add('hidden'); $('#pwBox').open = false; toast('🔒 Contraseña cambiada'); }
+      catch (e) { showErr('#pwError', e && (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' || e.code === 'auth/invalid-login-credentials') ? 'La contraseña actual no es correcta.' : NRCloud.authMsg(e)); }
+      b.disabled = false; b.textContent = 'Cambiar contraseña';
+    });
+    // Las cuentas nuevas (desde que se activó esta función) confirman su correo antes de comprar
+    const VERIFY_SINCE = Date.UTC(2026, 10, 7, 4);
+    const needsVerify = () => { if (!CLOUD || !current || current._temp) return false; const au = NRCloud.user(); return !!au && !au.verified && (+current.createdAt || 0) >= VERIFY_SINCE; };
+    function renderVerify() {
+      const on = needsVerify(), el = $('#verifyBanner');
+      el.classList.toggle('hidden', !on); if (!on) return;
+      el.innerHTML = `📧 Confirma tu correo para poder comprar: te enviamos un enlace a <b>${esc(current.email)}</b> (revisa también spam). <button type="button" data-vcheck class="ml-1 font-semibold text-neon underline">Ya lo confirmé</button> · <button type="button" data-vresend class="font-semibold text-neon underline">Reenviar</button>`;
+    }
+    document.addEventListener('click', async e => {
+      if (e.target.closest('[data-vresend]')) { try { await NRCloud.sendVerify(); toast('📧 Te enviamos el enlace otra vez'); } catch (err) { toast(NRCloud.authMsg(err)); } }
+      if (e.target.closest('[data-vcheck]')) { try { const ok = await NRCloud.reloadUser(); toast(ok ? '✅ Correo confirmado. ¡Ya puedes comprar!' : 'Todavía no aparece confirmado. Abre el enlace del correo y vuelve a tocar.'); renderAccount(); } catch (err) { toast(NRCloud.authMsg(err)); } }
+    });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && needsVerify()) NRCloud.reloadUser().then(ok => { if (ok) { renderAccount(); toast('✅ Correo confirmado. ¡Ya puedes comprar!'); } }).catch(() => {}); });
+
     bindForm($('#profileForm'), () => {
       const name = $('#pfName').value.trim(), phone = $('#pfPhone').value.trim();
       if (name.length < 2) return showErr('#pfError', 'Escribe tu nombre.');
@@ -1997,6 +2098,37 @@ window.NR_FIREBASE = {
     $('#catRows').addEventListener('scroll', syncArrows, { capture: true, passive: true });
     addEventListener('resize', syncArrows);
     $('#menuCats').addEventListener('click', e => { const b = e.target.closest('[data-menucat]'); if (!b) return; toggleMenu(false); showCat(b.dataset.menucat); });
+    /* ---------- Enlace directo a cada producto ---------- */
+    const productLink = id => location.origin + location.pathname + '?p=' + encodeURIComponent(baseId(id));
+    async function shareProduct(id) {
+      const p = PRODUCTS.find(x => x.id === id) || PRODUCTS.find(x => x.id === baseId(id)); if (!p) return;
+      const url = productLink(p.id), text = `${p.title} en ${settings().name}`;
+      if (navigator.share) { try { await navigator.share({ title: p.title, text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+      const done = () => toast('🔗 Enlace copiado: pégalo en WhatsApp o Instagram');
+      try { await navigator.clipboard.writeText(url); done(); }
+      catch (_) { const t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (__) { toast(url); } t.remove(); }
+    }
+    document.addEventListener('click', e => { const b = e.target.closest('[data-share]'); if (b) shareProduct(b.dataset.share); });
+    $('#gmShare').addEventListener('click', () => game.id && shareProduct(game.id));
+    function openFromLink() {
+      const id = new URLSearchParams(location.search).get('p'); if (!id) return;
+      const p = PRODUCTS.find(x => x.id === id && !x.variant);
+      if (!p) return toast('Ese producto ya no está disponible');
+      p.hasPkgs ? openGame(p.id) : openProduct(p.id);
+    }
+    const trackView = id => { if (CLOUD) NRCloud.track('views', baseId(id)); };
+
+    /* ---------- Reseñas publicadas ---------- */
+    function reviewsHTML(pid) {
+      const list = (DB.get('reviews', []) || []).filter(r => r.approved && (r.productIds || []).includes(baseId(pid))).sort((a, b) => b.date - a.date);
+      if (!list.length) return '';
+      const avg = list.reduce((a, r) => a + (+r.stars || 0), 0) / list.length;
+      return `<div class="mt-5 rounded-2xl border border-white/10 bg-white/[.03] p-4 text-left">
+        <div class="flex items-center justify-between gap-3"><span class="font-display text-base font-bold">Opiniones</span><span class="flex items-center gap-1.5 text-sm"><span>${starsHTML(avg, 'text-base')}</span><b>${avg.toFixed(1)}</b><span class="text-muted">(${list.length})</span></span></div>
+        <ul class="mt-3 space-y-3">${list.slice(0, 3).map(r => `<li class="border-t border-white/10 pt-3 text-sm"><div class="flex items-center justify-between gap-2"><b class="font-semibold">${esc(r.name || 'Cliente')}</b><span>${starsHTML(r.stars, 'text-sm')}</span></div>${r.text ? `<p class="mt-1 text-neutral-300">${esc(r.text)}</p>` : ''}</li>`).join('')}</ul>
+      </div>`;
+    }
+
     function openProduct(id) {
       const p = PRODUCTS.find(x => x.id === id); if (!p) return;
       $('#pmBody').innerHTML = `
@@ -2005,6 +2137,7 @@ window.NR_FIREBASE = {
             ${p.img ? `<img src="${p.img}" alt="${esc(p.title)}" class="absolute inset-0 h-full w-full object-cover">`
                     : `<span class="absolute inset-0 grid-bg"></span><span class="absolute inset-0 grid place-items-center text-8xl">${esc(p.icon)}</span>`}
             ${p.tag ? `<span class="absolute left-4 top-4 rounded-full bg-neon-blue px-3 py-1 text-xs font-bold shadow-glow">${esc(p.tag)}</span>` : ''}
+            <button type="button" data-share="${esc(p.id)}" aria-label="Compartir" class="absolute top-3 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80" style="right:3.25rem">${SHARE_SVG}</button>
             <button data-close="productModal" aria-label="Cerrar" class="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80">✕</button>
           </div>
           <div class="flex flex-col p-5 sm:p-7">
@@ -2012,6 +2145,7 @@ window.NR_FIREBASE = {
             <h3 class="mt-2 font-display text-2xl font-bold leading-tight">${esc(p.title)}</h3>
             <div class="mt-3 text-sm leading-relaxed text-muted">${descHTML(p.desc)}</div>
             <div class="mt-5">${priceBlock(p, true)}</div>
+            ${reviewsHTML(p.id)}
             <ul class="mt-5 space-y-2 text-sm text-neutral-300">
               <li>⚡ Entrega rápida después de verificar el pago</li>
               ${p.needsId ? '<li>🎮 Necesitarás tu ID de jugador al comprar</li>' : ''}${p.interna ? '<li>🔐 Recarga interna: con tu correo y contraseña o con gift card</li>' : ''}
@@ -2022,7 +2156,7 @@ window.NR_FIREBASE = {
             </div>
           </div>
         </div>`;
-      openModal('productModal');
+      openModal('productModal'); trackView(p.id);
     }
     $('#pmBody').addEventListener('click', e => { const add = e.target.closest('[data-add]'); if (add) addToCart(add.dataset.add); });
     $('#catSearch').addEventListener('input', e => { catQuery = e.target.value; renderProducts(); });
@@ -2059,7 +2193,8 @@ window.NR_FIREBASE = {
       $('#gmLEmail').value = game.email; $('#gmLPass').value = game.pass; $('#gmLPass').type = 'password';
       $('#gmPkgStep').textContent = ask ? '2' : '1'; $('#gmPayStep').textContent = ask ? '3' : '2';
       $('#gmUid').value = game.uid; $('#gmHelp').classList.add('hidden'); $('#gmError').classList.add('hidden');
-      renderGame(); openModal('gameModal');
+      $('#gmReviews').innerHTML = reviewsHTML(p.id);
+      renderGame(); openModal('gameModal'); trackView(p.id);
     }
     // Icono de los paquetes: el que el dueño eligió en el panel (emoji o imagen); si no hay, la foto del juego
 const GAME_INFO = [
@@ -2098,7 +2233,7 @@ const GAME_INFO = [
       return p.img ? `<img src="${p.img}" alt="" class="h-full w-full object-cover">` : esc(p.icon);
     }
     function renderGamePay(k) {
-      const bal = current ? (+current.balance || 0) : 0, price = k ? +k.price : 0, bs = k ? unitBs(k) : null;
+      const bal = current ? (+current.balance || 0) : 0, price = k ? payAmount.gm() : 0, bs = k ? gmBs() : null;
       const row = (m, icon, title, sub, amt) => { const on = game.method === m; return `
         <button type="button" data-gmpay="${m}" class="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition ${on ? 'border-neon bg-neon/10 shadow-glow' : 'border-white/10 bg-black/30 hover:border-neon/40'}">
           <span class="grid h-12 w-12 shrink-0 place-items-center rounded-xl ${m === 'binance' ? 'bg-black ring-1 ring-white/10' : m === 'pagomovil' ? 'bg-[#1d4f9a]/40 ring-1 ring-sky-400/30' : 'bg-amber-300/10 ring-1 ring-amber-300/30'}">${icon}</span>
@@ -2117,8 +2252,9 @@ const GAME_INFO = [
         ? `<span class="flex items-center gap-3"><span class="relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-neon-blue/10 text-xl">${pkgIconHTML(p)}</span><span class="min-w-0"><span class="block font-semibold text-white">${esc(k.pkgLabel)}</span><span class="text-xs text-neon">${money(k.price)}${unitBs(k) != null ? ' · ' + fmtBs(unitBs(k)) : ''}</span></span></span>`
         : '<span class="text-neutral-300">Selecciona un paquete</span>';
       $('#gmPkgBtn').classList.toggle('border-neon/60', !!k);
-      $('#gmTotal').textContent = k ? money(k.price) : '—';
-      $('#gmTotalBs').textContent = k && unitBs(k) != null ? fmtBs(unitBs(k)) : '';
+      $('#gmTotal').innerHTML = k ? (cutFor('gm') ? `<span class="mr-1.5 text-sm font-medium text-neutral-500 line-through">${money(k.price)}</span>` : '') + money(payAmount.gm()) : '—';
+      $('#gmTotalBs').textContent = k && gmBs() != null ? fmtBs(gmBs()) : '';
+      renderCoupon('gm');
       renderGamePay(k);
       pay.gm.method = game.method;
       $('#gmPay').classList.toggle('hidden', !game.method || !k);
@@ -2172,11 +2308,11 @@ const GAME_INFO = [
         closeModal('gameModal'); return openAuth('register', 'Regístrate para comprar. Es gratis y toma unos segundos.');
       }
       const k = gmPkg(); if (!k) return err('Selecciona un paquete.');
-      if (game.method === 'saldo' && (+current.balance || 0) < +k.price) return err(`No te alcanzan los Ncoins (tienes ${NC(current.balance)}). Elige otro método o compra más Ncoins en tu billetera.`);
+      if (game.method === 'saldo' && (+current.balance || 0) < payAmount.gm()) return err(`No te alcanzan los Ncoins (tienes ${NC(current.balance)}). Elige otro método o compra más Ncoins en tu billetera.`);
       if (p.needsId) playerIds[game.pkg] = p.needsServer ? `${game.uid} · Servidor ${String(game.zone).trim()}` : game.uid;
       if (p.interna) playerLogins[game.pkg] = game.lmode === 'cuenta' ? { mode: 'cuenta', email: game.email, pass: game.pass } : { mode: 'gift' };
       pay.gm.method = game.method;
-      placeOrder({ px: 'gm', lines: [{ id: game.pkg, qty: 1 }], total: () => +k.price, bs: () => unitBs(k), err: '#gmError', btn: $('#gmBuy'), label: 'Comprar ahora' });
+      placeOrder({ px: 'gm', lines: [{ id: game.pkg, qty: 1 }], total: () => payAmount.gm(), bs: () => gmBs(), err: '#gmError', btn: $('#gmBuy'), label: 'Comprar ahora' });
       return true;
     }
     $('#gmBuy').addEventListener('click', gameBuy);
@@ -2272,7 +2408,13 @@ const GAME_INFO = [
     /* ---------- Bloque de pago reutilizable (compra y recarga de saldo) ---------- */
     const pay = { co: { method: 'saldo', capture: null, ref: '' }, wa: { method: 'pagomovil', capture: null, ref: '' }, gm: { method: null, capture: null, ref: '' } };
     const gmPkg = () => { const p = PRODUCTS.find(x => x.id === game.id); return p && p.pkgs ? p.pkgs.find(v => v.id === game.pkg) || null : null; };
-    const payAmount = { co: () => cartTotal(), wa: () => walletAmount(), gm: () => { const k = gmPkg(); return k ? +k.price : 0; } };
+    const coBase = () => cart.reduce((s, i) => { const p = PRODUCTS.find(x => x.id === i.id); return s + (p && !(+p.giftValue > 0) ? p.price * i.qty : 0); }, 0);
+    const gmBase = () => { const k = gmPkg(); return k && !(+k.giftValue > 0) ? +k.price : 0; };
+    const cutFor = px => coupon ? cutOf(coupon, px === 'co' ? coBase() : px === 'gm' ? gmBase() : 0) : 0;
+    const lessBs = (usd, bs, cut) => bs == null || !cut || !(usd > 0) ? bs : roundBs(bs * (usd - cut) / usd);
+    const coBs = () => lessBs(cartTotal(), cartBs(), cutFor('co'));
+    const gmBs = () => { const k = gmPkg(); return k ? lessBs(+k.price, unitBs(k), cutFor('gm')) : null; };
+    const payAmount = { co: () => +(cartTotal() - cutFor('co')).toFixed(2), wa: () => walletAmount(), gm: () => { const k = gmPkg(); return k ? +(+k.price - cutFor('gm')).toFixed(2) : 0; } };
     function payDetails(method, usd, bsVal) {
       const st = settings(), row = (k, v, strong) => `<div class="flex items-start justify-between gap-3 py-1"><span class="text-muted">${k}</span><span class="text-right ${strong ? 'font-bold text-white' : 'font-medium'}">${esc(v)}</span></div>`;
       if (method === 'pagomovil') {
@@ -2301,7 +2443,7 @@ const GAME_INFO = [
               ? `<p class="mt-3 text-amber-300">No te alcanzan los Ncoins. <button type="button" data-open-wallet class="font-semibold text-neon underline">Comprar Ncoins</button></p>`
               : '<p class="mt-3 text-emerald-400">✓ Se descuenta de tus Ncoins y tu pedido queda pagado al instante.</p>'}
           </div>` : `
-          <div class="mt-4 rounded-xl border border-neon/25 bg-neon/5 p-4 text-sm">${payDetails(st.method, amount, px === 'co' ? cartBs() : px === 'gm' ? (gmPkg() ? unitBs(gmPkg()) : null) : amountBs(amount))}</div>
+          <div class="mt-4 rounded-xl border border-neon/25 bg-neon/5 p-4 text-sm">${payDetails(st.method, amount, px === 'co' ? coBs() : px === 'gm' ? gmBs() : amountBs(amount))}</div>
           <label class="mt-4 block text-sm"><span class="mb-1.5 block text-neutral-300">Número de referencia <span class="text-red-400">*</span></span>
             <input data-ref="${px}" class="inp" inputmode="text" placeholder="${st.method === 'binance' ? 'ID de la orden de Binance' : 'Últimos dígitos de la referencia'}" value="${esc(st.ref)}" /></label>
           <div class="mt-4">
@@ -2386,18 +2528,71 @@ const GAME_INFO = [
             ${p.interna ? (playerLogins[p.id] ? `<p class="mt-2 text-xs font-semibold text-amber-300">${esc(loginTxt(playerLogins[p.id]))}</p>` : '<p class="mt-2 text-xs font-semibold text-rose-300">Falta elegir la forma de recarga: abre el juego de nuevo.</p>') : ''}
           </li>`;
       }).join('');
-      const cb = cartBs();
-      $('#coTotal').innerHTML = money(cartTotal()) + (cb != null ? `<span class="block text-right text-xs font-normal text-muted">${fmtBs(cb)}</span>` : '');
+      refreshCo();
       $('#coError').classList.add('hidden');
       renderPay('co'); closeCart(); openModal('checkoutModal');
     }
+    function refreshCo() {
+      const cb = coBs(), cut = cutFor('co');
+      $('#coTotal').innerHTML = (cut ? `<span class="mr-1.5 text-sm font-medium text-neutral-500 line-through">${money(cartTotal())}</span>` : '') + money(payAmount.co())
+        + (cb != null ? `<span class="block text-right text-xs font-normal text-muted">${fmtBs(cb)}</span>` : '');
+      renderCoupon('co');
+    }
     $('#checkoutBtn').addEventListener('click', checkout);
+
+    /* Caja de cupón (carrito y juego) */
+    function renderCoupon(px) {
+      const box = $('#' + px + 'Coupon'); if (!box) return;
+      if (coupon) {
+        const cut = cutFor(px), base = px === 'co' ? coBase() : gmBase();
+        const why = !(base > 0) ? 'Este cupón no aplica a gift cards.' : base + 1e-9 < (+coupon.min || 0) ? `Compra mínima de ${money(coupon.min)} para usarlo.` : '';
+        box.innerHTML = `<div class="flex items-center gap-3 rounded-2xl border ${cut ? 'border-emerald-500/40 bg-emerald-500/10' : 'border-amber-500/40 bg-amber-500/5'} px-4 py-3 text-sm">
+          <span class="text-xl">🏷️</span>
+          <span class="min-w-0 flex-1"><span class="block font-semibold ${cut ? 'text-emerald-300' : 'text-amber-300'}">Cupón ${esc(coupon.code)}${cut ? ' · −' + money(cut) : ''}</span>${why ? `<span class="block text-xs text-muted">${esc(why)}</span>` : `<span class="block text-xs text-muted">${coupon.type === 'pct' ? (+coupon.value) + '% de descuento' : money(coupon.value) + ' de descuento'}</span>`}</span>
+          <button type="button" data-cpremove="${px}" class="text-xs font-semibold text-muted underline hover:text-white">Quitar</button></div>`;
+        return;
+      }
+      box.innerHTML = `<details class="rounded-2xl border border-white/10 bg-white/[.03]"${box.dataset.open ? ' open' : ''}>
+        <summary class="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-neon">🏷️ ¿Tienes un cupón?</summary>
+        <div class="px-4 pb-4"><div class="flex gap-2"><input data-cpcode="${px}" class="inp font-mono uppercase" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="20" placeholder="Ej. NR10" />
+          <button type="button" data-cpapply="${px}" class="btn-primary shrink-0 rounded-xl px-4 text-sm font-semibold">Aplicar</button></div>
+          <p data-cpmsg="${px}" class="mt-2 hidden text-xs text-rose-300"></p></div></details>`;
+    }
+    const usedCoupon = code => current && DB.get('orders', []).some(o => (o.userEmail === current.email || (current.uid && o.userId === current.uid)) && o.coupon && o.coupon.code === code && o.status !== 'Rechazado' && o.status !== 'Reembolsado');
+    let cpBusy = false;
+    async function applyCoupon(px) {
+      const inp = $(`[data-cpcode="${px}"]`), msg = $(`[data-cpmsg="${px}"]`);
+      const say = t => { msg.textContent = t; msg.classList.remove('hidden'); };
+      const code = String(inp.value || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20);
+      if (code.length < 3) return say('Escribe el código del cupón.');
+      if (!current) return say('Inicia sesión para usar cupones.');
+      if (cpBusy) return; cpBusy = true;
+      let c = null;
+      try { c = CLOUD ? await NRCloud.fetchDoc('coupons', code) : (DB.get('coupons', []) || []).find(x => x.code === code) || null; }
+      catch (e) { cpBusy = false; return say(e && e.code === 'permission-denied' ? 'Ese cupón no existe.' : NRCloud.authMsg(e)); }
+      cpBusy = false;
+      if (!c) return say('Ese cupón no existe. Revisa que esté bien escrito.');
+      if (c.active === false) return say('Ese cupón ya no está activo.');
+      if (+c.until && Date.now() > +c.until) return say('Ese cupón ya venció.');
+      if (+c.maxUses && (+c.used || 0) >= +c.maxUses) return say('Ese cupón ya se agotó.');
+      if (c.onePerClient !== false && usedCoupon(code)) return say('Ya usaste este cupón en otro pedido.');
+      coupon = { code, type: c.type === 'fix' ? 'fix' : 'pct', value: +c.value || 0, min: +c.min || 0, onePerClient: c.onePerClient !== false };
+      toast(`🏷️ Cupón ${code} aplicado`);
+      if (px === 'co') { refreshCo(); renderPay('co'); } else renderGame();
+      if (px === 'co') renderCoupon('gm'); else renderCoupon('co');
+    }
+    document.addEventListener('click', e => {
+      const a = e.target.closest('[data-cpapply]'); if (a) applyCoupon(a.dataset.cpapply);
+      const r = e.target.closest('[data-cpremove]');
+      if (r) { coupon = null; const px = r.dataset.cpremove; if (px === 'co') { refreshCo(); renderPay('co'); } else renderGame(); }
+    });
+    document.addEventListener('keydown', e => { const px = e.target.dataset && e.target.dataset.cpcode; if (px && e.key === 'Enter') { e.preventDefault(); applyCoupon(px); } });
     $('#coItems').addEventListener('input', e => { if (e.target.dataset.pid) playerIds[e.target.dataset.pid] = e.target.value.trim(); });
 
     let saldoOk = false;   // se activa al tocar "Confirmar y Pagar"
     $('#scOk').addEventListener('click', () => { saldoOk = true; closeModal('saldoConfirmModal'); placeOrder(pendingOrder || CO_SRC); });
     let placing = false, pendingOrder = null;
-    const CO_SRC = { px: 'co', get lines() { return cart; }, total: () => cartTotal(), bs: () => cartBs(), err: '#coError', get btn() { return $('#coConfirm'); }, label: 'Confirmar pedido' };
+    const CO_SRC = { px: 'co', get lines() { return cart; }, total: () => payAmount.co(), bs: () => coBs(), err: '#coError', get btn() { return $('#coConfirm'); }, label: 'Confirmar pedido' };
     async function placeOrder(src) {
       if (placing) return;
       { const why = blockedReason(); if (why) return showErr(src.err, why); }
@@ -2417,6 +2612,8 @@ const GAME_INFO = [
         { const used = ownRefUsed(pay[src.px].ref); if (used) return err(DUP_MSG(used)); }
         if (!pay[src.px].capture && !pay[src.px].viaWa) return err('Sube el capture del pago o elige enviarlo por WhatsApp.');
       }
+      const cut = cutFor(src.px);
+      if (cut && coupon.onePerClient && usedCoupon(coupon.code)) { coupon = null; refreshCo(); return err('Ya usaste este cupón en otro pedido. Lo quitamos del total.'); }
       const orders = DB.get('orders', []), all = adminProducts();
       for (const i of src.lines) {
         const ap = all.find(x => x.id === baseId(i.id));
@@ -2440,6 +2637,7 @@ const GAME_INFO = [
         status: method === 'saldo' ? 'Pagado' : 'Pendiente',
         stockApplied: !CLOUD && !PUB, giftGenerated: false,
       };
+      if (cut) order.coupon = { code: coupon.code, cut };
       if (CLOUD) {
         // En la nube: el pedido y el descuento del saldo se guardan juntos (todo o nada)
         placing = true; src.btn.disabled = true; src.btn.textContent = 'Enviando pedido…';
@@ -2468,11 +2666,12 @@ const GAME_INFO = [
       }
       notifyAdmin('shopping-bag', `Nuevo pedido ${order.id} de ${order.client} · ${METHODS[method]}${method === 'saldo' ? '' : ' (verificar pago)'}`);
 
+      if (cut) coupon = null;
       if (src.px === 'co') { cart = []; saveCart(); renderCart(); } pay[src.px] = { method: src.px === 'co' ? 'saldo' : null, capture: null, ref: '' };
       Object.keys(playerIds).forEach(k => delete playerIds[k]); Object.keys(playerLogins).forEach(k => delete playerLogins[k]);
       closeModal(src.px === 'co' ? 'checkoutModal' : 'gameModal'); if (src.px === 'gm') game.id = null; refreshCatalog(); renderAccount();
       $('#successCode').textContent = order.id;
-      $('#successTotal').innerHTML = `Total: <b>${order.amountBs ? esc(order.amountBs).replace('Bs ', 'Bs. ') + '</b> <span class="text-muted">(' + money(order.amount) + ')</span>' : money(order.amount) + '</b>'} · ${method === 'saldo' ? '<span class="text-amber-300">Pagado con Ncoins</span>' : '<span class="text-amber-400">Pago en verificación</span>'}`;
+      $('#successTotal').innerHTML = (order.coupon ? `<span class="text-emerald-300">🏷️ Cupón ${esc(order.coupon.code)} · −${money(order.coupon.cut)}</span><br>` : '') + `Total: <b>${order.amountBs ? esc(order.amountBs).replace('Bs ', 'Bs. ') + '</b> <span class="text-muted">(' + money(order.amount) + ')</span>' : money(order.amount) + '</b>'} · ${method === 'saldo' ? '<span class="text-amber-300">Pagado con Ncoins</span>' : '<span class="text-amber-400">Pago en verificación</span>'}`;
       $('#successSupport').href = waLink(supportMsg(order));
       const lines = order.items.map(i => `• ${i.name} ×${i.qty} — ${money(i.price * i.qty)}${i.playerId ? `\n   🎮 ID: ${i.playerId}` : ''}${i.login ? `\n   ${loginTxt(i.login)}` : ''}`).join('\n');
       $('#successCapture').href = waLink(`🛒 *NUEVO PEDIDO* · ${settings().name}\n\n🧾 Código: *${order.id}*\n👤 ${order.client} · ${order.phone}${current ? '\n📧 ' + current.email : ''}\n\n📦 Productos:\n${lines}\n\n💵 Total: ${order.amountBs ? order.amountBs + ' (' + money(order.amount) + ')' : money(order.amount)}\n💳 Pago: ${METHODS[order.method]}${order.ref ? ' · Ref. ' + order.ref : ''}${order.method !== 'saldo' ? '\n\n📷 Adjunto el capture del pago.' : ''}`);
@@ -2773,6 +2972,49 @@ const GAME_INFO = [
       span.textContent = show ? span.dataset.secret : '••••••••'; b.textContent = show ? 'Ocultar' : 'Ver';
     });
 
+    /* ---------- Calificar pedidos entregados y pedir cancelación ---------- */
+    const isMine = o => !!current && (o.userEmail === current.email || (current.uid && o.userId === current.uid));
+    const reviewed = id => LOCAL.get('reviewed', []).includes(id) || (DB.get('reviews', []) || []).some(r => r.id === id);
+    const cancelAsked = id => LOCAL.get('cancelAsked', []).includes(id);
+    function orderExtras(o) {
+      if (!isMine(o)) return '';
+      if (o.status === 'Completado') return reviewed(o.id)
+        ? '<p class="mt-3 text-center text-xs font-semibold text-amber-300">⭐ Gracias por tu reseña</p>'
+        : `<button data-review="${esc(o.id)}" class="mt-3 w-full rounded-xl border border-amber-500/40 py-2.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10">⭐ Calificar mi compra</button>`;
+      if (o.status === 'Pendiente') return cancelAsked(o.id)
+        ? '<p class="mt-3 text-center text-xs font-semibold text-muted">⏳ Pediste cancelar este pedido. Te avisaremos.</p>'
+        : `<button data-cancelorder="${esc(o.id)}" class="mt-3 w-full rounded-xl border border-red-500/30 py-2.5 text-sm font-semibold text-red-300 transition hover:bg-red-500/10">Cancelar pedido</button>`;
+      return '';
+    }
+    let rv = null;
+    const shortName = n => { const w = String(n || 'Cliente').trim().split(/\s+/); return w[0] + (w[1] ? ' ' + w[1][0].toUpperCase() + '.' : ''); };
+    function renderRvStars() { $('#rvStars').innerHTML = [1, 2, 3, 4, 5].map(i => `<button type="button" data-rvstar="${i}" aria-label="${i} estrella${i > 1 ? 's' : ''}" class="text-4xl leading-none" style="color:${i <= rv.stars ? '#FBBF24' : 'rgba(255,255,255,.18)'}">★</button>`).join(''); }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-review]');
+      if (b) { const o = DB.get('orders', []).find(x => x.id === b.dataset.review); if (!o) return; rv = { o, stars: 5 }; $('#rvWhat').textContent = `${o.product} · ${o.id}`; $('#rvText').value = ''; renderRvStars(); openModal('reviewModal'); }
+      const st = e.target.closest('[data-rvstar]'); if (st && rv) { rv.stars = +st.dataset.rvstar; renderRvStars(); }
+      const c = e.target.closest('[data-cancelorder]');
+      if (c) {
+        const o = DB.get('orders', []).find(x => x.id === c.dataset.cancelorder); if (!o || o.status !== 'Pendiente') return;
+        if (!confirm(`¿Quieres cancelar el pedido ${o.id}?\n\nTe avisaremos cuando quede cancelado. Si ya pagaste, te devolvemos el monto en Ncoins.`)) return;
+        const reports = DB.get('reports', []);
+        reports.unshift({ id: 'RP-' + Date.now().toString(36).toUpperCase(), kind: 'cancel', userId: o.userId || (current && current.uid) || null, orderId: o.id, itemId: o.items[0].id, product: o.product, cat: o.items[0].cat, problem: 'Quiero cancelar este pedido', details: '', userEmail: o.userEmail, client: o.client, phone: o.phone, date: Date.now(), status: 'Abierto' });
+        DB.set('reports', reports.slice(0, 200));
+        LOCAL.set('cancelAsked', [...LOCAL.get('cancelAsked', []), o.id].slice(-50));
+        toast('✅ Pedimos la cancelación. Te avisaremos.'); renderMyOrders(); if (ordersOpen) renderOrdersView();
+        if ($('#orderDetailModal').classList.contains('flex')) openOrderDetail(o);
+      }
+    });
+    $('#rvSend').addEventListener('click', () => {
+      if (!rv || !current) return;
+      const o = rv.o, r = { id: o.id, orderId: o.id, userId: current.uid || null, name: shortName(current.name), productIds: [...new Set(o.items.map(i => baseId(i.id)))], product: o.product, stars: rv.stars, text: $('#rvText').value.trim().slice(0, 280), date: Date.now(), approved: false };
+      DB.set('reviews', [r, ...(DB.get('reviews', []) || []).filter(x => x.id !== r.id)]);
+      LOCAL.set('reviewed', [...LOCAL.get('reviewed', []), o.id].slice(-100));
+      closeModal('reviewModal'); toast('⭐ ¡Gracias! Publicaremos tu reseña pronto.');
+      renderMyOrders(); if (ordersOpen) renderOrdersView();
+      if ($('#orderDetailModal').classList.contains('flex')) openOrderDetail(o);
+    });
+
     function orderCard(o, opts = {}) {
       const [label, cls] = STATUS[o.status] || STATUS.Pendiente;
       return `
@@ -2814,6 +3056,7 @@ const GAME_INFO = [
             <button data-report="${esc(o.id)}" class="flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 py-2.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10">⚠️ Reportar problema</button>
             <a href="${waLink(supportMsg(o))}" target="_blank" rel="noopener" class="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/40 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/10">${WA_ICON} Soporte</a>
           </div>
+          ${orderExtras(o)}
         </article>`;
     }
     function renderMyOrders() {
@@ -2896,7 +3139,7 @@ const GAME_INFO = [
     input.addEventListener('input', e => renderSearch(e.target.value));
     $('#searchResults').addEventListener('click', e => { const b = e.target.closest('[data-add]'); if (b) addToCart(b.dataset.add); });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeSearch(); closeCart(); toggleMenu(false); ['cnModal', 'saldoConfirmModal', 'reportModal', 'authModal', 'profileModal', 'successModal', 'checkoutModal', 'walletModal', 'productModal', 'orderDetailModal', 'pkgSheet', 'gameModal', 'helpSheet', 'comprarModal', 'faqModal', 'garantiaModal', 'contactoModal'].forEach(closeModal);
+      if (e.key === 'Escape') { closeSearch(); closeCart(); toggleMenu(false); ['cnModal', 'saldoConfirmModal', 'reportModal', 'authModal', 'profileModal', 'successModal', 'checkoutModal', 'walletModal', 'productModal', 'orderDetailModal', 'pkgSheet', 'gameModal', 'helpSheet', 'comprarModal', 'faqModal', 'garantiaModal', 'contactoModal', 'terminosModal', 'reviewModal'].forEach(closeModal);
         if (ordersOpen && !anyOverlayOpen()) closeOrdersView(); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
     });
@@ -2953,6 +3196,7 @@ const GAME_INFO = [
     function blockedReason() {
       if (!storeOnline) return '🛠️ Tienda en mantenimiento. Vuelve en unos minutos.';
       const sc = mySanction(); if (sc) return sc.text;
+      if (needsVerify()) return '📧 Confirma tu correo para comprar: abre el enlace que te enviamos y toca "Ya lo confirmé".';
       if (closedState().closed) return closedText() + '. Puedes ver el catálogo, pero los pedidos se reciben en horario de atención.';
       return '';
     }
@@ -2991,6 +3235,7 @@ const GAME_INFO = [
       }
       if (e.key === 'nradmin_settings' && !PUB) { setWaFloat(); renderSocial(); renderInfo(); refreshCatalog(); renderBanners(); renderClosedBanner(); applyLogo(); }
       if (e.key === 'nradmin_banners' && !PUB) renderBanners();
+      if (e.key === 'nradmin_reviews' && game.id && $('#gameModal').classList.contains('flex')) $('#gmReviews').innerHTML = reviewsHTML(game.id);
     });
 
     /* ---------- Pantalla "Mis pedidos" ---------- */
@@ -3050,6 +3295,7 @@ const GAME_INFO = [
             <a href="${waLink(supportMsg(o))}" target="_blank" rel="noopener" aria-label="Soporte por WhatsApp" class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-emerald-400 min-[400px]:h-10 min-[400px]:w-10 sm:h-11 sm:w-11 transition hover:bg-emerald-500/10"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M9.6 8.6c.2 2.4 2.4 4.6 4.8 4.8l.9-1 1.6.7-.3 1.4c-3.6.3-7.1-3.2-6.8-6.8l1.4-.3.7 1.6z" stroke-width="1.5"/></svg></a>
            </div>
            ${credBlock(o, true)}
+           ${orderExtras(o)}
           </li>`).join('')}
         </ul>
         ${list.length ? '' : `<div class="mt-6 rounded-2xl border border-white/10 p-8 text-center"><p class="text-4xl">🧾</p><p class="mt-3 font-semibold">${all.length ? 'No hay pedidos con ese filtro' : 'Aún no tienes pedidos'}</p><p class="mt-1 text-sm text-muted">${all.length ? 'Prueba con otro filtro.' : 'Cuando compres, tus pedidos aparecerán aquí con su código.'}</p>${all.length ? '' : '<button id="ovShop" class="btn-primary mt-5 rounded-xl px-6 py-3 text-sm font-semibold">Ir a la tienda</button>'}</div>`}`;
@@ -3242,7 +3488,7 @@ const GAME_INFO = [
         <li class="rounded-2xl border ${n.read ? 'border-white/10 bg-white/[.02]' : 'border-neon/40 bg-neon/5'} p-4">
           <div class="flex items-start gap-3">
             <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-neon-blue/15 text-xl">${esc(n.icon || '🔔')}</span>
-            <div class="min-w-0 flex-1"><p class="font-semibold">${esc(n.title)}</p><p class="mt-0.5 text-sm text-neutral-300">${esc(n.text)}</p><p class="mt-1 text-[11px] text-muted">${fmtDate(n.auto ? Date.now() : n.date)}</p></div>
+            <div class="min-w-0 flex-1"><p class="font-semibold">${esc(n.title)}</p><p class="mt-0.5 text-sm text-neutral-300">${esc(n.text)}</p><p class="mt-1 text-[11px] text-muted">${fmtDate(n.date)}</p></div>
             ${n.read ? '' : '<span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-neon shadow-glow"></span>'}
           </div>
           ${notifActionBtn(n)}
@@ -3436,7 +3682,7 @@ const GAME_INFO = [
     (() => {   // los botones flotantes se apartan mientras el cliente baja por la página
       let t; addEventListener('scroll', () => { document.body.classList.add('fab-quiet'); clearTimeout(t); t = setTimeout(() => document.body.classList.remove('fab-quiet'), 650); }, { passive: true });
     })();
-    const HELP_SHEETS = ['comprar', 'faq', 'garantia', 'contacto'];
+    const HELP_SHEETS = ['comprar', 'faq', 'garantia', 'contacto', 'terminos'];
     document.addEventListener('click', e => {
       const a = e.target.closest('a[href^="#"]'); if (!a) return;
       const id = a.getAttribute('href').slice(1); if (!HELP_SHEETS.includes(id)) return;
@@ -3482,6 +3728,8 @@ const GAME_INFO = [
       setWaFloat(); renderSocial(); renderInfo(); renderBanners();
       renderFilters(); renderProducts(); renderCart(); renderAccount(); renderMaintenance(); renderSanctionBanner(); applyLogo();
       saveSnap();
+      try { if (CLOUD && !sessionStorage.getItem('nr_visit')) { sessionStorage.setItem('nr_visit', '1'); NRCloud.track('visits'); } } catch (_) {}
+      openFromLink();
     })();
   })();
   </script>
