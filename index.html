@@ -385,6 +385,7 @@
         </div>
         <p id="avgPill" class="mb-4 hidden w-fit rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300"></p>
         <div id="catRows" class="space-y-9 pt-1"></div>
+        <div id="topBox" class="hidden" style="margin-top:2.25rem"></div>
         <div id="catHead" class="mb-4 flex items-baseline justify-between">
           <h2 id="catTitle" class="font-display text-xl font-bold sm:text-2xl">Catálogo</h2>
           <p id="catCount" class="text-xs text-muted sm:text-sm"></p>
@@ -660,6 +661,19 @@
   <!-- =====================================================
        MODAL · REGISTRO / INICIO DE SESIÓN
   ====================================================== -->
+  <div id="soonScreen" class="hidden" style="position:fixed;inset:0;z-index:80;overflow-y:auto;background:radial-gradient(700px 420px at 50% 0%,rgba(0,102,255,.35),transparent 70%),radial-gradient(520px 380px at 50% 100%,rgba(0,229,255,.16),transparent 70%),#05080f">
+    <div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 22px;text-align:center">
+      <span data-brandlogo class="grid place-items-center font-display font-extrabold text-white" style="width:104px;height:104px;border-radius:26px;border:2px solid #00e5ff;box-shadow:0 0 44px rgba(0,102,255,.6);background:#0b1020;font-size:40px">N</span>
+      <p id="soonName" class="font-display font-extrabold text-white" style="margin-top:18px;font-size:26px;letter-spacing:.02em"></p>
+      <p class="font-display font-extrabold" style="margin-top:22px;font-size:13px;letter-spacing:.3em;color:#ff8a3d">MUY PRONTO</p>
+      <h1 id="soonTitle" class="font-display font-extrabold text-white" style="margin-top:8px;font-size:34px;line-height:1.12;max-width:440px"></h1>
+      <div id="soonClock" style="margin-top:24px;display:flex;gap:10px;justify-content:center"></div>
+      <p id="soonDate" class="text-muted" style="margin-top:12px;font-size:13px"></p>
+      <p id="soonMsg" class="text-neutral-300" style="margin-top:18px;font-size:15px;line-height:1.55;max-width:420px;white-space:pre-line"></p>
+      <div id="soonAcct" style="margin-top:24px;width:100%;max-width:360px"></div>
+      <a id="soonWa" href="#" target="_blank" rel="noopener" class="hidden font-semibold text-emerald-300" style="margin-top:14px;font-size:14px">💬 Escríbenos por WhatsApp</a>
+    </div>
+  </div>
   <div id="authModal" class="modal fixed inset-0 z-[85] hidden items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
     <div class="glass max-h-[92vh] w-full max-w-md overflow-y-auto rounded-3xl p-6 shadow-glow-lg sm:p-8">
       <div class="flex items-start justify-between gap-4">
@@ -795,6 +809,7 @@
           <p id="gmCat" class="text-xs font-semibold uppercase tracking-widest text-neon"></p>
           <h3 id="gmTitle" class="mt-1 font-display text-xl font-bold leading-tight sm:text-2xl"></h3>
         </div>
+        <button type="button" id="gmFav" aria-label="Favorito" class="absolute top-3 grid h-9 w-9 place-items-center rounded-full bg-black/50 text-white hover:bg-black/80" style="right:5.75rem;font-size:17px;line-height:1">🤍</button>
         <button type="button" id="gmShare" aria-label="Compartir" class="absolute top-3 grid h-9 w-9 place-items-center rounded-full bg-black/50 text-white hover:bg-black/80" style="right:3.25rem"><svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
         <button data-close="gameModal" aria-label="Cerrar" class="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-black/50 text-white hover:bg-black/80">✕</button>
       </div>
@@ -2120,7 +2135,7 @@ window.NR_FIREBASE = {
       const order = storeCats().map(c => c.name), used = [...new Set(list.map(p => p.cat))];
       const cats = [...order.filter(c => used.includes(c)), ...used.filter(c => !order.includes(c))];
       const arrow = (d) => `<button type="button" data-scroll="${d}" aria-label="${d < 0 ? 'Anterior' : 'Siguiente'}" class="cat-arrow absolute top-[38%] z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-neon/30 bg-ink-900/80 text-neon shadow-glow backdrop-blur transition hover:bg-neon-blue hover:text-white ${d < 0 ? '-left-1 sm:-left-3' : '-right-1 sm:-right-3'}"><svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="${d < 0 ? 'm15 18-6-6 6-6' : 'm9 18 6-6-6-6'}" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
-      $('#catRows').innerHTML = saleHTML() + dailyHTML() + cats.map(c => {
+      $('#catRows').innerHTML = saleHTML() + dailyHTML() + favsHTML() + cats.map(c => {
         const ci = catInfo(c), items = list.filter(p => p.cat === c);
         return `<section>
           <div class="mb-3 flex items-end justify-between gap-3">
@@ -2209,6 +2224,7 @@ window.NR_FIREBASE = {
             ${p.img ? `<img src="${p.img}" alt="${esc(p.title)}" class="absolute inset-0 h-full w-full object-cover">`
                     : `<span class="absolute inset-0 grid-bg"></span><span class="absolute inset-0 grid place-items-center text-8xl">${esc(p.icon)}</span>`}
             ${p.tag ? `<span class="absolute left-4 top-4 rounded-full bg-neon-blue px-3 py-1 text-xs font-bold shadow-glow">${esc(p.tag)}</span>` : ''}
+            <button type="button" data-fav="${esc(p.id)}" aria-label="Favorito" class="absolute top-3 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80" style="right:5.75rem;font-size:17px;line-height:1">${isFav(p.id) ? '❤️' : '🤍'}</button>
             <button type="button" data-share="${esc(p.id)}" aria-label="Compartir" class="absolute top-3 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80" style="right:3.25rem">${SHARE_SVG}</button>
             <button data-close="productModal" aria-label="Cerrar" class="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-black/80">✕</button>
           </div>
@@ -2254,6 +2270,7 @@ window.NR_FIREBASE = {
     const game = { id: null, pkg: null, uid: '', method: null, lmode: null, email: '', pass: '' };
     function openGame(id) {
       const p = PRODUCTS.find(x => x.id === id && x.hasPkgs); if (!p) return;
+      try { $('#gmFav').textContent = isFav(id) ? '❤️' : '🤍'; } catch (_) {}
       if (game.id !== id) { game.id = id; game.pkg = null; game.uid = ''; game.zone = ''; game.method = null; game.lmode = null; game.email = ''; game.pass = ''; pay.gm = { method: null, capture: null, ref: '' }; }
       $('#gmMedia').innerHTML = p.img ? `<img src="${p.img}" alt="${esc(p.title)}" class="absolute inset-0 h-full w-full object-cover">` : `<span class="absolute inset-0 grid place-items-center text-5xl">${esc(p.icon)}</span>`;
       $('#gmCat').textContent = p.cat; $('#gmTitle').textContent = p.title; $('#gmDesc').innerHTML = descHTML(p.ownDesc || gameDesc(p.title, p.pkgs, p.needsId, p.interna));
@@ -3224,9 +3241,9 @@ const GAME_INFO = [
     function orderExtras(o) {
       if (!isMine(o)) return '';
       const tk = ticketsHTML(o); if (tk) return tk;
-      if (o.status === 'Completado') return reviewed(o.id)
+      if (o.status === 'Completado') return `<button data-receipt="${esc(o.id)}" class="mt-3 w-full rounded-xl border border-neon/40 py-2.5 text-sm font-semibold text-neon transition hover:bg-neon/10">🧾 Descargar recibo</button>` + (reviewed(o.id)
         ? '<p class="mt-3 text-center text-xs font-semibold text-amber-300">⭐ Gracias por tu reseña</p>'
-        : `<button data-review="${esc(o.id)}" class="mt-3 w-full rounded-xl border border-amber-500/40 py-2.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10">⭐ Calificar mi compra</button>`;
+        : `<button data-review="${esc(o.id)}" class="mt-3 w-full rounded-xl border border-amber-500/40 py-2.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10">⭐ Calificar mi compra</button>`);
       if (o.status === 'Pendiente') return cancelAsked(o.id)
         ? '<p class="mt-3 text-center text-xs font-semibold text-muted">⏳ Pediste cancelar este pedido. Te avisaremos.</p>'
         : `<button data-cancelorder="${esc(o.id)}" class="mt-3 w-full rounded-xl border border-red-500/30 py-2.5 text-sm font-semibold text-red-300 transition hover:bg-red-500/10">Cancelar pedido</button>`;
@@ -3441,6 +3458,7 @@ const GAME_INFO = [
     // Bloquea pedidos y recargas cuando está cerrado o el cliente está sancionado
     function blockedReason() {
       if (!storeOnline) return '🛠️ Tienda en mantenimiento. Vuelve en unos minutos.';
+      if (soonNow()) return '🚀 Todavía no abrimos. ¡Muy pronto podrás comprar!';
       const sc = mySanction(); if (sc) return sc.text;
       if (needsVerify()) return '📧 Confirma tu correo para comprar: abre el enlace que te enviamos y toca "Ya lo confirmé".';
       if (closedState().closed) return closedText() + '. Puedes ver el catálogo, pero los pedidos se reciben en horario de atención.';
@@ -3929,6 +3947,153 @@ const GAME_INFO = [
     (() => {   // los botones flotantes se apartan mientras el cliente baja por la página
       let t; addEventListener('scroll', () => { document.body.classList.add('fab-quiet'); clearTimeout(t); t = setTimeout(() => document.body.classList.remove('fab-quiet'), 650); }, { passive: true });
     })();
+    /* ================= Muy pronto · Preguntas editables · Top · Favoritos · Recibo ================= */
+    // ---- Pantalla "Muy pronto" (se prende desde el panel) ----
+    function soonCfg() { const x = settings().soon; return x && typeof x === 'object' ? x : {}; }
+    function soonNow() {
+      const c = soonCfg(); if (c.on !== true) return null;
+      if (+c.at > 0 && +c.at <= Date.now()) return null;                      // llegó la fecha: la tienda abre sola
+      try { if (c.key && sessionStorage.getItem('nr_soon_ok') === String(c.key)) return null; } catch (_) {}   // el dueño viendo su tienda
+      return c;
+    }
+    try { const k = new URLSearchParams(location.search).get('ver'); if (k) sessionStorage.setItem('nr_soon_ok', k); } catch (_) {}
+    var soonShown = false;
+    function renderSoon() {
+      const c = soonNow(), el = $('#soonScreen'); if (!el) return;
+      if (!c) { if (soonShown) { soonShown = false; el.classList.add('hidden'); document.documentElement.style.overflow = ''; } return; }
+      if (!soonShown) { soonShown = true; el.classList.remove('hidden'); document.documentElement.style.overflow = 'hidden'; }
+      $('#soonName').textContent = settings().name || 'NR Digital';
+      $('#soonTitle').textContent = c.title || 'Abrimos nuestra tienda';
+      $('#soonMsg').textContent = c.msg || 'Recargas, streaming y gift cards al instante. Crea tu cuenta ahora y sé de los primeros en comprar.';
+      const at = +c.at || 0, ms = Math.max(0, at - Date.now());
+      const cell = (n, l) => `<span style="min-width:68px;padding:12px 6px;border-radius:16px;border:1px solid rgba(0,229,255,.35);background:rgba(0,102,255,.14)"><b class="font-display" style="display:block;font-size:30px;line-height:1;color:#fff">${String(n).padStart(2, '0')}</b><span style="display:block;margin-top:6px;font-size:10px;letter-spacing:.14em;color:#8fa3c8">${l}</span></span>`;
+      $('#soonClock').innerHTML = at ? cell(Math.floor(ms / 864e5), 'DÍAS') + cell(Math.floor(ms / 36e5) % 24, 'HORAS') + cell(Math.floor(ms / 6e4) % 60, 'MIN') + cell(Math.floor(ms / 1e3) % 60, 'SEG') : '';
+      $('#soonDate').textContent = at ? 'Abrimos el ' + new Date(at).toLocaleString('es', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }) : '';
+      const key = current ? 'in:' + current.email : 'out';
+      if ($('#soonAcct').dataset.k !== key) {
+        $('#soonAcct').dataset.k = key;
+        $('#soonAcct').innerHTML = current
+          ? `<p style="padding:14px 16px;border-radius:16px;border:1px solid rgba(16,185,129,.4);background:rgba(16,185,129,.1);font-size:14px;color:#6ee7b7">✅ <b>${esc(String(current.name || '').split(' ')[0])}</b>, tu cuenta ya está lista. Te esperamos el día de la apertura.</p>`
+          : `<button type="button" data-soonreg class="btn-primary w-full rounded-xl py-3.5 font-semibold">Crear mi cuenta gratis</button><button type="button" data-soonlog class="text-muted" style="margin-top:12px;font-size:13px">Ya tengo cuenta · <span class="text-neon font-semibold">Entrar</span></button>`;
+      }
+      const ph = String(settings().phone || '').replace(/\D/g, ''), wa = $('#soonWa');
+      wa.classList.toggle('hidden', !ph); if (ph) wa.href = waLink('Hola, quiero saber cuándo abre ' + (settings().name || 'la tienda'));
+    }
+    document.addEventListener('click', e => {
+      if (e.target.closest('[data-soonreg]')) openAuth('register', 'Crea tu cuenta y queda listo para la apertura.');
+      if (e.target.closest('[data-soonlog]')) openAuth('login', 'Entra con tu cuenta.');
+    });
+    setInterval(() => { if (soonShown || soonCfg().on === true) renderSoon(); }, 1000);
+
+    // ---- Preguntas frecuentes escritas desde el panel ----
+    var FAQ_DEFAULT = null;
+    function renderFaq() {
+      const box = document.querySelector('#faqModal .space-y-2\\.5'); if (!box) return;
+      if (FAQ_DEFAULT === null) FAQ_DEFAULT = box.innerHTML;
+      const list = (Array.isArray(settings().faq) ? settings().faq : []).filter(x => x && String(x.q || '').trim() && String(x.a || '').trim());
+      box.innerHTML = !list.length ? FAQ_DEFAULT : list.map(x => `<details class="faq group rounded-2xl border border-white/10 bg-white/[.03] open:border-neon/30 open:bg-neon/[.04]">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-semibold sm:text-base">${esc(String(x.q).trim())}<svg class="h-4 w-4 shrink-0 text-neon transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+            <div class="px-4 pb-4 text-sm leading-relaxed text-muted" style="white-space:pre-line">${esc(String(x.a).trim())}</div>
+          </details>`).join('');
+    }
+
+    // ---- Top compradores del mes (lo publica el panel, con los nombres tapados) ----
+    function renderTop() {
+      const box = $('#topBox'); if (!box) return;
+      const cfg = settings().top || {}, f = feed(), list = cfg.on === true && Array.isArray(f.top) ? f.top.slice(0, 10) : [];
+      box.classList.toggle('hidden', !list.length); if (!list.length) { box.innerHTML = ''; return; }
+      const medal = ['🥇', '🥈', '🥉'];
+      box.innerHTML = `<section><h2 class="mb-3 font-display text-xl font-extrabold uppercase leading-none tracking-tight sm:text-2xl" style="color:#ffc83c">🏆 Top compradores${f.topMonth ? ' · ' + esc(f.topMonth) : ''}</h2>
+        <ol class="overflow-hidden rounded-2xl border" style="border-color:rgba(255,200,60,.35);background:linear-gradient(135deg,rgba(255,200,60,.08),rgba(255,255,255,.02))">${list.map((x, i) => `<li class="flex items-center justify-between gap-3 px-4 py-3 text-sm" style="${i ? 'border-top:1px solid rgba(255,255,255,.06)' : ''}"><span class="flex min-w-0 items-center gap-3"><span class="shrink-0 text-center font-display font-bold" style="width:28px;font-size:${i < 3 ? 20 : 14}px;color:#8fa3c8">${medal[i] || i + 1}</span><span class="truncate font-semibold">${esc(x.n)}</span></span><span class="shrink-0 text-xs text-muted">${+x.c} compra${+x.c === 1 ? '' : 's'}</span></li>`).join('')}</ol>
+        <p class="mt-2 text-xs text-muted">Se actualiza con cada compra completada este mes.</p></section>`;
+    }
+
+    // ---- Favoritos (se guardan en este teléfono) ----
+    function favList() { try { const a = JSON.parse(localStorage.getItem('nrshop_favs') || '[]'); return Array.isArray(a) ? a.map(String) : []; } catch (_) { return []; } }
+    function isFav(id) { return favList().includes(String(id)); }
+    function toggleFav(id) {
+      id = String(id); let a = favList(); const on = !a.includes(id);
+      a = on ? [id, ...a].slice(0, 40) : a.filter(x => x !== id);
+      try { localStorage.setItem('nrshop_favs', JSON.stringify(a)); } catch (_) {}
+      toast(on ? '❤️ Guardado en tus favoritos' : 'Quitado de favoritos'); try { renderProducts(); } catch (_) {}
+      return on;
+    }
+    function favsHTML() {
+      const ids = favList(); if (!ids.length) return '';
+      const list = ids.map(id => SHOWN().find(p => String(p.id) === id)).filter(p => p && !p.raffle).slice(0, 12); if (!list.length) return '';
+      return `<section><div class="mb-3 flex items-end justify-between gap-3"><h2 class="font-display text-xl font-extrabold uppercase leading-none tracking-tight sm:text-2xl" style="color:#ff6b8b">❤️ Tus favoritos</h2></div>
+        <div class="flex gap-2.5 overflow-x-auto pb-1">${list.map(p => `<button type="button" data-detail="${esc(p.id)}" class="card shrink-0 overflow-hidden rounded-xl p-2 text-left ${p.stock > 0 ? '' : 'opacity-70'}" style="width:118px">
+          <span class="relative grid h-20 w-full place-items-center overflow-hidden rounded-lg bg-gradient-to-br from-neon-blue/15 via-transparent to-neon/10 text-4xl">${p.img ? `<img src="${p.img}" alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover">` : esc(p.icon)}</span>
+          <span class="mt-1.5 block truncate text-xs font-semibold">${esc(p.title)}</span><span class="block font-display text-sm font-bold text-neon">${p.stock > 0 ? (p.hasPkgs ? 'Desde ' : '') + money(p.price) : 'Agotado'}</span></button>`).join('')}</div></section>`;
+    }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-fav]'); if (b) b.textContent = toggleFav(b.dataset.fav) ? '❤️' : '🤍';
+      if (e.target.closest('#gmFav') && game.id) $('#gmFav').textContent = toggleFav(game.id) ? '❤️' : '🤍';
+    });
+
+    // ---- Recibo de la compra en imagen (para guardar o subir a estados) ----
+    function receiptLogo() {
+      return new Promise(res => {
+        const im = new Image(); let done = false; const end = v => { if (!done) { done = true; res(v); } };
+        im.onload = () => end(im); im.onerror = () => end(null); setTimeout(() => end(null), 2500);
+        im.src = settings().logo || 'icon-192.png';
+      });
+    }
+    async function makeReceipt(o) {
+      const W = 1080, items = (o.items || []).slice(0, 8), H = 1340 + items.length * 92;
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d');
+      const FF = '"Poppins","Segoe UI",system-ui,-apple-system,Roboto,sans-serif';
+      const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#071127'); g.addColorStop(1, '#05080f'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+      const rg = c.createRadialGradient(W / 2, 0, 0, W / 2, 0, 760); rg.addColorStop(0, 'rgba(0,102,255,.55)'); rg.addColorStop(1, 'rgba(0,102,255,0)'); c.fillStyle = rg; c.fillRect(0, 0, W, 760);
+      const rr = (x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+      const fit = (t, max) => { t = String(t); if (c.measureText(t).width <= max) return t; while (t.length > 3 && c.measureText(t + '…').width > max) t = t.slice(0, -1); return t + '…'; };
+      const logo = await receiptLogo();
+      c.save(); rr(W / 2 - 80, 70, 160, 160, 40); c.clip();
+      if (logo) { try { c.drawImage(logo, W / 2 - 80, 70, 160, 160); } catch (_) {} } else { c.fillStyle = '#0b1b3d'; c.fillRect(W / 2 - 80, 70, 160, 160); c.fillStyle = '#fff'; c.font = '800 84px ' + FF; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('N', W / 2, 154); }
+      c.restore(); c.lineWidth = 5; c.strokeStyle = '#00e5ff'; rr(W / 2 - 80, 70, 160, 160, 40); c.stroke();
+      c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+      c.fillStyle = '#fff'; c.font = '800 62px ' + FF; c.fillText(fit(String(settings().name || 'NR Digital').toUpperCase(), 900), W / 2, 318);
+      c.fillStyle = '#00e5ff'; c.font = '700 30px ' + FF; c.fillText('C O M P R O B A N T E   D E   C O M P R A', W / 2, 372);
+      c.fillStyle = 'rgba(16,185,129,.16)'; rr(W / 2 - 250, 412, 500, 84, 42); c.fill(); c.lineWidth = 3; c.strokeStyle = '#10b981'; c.stroke();
+      c.fillStyle = '#6ee7b7'; c.font = '700 38px ' + FF; c.fillText('✓  Compra entregada', W / 2, 467);
+      c.fillStyle = 'rgba(255,255,255,.045)'; rr(70, 548, W - 140, 300 + items.length * 92, 36); c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(255,255,255,.12)'; c.stroke();
+      const row = (l, v, y, big) => { c.textAlign = 'left'; c.fillStyle = '#8fa3c8'; c.font = '500 32px ' + FF; c.fillText(l, 116, y); c.textAlign = 'right'; c.fillStyle = '#fff'; c.font = (big ? '800 46px ' : '600 34px ') + FF; c.fillText(fit(v, 560), W - 116, y); };
+      row('Pedido', '#' + o.id, 628); row('Fecha', fmtDate(o.date), 700);
+      let mname = METHODS[o.method]; if (!mname) { try { mname = (extraOf(o.method) || {}).name; } catch (_) {} }
+      row('Pago', mname || '—', 772);
+      c.strokeStyle = 'rgba(255,255,255,.1)'; c.beginPath(); c.moveTo(116, 812); c.lineTo(W - 116, 812); c.stroke();
+      let y = 880;
+      items.forEach(i => { c.textAlign = 'left'; c.fillStyle = '#fff'; c.font = '600 36px ' + FF; c.fillText(fit((i.qty > 1 ? i.qty + ' × ' : '') + (i.name || i.title || 'Producto'), 620), 116, y); c.textAlign = 'right'; c.fillStyle = '#cbd5e1'; c.font = '600 34px ' + FF; if (+i.price > 0) c.fillText(money(+i.price * (+i.qty || 1)), W - 116, y); y += 92; });
+      y += 70; c.fillStyle = 'rgba(0,102,255,.2)'; rr(70, y - 70, W - 140, 130, 32); c.fill(); c.strokeStyle = 'rgba(0,229,255,.5)'; c.lineWidth = 3; c.stroke();
+      c.textAlign = 'left'; c.fillStyle = '#cfe6ff'; c.font = '700 38px ' + FF; c.fillText('TOTAL', 116, y + 10);
+      c.textAlign = 'right'; c.fillStyle = '#fff'; c.font = '800 58px ' + FF; c.fillText(money(o.amount), W - 116, y + 16);
+      if (orderBs(o)) { c.fillStyle = '#8fa3c8'; c.font = '500 30px ' + FF; c.fillText(String(orderBs(o)).replace('Bs ', 'Bs. '), W - 116, y + 104); }
+      c.textAlign = 'center'; c.fillStyle = '#fff'; c.font = '700 40px ' + FF; c.fillText('¡Gracias por tu compra, ' + fit(String(o.client || '').split(' ')[0] || 'crack', 400) + '! 💙', W / 2, H - 150);
+      c.fillStyle = '#00e5ff'; c.font = '600 32px ' + FF; c.fillText(fit(location.host + location.pathname.replace(/index\.html$/, '').replace(/\/$/, ''), 900), W / 2, H - 92);
+      c.fillStyle = '#5b6b8c'; c.font = '500 24px ' + FF; c.fillText('Recargas · Streaming · Gift Cards', W / 2, H - 48);
+      return cv;
+    }
+    var receiptBusy = false;
+    document.addEventListener('click', async e => {
+      const b = e.target.closest('[data-receipt]'); if (!b || receiptBusy) return;
+      const o = DB.get('orders', []).find(x => x.id === b.dataset.receipt); if (!o || !isMine(o)) return;
+      receiptBusy = true;
+      try {
+        const cv = await makeReceipt(o), blob = await new Promise(r => cv.toBlob(r, 'image/png')), name = 'Recibo-' + o.id + '.png';
+        const file = new File([blob], name, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Mi compra en ' + (settings().name || 'NR Digital') }); receiptBusy = false; return; } catch (er) { if (er && er.name === 'AbortError') { receiptBusy = false; return; } } }
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        toast('🧾 Recibo guardado en tus descargas');
+      } catch (er) { console.warn(er); toast('No se pudo crear el recibo. Intenta de nuevo.'); }
+      receiptBusy = false;
+    });
+    window.addEventListener('storage', e => {
+      if (e.key === 'nradmin_settings') { renderSoon(); renderFaq(); renderTop(); }
+      if (e.key === 'nradmin_feed') renderTop();
+      if (e.key === 'nradmin_users' || e.key === 'nrshop_session') renderSoon();
+    });
+    function renderNewBits() { try { renderSoon(); renderFaq(); renderTop(); } catch (er) { console.warn(er); } }
+
     const HELP_SHEETS = ['comprar', 'faq', 'garantia', 'contacto', 'terminos', 'vip', 'sorteo'];
     document.addEventListener('click', e => {
       const a = e.target.closest('a[href^="#"]'); if (!a) return;
@@ -3949,6 +4114,7 @@ const GAME_INFO = [
     });
     // Primer dibujo inmediato: esqueleto de carga (o tu catálogo guardado), nunca la página de ejemplo
     try { setWaFloat(); renderSocial(); renderInfo(); renderBanners(); renderFilters(); renderProducts(); applyLogo(); } catch (e) { console.warn(e); }
+    renderNewBits();
     if (CLOUD) SNAPDB.get().then(v => {
       if (!v || NRCloud.ready('products')) return;
       SNAP = v; PRODUCTS = loadCatalog(); cleanCart();
@@ -3972,7 +4138,7 @@ const GAME_INFO = [
       } else await loadPublished();   // datos.json publicado desde el panel (si existe)
       storeOnline = readOnline();
       PRODUCTS = loadCatalog(); cleanCart();
-      setWaFloat(); renderSocial(); renderInfo(); renderBanners();
+      setWaFloat(); renderSocial(); renderInfo(); renderBanners(); renderNewBits();
       renderFilters(); renderProducts(); renderCart(); renderAccount(); renderMaintenance(); renderSanctionBanner(); applyLogo();
       saveSnap();
       try { syncMethods(); renderSaleBanner(); renderAvg(); renderRaffleLink(); } catch (_) {}
