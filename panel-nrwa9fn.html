@@ -570,6 +570,7 @@
         <section data-panel="cupones" class="view hidden space-y-6">
           <div><p class="text-sm text-muted">Promociones</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Ofertas y cupones</h2></div>
           <div id="saleCard" class="panel rounded-2xl p-5"></div>
+          <div id="itemSaleBox" class="panel rounded-2xl p-5"></div>
           <div class="grid gap-6 xl:grid-cols-2"><div id="dailyBox" class="panel rounded-2xl p-5"></div><div id="socialBox" class="panel rounded-2xl p-5"></div></div>
           <div id="comboBox" class="panel rounded-2xl p-5"></div>
           <div class="panel rounded-2xl p-5">
@@ -1896,7 +1897,7 @@ window.NR_FIREBASE = {
       if (name === 'clientes') { renderClients(); store.set('clientsSeenAt', Date.now()); renderNewClientsBadge(); }
       if (name === 'pedidos') renderOrders();
       if (name === 'productos') renderProducts();
-      if (name === 'cupones') { renderSale(); renderOfferExtras(); renderCoupons(); }
+      if (name === 'cupones') { renderSale(); renderItemSales(); renderOfferExtras(); renderCoupons(); }
       if (name === 'vip') { renderVip(); renderTix(); }
       if (name === 'config') renderCfgExtras();
       if (name === 'finanzas') renderFinExtras();
@@ -4020,8 +4021,7 @@ window.NR_FIREBASE = {
         <div class="mt-4 flex flex-wrap gap-2">${[['off', 'Apagado'], ['auto', 'Automático'], ['manual', 'Lo elijo yo']].map(([k, l]) => `<button type="button" data-dmode="${k}" class="rounded-xl px-3.5 py-2 text-sm font-semibold transition ${(d.mode || 'off') === k ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${l}</button>`).join('')}</div>
         ${d.mode === 'manual' ? `<select data-dprod class="field mt-3"><option value="">Elige un producto…</option>${sellable.map(x => `<option value="${esc(x.id)}" ${d.productId === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>` : d.mode === 'auto' ? '<p class="mt-3 text-xs text-muted">Cada día se elige uno distinto entre los que tienen stock.</p>' : ''}`;
       $('#socialBox').innerHTML = `<h3 class="font-semibold">🤝 Confianza en la tienda</h3><p class="mt-0.5 text-xs text-muted">Se calculan con tus pedidos reales. Se actualizan mientras el panel esté abierto.</p>
-        <button type="button" data-social="recent" class="mt-4 flex w-full items-center justify-between gap-4 rounded-xl border border-white/5 p-3 text-left hover:border-neon/30"><span><span class="block text-sm font-medium">🛒 Ventas recientes</span><span class="text-xs text-muted">"María G. compró Free Fire hace 5 min" (solo primer nombre)</span></span>${sw(so.recent !== false)}</button>
-        <button type="button" data-social="avg" class="mt-2 flex w-full items-center justify-between gap-4 rounded-xl border border-white/5 p-3 text-left hover:border-neon/30"><span><span class="block text-sm font-medium">⚡ Tiempo de entrega promedio</span><span class="text-xs text-muted">${+f.avgN >= 3 ? `Ahora: ${Math.round(f.avgMin)} min (últimos ${f.avgN} pedidos)` : 'Se muestra cuando haya al menos 3 pedidos entregados con esta versión'}</span></span>${sw(so.avg !== false)}</button>`;
+        <button type="button" data-social="avg" class="mt-4 flex w-full items-center justify-between gap-4 rounded-xl border border-white/5 p-3 text-left hover:border-neon/30"><span><span class="block text-sm font-medium">⚡ Tiempo de entrega promedio</span><span class="text-xs text-muted">${+f.avgN >= 3 ? `Ahora: ${Math.round(f.avgMin)} min (últimos ${f.avgN} pedidos)` : 'Se muestra cuando haya al menos 3 pedidos entregados con esta versión'}</span></span>${sw(so.avg !== false)}</button>`;
       const singles = products.filter(x => x.active && !(+x.giftValue > 0) && !(x.packages || []).length && !(x.comboOf || []).length);
       const combos = products.filter(x => (x.comboOf || []).length);
       const pick = comboDraft.ids.map(id => products.find(x => x.id === id)).filter(Boolean), sum = pick.reduce((a, x) => a + +x.price, 0);
@@ -4084,12 +4084,55 @@ window.NR_FIREBASE = {
       const done = orders.filter(o => o.status === 'Completado' && +o.doneAt > o.date).sort((a, b) => b.doneAt - a.doneAt).slice(0, 30);
       const mins = done.map(o => (o.doneAt - o.date) / 6e4).filter(m => m < 1440).sort((a, b) => a - b);
       const avgMin = mins.length ? +mins[Math.floor(mins.length / 2)].toFixed(1) : 0;
-      const recent = orders.filter(validOrder).sort((a, b) => b.date - a.date).slice(0, 12).map(o => ({ n: shortN(o.client), p: String(o.product || '').slice(0, 42), t: o.date }));
+      const recent = [];   // las compras recientes ya no se publican (se quitó el aviso emergente de la tienda)
       const cur = store.get('feed', null) || {};
       const tp = topBuyers();
       if (JSON.stringify(cur.recent || []) === JSON.stringify(recent) && +cur.avgMin === avgMin && +cur.avgN === mins.length && JSON.stringify(cur.top || []) === JSON.stringify(tp.top) && (cur.topMonth || '') === tp.topMonth) return;
       store.set('feed', { recent, avgMin, avgN: mins.length, top: tp.top, topMonth: tp.topMonth, t: Date.now() });
     }
+
+    /* ================= Oferta en un producto específico ================= */
+    var isDraft = { id: '', pct: '', until: '' };
+    const itemSalesAll = () => { const a = (store.get('settings', {}) || {}).itemSales; return (Array.isArray(a) ? a : []).filter(x => x && x.id); };
+    function saveItemSales(list, closed) {
+      const st = store.get('settings', {}) || {}, now = Date.now();
+      const log = [...(closed || []).map(x => ({ id: x.id, pct: +x.pct, from: x.since || 0, to: +x.until ? Math.min(now, +x.until) : now })), ...(Array.isArray(st.itemSaleLog) ? st.itemSaleLog : [])].slice(0, 40);
+      store.set('settings', { ...st, itemSales: list, itemSaleLog: log });
+    }
+    function renderItemSales() {
+      const box = $('#itemSaleBox'); if (!box) return;
+      const now = Date.now(), all = itemSalesAll(), opts = products.filter(x => !x.raffle && !(+x.giftValue > 0));
+      const x0 = products.find(y => y.id === isDraft.id), pct = +isDraft.pct || 0, base = x0 ? +x0.price : 0;
+      box.innerHTML = `<h3 class="font-semibold">🏷️ Oferta en un producto</h3><p class="mt-0.5 text-xs text-muted">Ponle descuento a un solo artículo, sin tocar los demás. Sale en la tienda en la fila "En oferta" con el precio viejo tachado. Si ese producto también cae en la oferta general, vale esta. No aplica a gift cards ni sorteos.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-3"><label class="block"><span class="mb-1.5 block text-xs text-muted">Producto</span><select id="isProd" class="field py-2 text-sm"><option value="">Elige…</option>${opts.map(x => `<option value="${esc(x.id)}" ${x.id === isDraft.id ? 'selected' : ''}>${esc(x.name)} · ${(x.packages || []).length ? 'desde ' : ''}${money(x.price)}</option>`).join('')}</select></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Descuento (%)</span><input id="isPct" type="number" min="1" max="95" step="1" inputmode="numeric" value="${esc(isDraft.pct)}" placeholder="15" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Hasta el día (opcional)</span><input id="isUntil" type="date" min="${toInputDate(now)}" value="${esc(isDraft.until)}" class="field py-2 text-sm" /></label></div>
+        <p id="isPrev" class="mt-3 text-sm text-neutral-300">${x0 && pct > 0 && pct < 100 ? `Quedaría en <b style="color:#ff8a3d">${money(+(base * (1 - pct / 100)).toFixed(2))}</b> <s class="text-muted">${money(base)}</s>${(x0.packages || []).length ? ' · el descuento aplica a todos sus paquetes' : ''}` : ''}</p>
+        <button type="button" data-isadd class="btn-primary mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold">Poner en oferta</button>
+        <ul class="mt-4 space-y-1.5 text-sm">${all.map(s => { const x = products.find(y => y.id === s.id), over = +s.until > 0 && +s.until < now; return `<li class="flex items-center justify-between gap-3 rounded-lg border ${over ? 'border-white/5 opacity-60' : 'border-amber-500/30'} px-3 py-2"><span class="min-w-0"><span class="block truncate font-medium">${esc(x ? x.name : 'Producto borrado')}</span><span class="block text-xs text-muted"><b style="color:#ff8a3d">-${+s.pct}%</b>${x ? ' · ' + money(+(+x.price * (1 - s.pct / 100)).toFixed(2)) + ' <s>' + money(x.price) + '</s>' : ''} · ${over ? 'ya terminó' : +s.until ? 'hasta el ' + new Date(+s.until).toLocaleDateString('es', { day: 'numeric', month: 'short' }) : 'sin fecha de fin'}</span></span><button type="button" data-isdel="${esc(s.id)}" class="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-muted hover:text-white">Quitar</button></li>`; }).join('') || '<li class="text-muted">Ningún producto con oferta propia.</li>'}</ul>`;
+    }
+    document.addEventListener('input', e => {
+      if (e.target.id !== 'isPct') return; isDraft.pct = e.target.value;
+      const x0 = products.find(y => y.id === isDraft.id), pct = +isDraft.pct || 0, el = $('#isPrev');
+      if (el) el.innerHTML = x0 && pct > 0 && pct < 100 ? `Quedaría en <b style="color:#ff8a3d">${money(+(+x0.price * (1 - pct / 100)).toFixed(2))}</b> <s class="text-muted">${money(x0.price)}</s>` : '';
+    });
+    document.addEventListener('change', e => {
+      if (e.target.id === 'isProd') { isDraft.id = e.target.value; renderItemSales(); }
+      if (e.target.id === 'isUntil') isDraft.until = e.target.value;
+    });
+    document.addEventListener('click', e => {
+      if (STAFF) return;
+      if (e.target.closest('[data-isadd]')) {
+        const x = products.find(y => y.id === isDraft.id), pct = Math.round(+isDraft.pct || 0); if (!x) return toast('Elige un producto', 'warn');
+        if (!(pct >= 1 && pct <= 95)) return toast('El descuento debe estar entre 1 y 95%', 'warn');
+        const until = isDraft.until ? fromInputDate(isDraft.until) + DAYMS - 1 : 0; if (until && until < Date.now()) return toast('Esa fecha ya pasó', 'warn');
+        const all = itemSalesAll(), prev = all.filter(s => s.id === x.id);
+        saveItemSales([...all.filter(s => s.id !== x.id), { id: x.id, pct, until, since: Date.now() }], prev);
+        isDraft = { id: '', pct: '', until: '' }; renderItemSales(); toast(`🏷️ ${x.name} en oferta: -${pct}%`);
+      }
+      const dl = e.target.closest('[data-isdel]'); if (dl) { const all = itemSalesAll(); saveItemSales(all.filter(s => s.id !== dl.dataset.isdel), all.filter(s => s.id === dl.dataset.isdel)); renderItemSales(); toast('Oferta quitada: el producto volvió a su precio normal'); }
+    });
+    window.addEventListener('storage', e => { if (['nradmin_settings', 'nradmin_products'].includes(e.key) && $('#itemSaleBox') && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#itemSaleBox'))) { try { renderItemSales(); } catch (_) {} } });
 
     /* ================= Herramientas de productos: duplicar · precios en lote · calculadora · programar · cuentas ================= */
     function schedChip(p) {
@@ -4445,7 +4488,7 @@ window.NR_FIREBASE = {
 
     /* ================= Historial de cambios ================= */
     var AUD = undefined;
-    const SET_NAMES = { sale: 'la oferta general', vip: 'el Club VIP', soon: 'la pantalla "Muy pronto"', faq: 'las preguntas frecuentes', top: 'el top de compradores', daily: 'el producto del día', raffle: 'el sorteo mensual', extraPays: 'los métodos de pago', closed: 'el modo mantenimiento', name: 'el nombre de la tienda', phone: 'el WhatsApp', logo: 'el logo', rate: 'la tasa', social: 'el aviso de compras recientes' };
+    const SET_NAMES = { itemSales: 'las ofertas por producto', sale: 'la oferta general', vip: 'el Club VIP', soon: 'la pantalla "Muy pronto"', faq: 'las preguntas frecuentes', top: 'el top de compradores', daily: 'el producto del día', raffle: 'el sorteo mensual', extraPays: 'los métodos de pago', closed: 'el modo mantenimiento', name: 'el nombre de la tienda', phone: 'el WhatsApp', logo: 'el logo', rate: 'la tasa', social: 'el aviso de compras recientes' };
     function audSnap() {
       const pr = {}; (store.get('products', []) || []).forEach(x => { if (x && x.id) pr[x.id] = { n: x.name, p: +x.price, a: x.active !== false, k: (x.packages || []).map(k => k && [k.label, +k.price]) }; });
       const st = {}; Object.entries(store.get('settings', {}) || {}).forEach(([k, v]) => { st[k] = JSON.stringify(v); });
@@ -4471,7 +4514,7 @@ window.NR_FIREBASE = {
           Object.keys(old.pr).forEach(id => { if (!cur[id]) lines.push('Borró el producto "' + old.pr[id].n + '"'); });
         } else if (k === 'settings') {
           const cur = v || {}, keys = new Set([...Object.keys(cur), ...Object.keys(old.st)]);
-          keys.forEach(key => { if (key === 'saleLog') return; if (JSON.stringify(cur[key]) !== old.st[key]) lines.push('Cambió ' + (SET_NAMES[key] || 'la configuración (' + key + ')')); });
+          keys.forEach(key => { if (key === 'saleLog' || key === 'itemSaleLog') return; if (JSON.stringify(cur[key]) !== old.st[key]) lines.push('Cambió ' + (SET_NAMES[key] || 'la configuración (' + key + ')')); });
         } else if (k === 'coupons') {
           const cur = (v || []).filter(Boolean).map(c => String(c.code));
           cur.filter(c => !old.cp.includes(c)).forEach(c => lines.push('Creó el cupón ' + c)); old.cp.filter(c => !cur.includes(c)).forEach(c => lines.push('Borró el cupón ' + c));
@@ -4849,8 +4892,12 @@ window.NR_FIREBASE = {
     const saleLive = sl => sl.on && +sl.pct > 0 && (!+sl.until || Date.now() <= +sl.until);
     let saleDraft = null;
     // % de oferta que tenía una categoría en un momento dado (para revisar montos de pedidos viejos)
-    function salePctAt(t, cat) {
+    function salePctAt(t, cat, pid) {
       const st = store.get('settings', {}) || {}, sl = st.sale || {}, M = 3 * 60000;
+      if (pid) {   // oferta propia del producto: manda sobre la general (igual que en la tienda)
+        const id = String(pid).split('~')[0], iw = [...(Array.isArray(st.itemSales) ? st.itemSales : []).map(x => ({ id: x.id, pct: x.pct, from: x.since || 0, to: +x.until || Infinity })), ...(Array.isArray(st.itemSaleLog) ? st.itemSaleLog : [])];
+        const h = iw.find(x => x && x.id === id && t >= (x.from || 0) - M && t <= (x.to || Infinity) + M); if (h) return +h.pct || 0;
+      }
       const wins = [...(sl.on ? [{ pct: sl.pct, cats: sl.cats, from: sl.since || 0, to: +sl.until || Infinity }] : []), ...(Array.isArray(st.saleLog) ? st.saleLog : [])];
       const w = wins.find(x => t >= (x.from || 0) - M && t <= (x.to || Infinity) + M && (!x.cats || !x.cats.length || x.cats.includes(cat)));
       return w ? +w.pct || 0 : 0;
@@ -5110,7 +5157,7 @@ window.NR_FIREBASE = {
     const expectedAmount = o => {
       let full = 0, base = 0;
       const vpct = o.vip ? Math.min(+o.vip.pct || 0, vipPctOf(userByEmail(o.userEmail))) : 0;
-      o.items.forEach(i => { const k = pkgOf(i.id), p = prodOf(i.id), gift = +i.giftValue > 0 || +((p || {}).giftValue) > 0 || !!((p || {}).raffle) || !!i.tickets, pct = gift ? 0 : salePctAt(o.date, i.cat || (p || {}).cat), u = k ? +k.price : p ? +p.price : +i.price || 0;
+      o.items.forEach(i => { const k = pkgOf(i.id), p = prodOf(i.id), gift = +i.giftValue > 0 || +((p || {}).giftValue) > 0 || !!((p || {}).raffle) || !!i.tickets, pct = gift ? 0 : salePctAt(o.date, i.cat || (p || {}).cat, i.id), u = k ? +k.price : p ? +p.price : +i.price || 0;
         let x = pct ? +(u * (1 - pct / 100)).toFixed(2) : u; if (vpct && !gift) x = +(x * (1 - vpct / 100)).toFixed(2);
         const v = x * i.qty; full += v; if (!gift) base += v; });
       const c = o.coupon && coupons().find(x => x.code === o.coupon.code);
