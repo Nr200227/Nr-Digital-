@@ -164,6 +164,7 @@
     button:not(:disabled):active, a[href]:active, .filter-btn:active, .pf-type:active { scale: .95; transition-duration: .08s; }
     .btn-primary:not(:disabled):active { scale: .96; filter: brightness(1.15); box-shadow: 0 0 34px rgba(0,240,255,.55); }
     /* onda de luz donde tocas */
+    .rpl:not(.min-w-0):not(.truncate):not(.w-full) { min-width: min-content; }   /* al tocar, el botón no se encoge */
     .rpl { overflow: hidden; isolation: isolate; }   /* sin tocar la posición: los botones flotantes (como la X) se quedan en su sitio */
     .rpl-wave { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; transform: scale(0); opacity: .7;
       background: radial-gradient(circle, rgba(255,255,255,.8) 0%, rgba(0,240,255,.5) 38%, transparent 70%); animation: rplGo .55s ease-out forwards; }
@@ -456,6 +457,10 @@
             <div class="overflow-x-auto"><table class="tbl w-full"><thead><tr><th>ID</th><th>Icono</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock / Licencias</th><th>Estado</th><th class="text-right">Acciones</th></tr></thead><tbody id="allProducts"></tbody></table></div>
             <p id="prodEmpty" class="hidden p-8 text-center text-sm text-muted">No hay productos que coincidan.</p>
           </div>
+          <div id="priceToolBox" class="owner-only panel rounded-2xl p-5"></div>
+          <div id="calcBox" class="owner-only panel rounded-2xl p-5"></div>
+          <div id="schedBox" class="owner-only panel rounded-2xl p-5"></div>
+          <div id="accBox" class="owner-only panel rounded-2xl p-5"></div>
         </section>
 
         <!-- ========== BANNERS / CARRUSEL ========== -->
@@ -491,6 +496,7 @@
                 <input id="orderSearch" type="search" placeholder="Buscar pedido o cliente…" class="field pl-10" />
               </div>
             </div>
+            <div id="bulkBar" class="hidden"></div>
             <div class="overflow-x-auto"><table class="tbl w-full"><thead><tr><th>Código</th><th>Cliente</th><th>Producto</th><th>Pago</th><th>Fecha</th><th>Monto</th><th>Estado</th><th class="text-right">Acciones</th></tr></thead><tbody id="allOrders"></tbody></table></div>
             <p id="orderEmpty" class="hidden p-8 text-center text-sm text-muted">No hay pedidos con ese criterio.</p>
           </div>
@@ -630,7 +636,10 @@
         <section data-panel="finanzas" class="view hidden space-y-6">
           <div><p class="text-sm text-muted">Reportes</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Finanzas / Ingresos</h2></div>
           <div id="finKpis" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"></div>
+          <div id="goalBox" class="panel rounded-2xl p-5"></div>
           <div id="closeBox" class="panel rounded-2xl p-5"></div>
+          <div id="expBox" class="panel rounded-2xl p-5"></div>
+          <div id="rankBox" class="panel rounded-2xl p-5"></div>
           <div id="profitBox" class="panel rounded-2xl p-5"></div>
           <div class="grid gap-6 xl:grid-cols-3">
             <div class="panel min-w-0 overflow-hidden rounded-2xl p-5 xl:col-span-2">
@@ -708,6 +717,9 @@
           <div id="soonBox" class="panel rounded-2xl p-5"></div>
           <div id="topCfgBox" class="panel rounded-2xl p-5"></div>
           <div id="faqBox" class="panel rounded-2xl p-5"></div>
+          <div id="pendBox" class="panel rounded-2xl p-5"></div>
+          <div id="backupBox" class="panel rounded-2xl p-5"></div>
+          <div id="logBox" class="panel rounded-2xl p-5"></div>
           <div class="grid gap-6 xl:grid-cols-3">
             <form id="settingsForm" class="panel space-y-5 rounded-2xl p-5 sm:p-6 xl:col-span-2">
               <h3 class="font-semibold">Datos de la tienda</h3>
@@ -1153,7 +1165,9 @@
   <!-- VISOR DE CAPTURE -->
   <div id="imgModal" class="fixed inset-0 z-[75] hidden items-center justify-center bg-black/90 p-4">
     <button type="button" data-close="imgModal" aria-label="Cerrar" class="absolute right-4 top-4 rounded-lg bg-white/10 p-2 text-white hover:bg-white/20"><i data-lucide="x" class="h-5 w-5"></i></button>
-    <img id="imgFull" alt="Capture del pago" class="max-h-[88vh] max-w-full rounded-2xl object-contain shadow-glow-lg" />
+    <img id="imgFull" alt="Capture del pago" class="max-h-[88vh] max-w-full rounded-2xl object-contain shadow-glow-lg" style="cursor:zoom-in" />
+    <div id="imgCap" class="hidden" style="position:fixed;left:12px;right:12px;bottom:12px;z-index:2;padding:10px 12px;border-radius:16px;background:rgba(8,12,24,.92);border:1px solid rgba(0,229,255,.3);font-size:13px;color:#fff"></div>
+    <p id="imgHint" style="position:fixed;left:16px;top:18px;font-size:12px;color:#cbd5e1;background:rgba(0,0,0,.5);padding:4px 10px;border-radius:999px">Toca la imagen para acercar</p>
   </div>
 
   <!-- MODAL · CONFIRMAR -->
@@ -1577,6 +1591,7 @@ window.NR_FIREBASE = {
           try { if (navigator.userActivation && navigator.userActivation.isActive) toast('Solo el dueño puede cambiar esto', 'warn'); } catch (_) {}
           return false;
         }
+        try { auditSet(k, v); } catch (_) {}
         return CLOUD && NRCloud.has(k) ? NRCloud.set(k, v) : local.set(k, v);
       },
       del: k => local.del(k),
@@ -1871,6 +1886,7 @@ window.NR_FIREBASE = {
 
     /* ---------- Navegación ---------- */
     function showView(name) {
+      if (STAFF && !Object.keys(STAFF_VIEWS).some(v => can(STAFF_VIEWS[v]))) { $$('.view').forEach(v => v.classList.add('hidden')); toast('Tu cuenta todavía no tiene permisos. Avísale al dueño.', 'warn'); return; }
       if (STAFF && !(STAFF_VIEWS[name] && can(STAFF_VIEWS[name]))) name = staffHome();
       if (name === 'monitor') monLoad();
       if (name === 'vencimientos') renderServices();
@@ -1883,6 +1899,8 @@ window.NR_FIREBASE = {
       if (name === 'cupones') { renderSale(); renderOfferExtras(); renderCoupons(); }
       if (name === 'vip') { renderVip(); renderTix(); }
       if (name === 'config') renderCfgExtras();
+      if (name === 'finanzas') renderFinExtras();
+      if (name === 'productos') renderProdTools();
       if (name === 'resenas') renderReviews();
       $$('.view').forEach(v => v.classList.toggle('hidden', v.dataset.panel !== name));
       $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === name));
@@ -2152,7 +2170,7 @@ window.NR_FIREBASE = {
       <tr>
         <td class="font-mono text-xs text-muted">${p.id}</td>
         <td>${productThumb(p)}</td>
-        <td class="font-medium">${esc(p.name)}</td>
+        <td class="font-medium">${esc(p.name)}${schedChip(p)}</td>
         <td><span class="rounded-lg bg-white/5 px-2 py-1 text-xs text-neutral-300">${esc(p.cat)}</span></td>
         <td class="font-semibold">${(p.packages || []).length ? `<span class="text-[10px] font-normal text-muted">desde</span> ` : ''}${money(p.price)}${(p.packages || []).length ? `<p class="text-[11px] font-normal text-neon">${p.packages.length} paquetes</p>` : ''}</td>
         <td>${stockCell(p.stock)}</td>
@@ -2160,6 +2178,7 @@ window.NR_FIREBASE = {
         <td class="text-right">
           <div class="inline-flex gap-1">
             <button data-edit="${p.id}" aria-label="Editar" class="rounded-lg p-2 text-muted transition hover:bg-neon-blue/15 hover:text-neon"><i data-lucide="pencil" class="h-4 w-4"></i></button>
+            <button data-dup="${p.id}" aria-label="Duplicar" title="Duplicar producto" class="rounded-lg p-2 text-muted transition hover:bg-neon-blue/15 hover:text-neon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button>
             <button data-del="${p.id}" aria-label="Eliminar" class="rounded-lg p-2 text-muted transition hover:bg-red-500/15 hover:text-red-400"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
           </div>
         </td>
@@ -2260,6 +2279,7 @@ window.NR_FIREBASE = {
       const im = e.target.closest('[data-img]');
       if (im) {
         const v = im.dataset.img;
+        try { imgOpenFor(v.startsWith('@') ? v.slice(1) : ((im.closest('tr') && im.closest('tr').querySelector('[data-order]') || {}).dataset || {}).order || (im.closest('#omBody') ? $('#omCode').textContent : '')); } catch (_) {}
         if (v.startsWith('@')) { $('#imgFull').removeAttribute('src'); openModal('imgModal'); getCapture(v.slice(1)).then(src => { if (src) $('#imgFull').src = src; else toast('No se encontró el capture', 'warn'); }); }
         else { $('#imgFull').src = v; openModal('imgModal'); }
       }
@@ -2556,14 +2576,20 @@ window.NR_FIREBASE = {
 
       const counts = { Todos: orders.length }; Object.keys(STATUS).forEach(k => counts[k] = 0);
       orders.forEach(o => { if (o.status in counts) counts[o.status]++; });
-      $('#orderTabs').innerHTML = Object.entries(counts).map(([k, n]) => `
-        <button data-ofilter="${k}" class="rounded-xl px-3.5 py-2 text-sm font-medium transition ${k === orderFilter ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${k} <span class="ml-1 opacity-70">${n}</span></button>`).join('');
+      const tabBtn = (k, label, n) => `
+        <button data-ofilter="${k}" class="rounded-xl px-3.5 py-2 text-sm font-medium transition ${k === orderFilter ? 'bg-neon-blue text-white shadow-glow' : 'border border-white/10 text-muted hover:text-white'}">${label} <span class="ml-1 opacity-70">${n}</span></button>`;
+      const tagN = {}; orders.forEach(o => { const g = oMeta(o.id).g; if (g && O_TAGS[g]) tagN[g] = (tagN[g] || 0) + 1; });
+      if (orderFilter.startsWith('tag:') && !tagN[orderFilter.slice(4)]) orderFilter = 'Todos';
+      $('#orderTabs').innerHTML = tabBtn('Cola', '⏳ Por atender', orders.filter(inQueue).length) + Object.entries(counts).map(([k, n]) => tabBtn(k, k, n)).join('') + Object.keys(tagN).map(g => tabBtn('tag:' + g, O_TAGS[g][0] + ' ' + O_TAGS[g][1], tagN[g])).join('');
 
       const q = $('#orderSearch').value.trim().toLowerCase();
-      const list = orders.filter(o => (orderFilter === 'Todos' || o.status === orderFilter) && (!q || (o.id + o.client + o.product + (o.userEmail || '') + (o.phone || '')).toLowerCase().includes(q)));
+      const inF = o => orderFilter === 'Todos' || (orderFilter === 'Cola' ? inQueue(o) : orderFilter.startsWith('tag:') ? oMeta(o.id).g === orderFilter.slice(4) : o.status === orderFilter);
+      let list = orders.filter(o => inF(o) && (!q || (o.id + o.client + o.product + (o.userEmail || '') + (o.phone || '') + (oMeta(o.id).n || '')).toLowerCase().includes(q)));
+      if (orderFilter === 'Cola') list = list.slice().sort((a, b) => a.date - b.date);   // el que más lleva esperando, primero
+      const bulkOn = orderFilter === 'Cola' || orderFilter === 'Pendiente';
       $('#allOrders').innerHTML = list.map(o => `
         <tr>
-          <td class="font-mono text-xs font-semibold text-neon">${esc(o.id)}</td>
+          <td class="font-mono text-xs font-semibold text-neon">${bulkOn && o.status === 'Pendiente' ? `<input type="checkbox" data-bulk="${esc(o.id)}" ${bulkSel.has(o.id) ? 'checked' : ''} aria-label="Seleccionar" class="mr-2 h-4 w-4 accent-[#0066FF]" style="vertical-align:middle" />` : ''}${esc(o.id)}${waitChip(o)}${oChips(o)}</td>
           <td>${clientCell(o)}</td>
           <td class="max-w-[260px] truncate text-neutral-300" title="${esc(o.product)}">${esc(o.product)}</td>
           <td class="text-xs">${METHODS[o.method] || '—'}${o.capture ? `<button data-img="${o.capture === '@' ? '@' + esc(o.id) : o.capture}" class="ml-1.5 rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold text-neon hover:bg-neon/15">capture</button>` : o.captureVia === 'whatsapp' ? '<span class="ml-1.5 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">capture por WA</span>' : ''}</td>
@@ -2580,6 +2606,7 @@ window.NR_FIREBASE = {
         </tr>`).join('');
       $('#orderEmpty').textContent = orders.length ? 'No hay pedidos con ese criterio.' : 'Aún no hay pedidos. Cuando un cliente compre en la tienda, aparecerá aquí con su código.';
       $('#orderEmpty').classList.toggle('hidden', list.length > 0);
+      try { renderBulk(); } catch (_) {}
     }
     $('#orderTabs').addEventListener('click', e => { const b = e.target.closest('[data-ofilter]'); if (b) { orderFilter = b.dataset.ofilter; renderOrders(); } });
     $('#orderSearch').addEventListener('input', renderOrders);
@@ -2676,6 +2703,7 @@ window.NR_FIREBASE = {
             ${field('pin', idx, 'PIN', d.pin, 'Ej. 1234')}
           </div>
           <div class="mt-3">${field('note', idx, 'Nota para el cliente (opcional)', d.note, 'Ej. No cambies la contraseña')}</div>
+          ${accPickHTML(i, idx, d)}
         </div>`;
       }).join('')).join('');
       $('#dvError').classList.add('hidden'); openModal('deliveryModal'); icons();
@@ -2737,7 +2765,7 @@ window.NR_FIREBASE = {
           <button data-setstatus="Rechazado" data-oid="${esc(o.id)}" class="mt-2 block rounded-lg border border-amber-500/40 px-3 py-1.5 text-xs font-semibold text-amber-200 hover:bg-amber-500/25">Aceptar cancelación</button></div>` : '';
       const blHit = blMatch(o), blBox = blHit ? `<div class="mb-4 rounded-2xl border border-rose-500/50 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">⛔ <b>Este cliente está en tu lista negra</b> (${esc(blHit.v)}): ${esc(blHit.note || 'sin motivo')}. Revisa muy bien antes de aprobar.</div>` : '';
       const byBox = o.by ? `<p class="mb-4 rounded-xl border border-white/10 px-4 py-2.5 text-xs text-muted">👤 Último cambio: <b class="text-white">${esc(o.by)}</b>${o.byAt ? ' · ' + new Date(o.byAt).toLocaleString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</p>` : '';
-      $('#omBody').innerHTML = `${byBox}${blBox}${cancelBox}${capBox}${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
+      $('#omBody').innerHTML = `${byBox}${oMetaBox(o)}${blBox}${cancelBox}${capBox}${dupBox}${o.priceAlert ? `<div class="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">⚠️ ${esc(o.priceAlert)}. Revisa este pedido antes de entregarlo.</div>` : ''}
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-2xl border border-white/10 p-4">
             <p class="text-xs uppercase tracking-widest text-muted">Cliente</p>
@@ -2758,12 +2786,11 @@ window.NR_FIREBASE = {
         <div class="mt-4 rounded-2xl border border-white/10 p-4">
           <p class="mb-2 text-xs uppercase tracking-widest text-muted">Productos</p>
           <ul class="space-y-2">${o.items.map(i => `
-            <li class="flex items-start justify-between gap-3 text-sm">
-              <div><p>${esc(i.name)} <span class="text-muted">×${i.qty}</span></p>${i.tickets ? `<p class="mt-1 text-xs">🎟️ ${i.tickets.map(t => `<span class="font-mono font-semibold text-neon">#${esc(t)}</span>`).join(' ')}</p>` : ''}${i.playerId ? `<p class="mt-0.5 text-xs">🎮 ID de jugador: <span class="select-all font-mono font-semibold text-neon">${esc(i.playerId)}</span></p>` : ''}${i.login ? (i.login.mode === 'gift' ? '<p class="mt-1 inline-flex rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">🎁 Quiere recibir una gift card</p>' : `<div class="mt-1.5 rounded-lg border border-amber-400/30 bg-amber-400/5 p-2 text-xs leading-relaxed"><p class="font-semibold text-amber-300">🔐 Recarga interna</p><p>📧 <span class="select-all font-mono">${esc(i.login.email || '')}</span></p>${i.login.pass ? `<p>🔑 <span class="select-all font-mono">${esc(i.login.pass)}</span></p>` : '<p class="text-muted">🔑 Contraseña borrada por seguridad</p>'}</div>`) : ''}
+            <li class="text-sm">
+              <div class="min-w-0"><p class="flex items-start justify-between gap-3 font-medium"><span>${esc(i.name)} <span class="text-muted">×${i.qty}</span></span><span class="shrink-0 font-semibold">${money(i.price * i.qty)}</span></p>${i.tickets ? `<p class="mt-1 text-xs">🎟️ ${i.tickets.map(t => `<span class="font-mono font-semibold text-neon">#${esc(t)}</span>`).join(' ')}</p>` : ''}${i.playerId ? idBox(i.playerId) : ''}${i.login ? (i.login.mode === 'gift' ? '<p class="mt-1 inline-flex rounded-full bg-amber-400/15 px-2 py-0.5 text-[11px] font-semibold text-amber-300 ring-1 ring-amber-400/30">🎁 Quiere recibir una gift card</p>' : `<div class="mt-1.5 rounded-lg border border-amber-400/30 bg-amber-400/5 p-2 text-xs leading-relaxed"><p class="font-semibold text-amber-300">🔐 Recarga interna</p><p>📧 <span class="select-all font-mono">${esc(i.login.email || '')}</span></p>${i.login.pass ? `<p>🔑 <span class="select-all font-mono">${esc(i.login.pass)}</span></p>` : '<p class="text-muted">🔑 Contraseña borrada por seguridad</p>'}</div>`) : ''}
                 ${i.renew ? (() => { const sv = svOfRenew(i); return `<p class="mt-1 inline-flex rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">🔁 Renovación${sv ? ' · vence ' + fmtDay(sv.end) : ''} · mismos datos</p>`; })() : ''}
                 ${isStream(i) ? (i.delivery && i.delivery.length ? i.delivery.map((d, k) => `<div class="mt-1.5 rounded-lg border border-neon/30 bg-neon/5 p-2 text-xs leading-relaxed">${i.delivery.length > 1 ? `<p class="font-semibold text-neon">Cuenta ${k + 1}</p>` : ''}<p>📧 <span class="select-all font-mono">${esc(d.email)}</span></p><p>🔒 <span class="select-all font-mono">${esc(d.pass)}</span></p>${d.profile ? `<p>👤 Perfil: ${esc(d.profile)}${d.pin ? ' · PIN ' + esc(d.pin) : ''}</p>` : d.pin ? `<p>PIN ${esc(d.pin)}</p>` : ''}${d.note ? `<p class="text-muted">📝 ${esc(d.note)}</p>` : ''}</div>`).join('') : o.status === 'Pagado' ? '<p class="mt-1 text-xs text-amber-300">🔑 Falta entregar los datos de acceso.</p>' : '') : ''}
                 ${i.giftValue ? (i.giftCodes && i.giftCodes.length ? i.giftCodes.map(code => { const c = giftByCode(code) || {}; return `<p class="mt-1 text-xs">🎁 <span class="select-all font-mono font-semibold ${c.status === 'Disponible' ? 'text-neon' : 'text-muted line-through'}">${esc(code)}</span> <span class="ml-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ring-1 ${GIFT_STATUS[c.status] || ''}">${esc(c.status || '')}</span></p>`; }).join('') : '<p class="mt-1 text-xs text-amber-300">🎁 El código se generará al aprobar el pago.</p>') : ''}</div>
-              <span class="font-semibold">${money(i.price * i.qty)}</span>
             </li>`).join('')}
           </ul>
         </div>
@@ -3782,6 +3809,7 @@ window.NR_FIREBASE = {
       if (e.key === 'nradmin_settings' || e.key === 'nradmin_products') { syncMethods(); renderSale(); renderOfferExtras(); renderVip(); if (!payDraft) renderPays(); }
       if (['nradmin_products', 'nradmin_waitlist', 'nradmin_orders'].includes(e.key)) { renderStockBoxes(); stockAlerts(); }
       if (['nradmin_priv', 'nradmin_orders', 'nradmin_topups'].includes(e.key)) { renderProfit(); renderClose(); renderQR(); renderBL(); }
+      if (e.key === 'nradmin_priv' && !$('[data-panel="pedidos"]').classList.contains('hidden') && !document.querySelector('#allOrders select:focus')) renderOrders();
       if (e.key === 'nradmin_users' || e.key === 'nradmin_orders') renderVip();
       if (e.key === 'nradmin_orders' || e.key === 'nradmin_products') renderTix();
       if (e.key === 'nradmin_waitlist') store.get('waitlist', []).filter(w => !seenWait.has(w.id)).forEach(w => { seenWait.add(w.id); liveAlert({ emoji: '🔔', title: 'Un cliente espera stock', label: 'Ver', text: `${w.name} quiere ${w.product} cuando haya stock.`, onOpen: () => showView('dashboard') }); });
@@ -4063,6 +4091,411 @@ window.NR_FIREBASE = {
       store.set('feed', { recent, avgMin, avgN: mins.length, top: tp.top, topMonth: tp.topMonth, t: Date.now() });
     }
 
+    /* ================= Herramientas de productos: duplicar · precios en lote · calculadora · programar · cuentas ================= */
+    function schedChip(p) {
+      const now = Date.now(), f = t => new Date(+t).toLocaleString('es', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+      if (+p.showAt > now) return `<span class="mt-0.5 block text-[11px] font-normal" style="color:#7dd3fc">📅 Sale el ${f(p.showAt)}</span>`;
+      if (+p.hideAt > 0 && +p.hideAt <= now) return '<span class="mt-0.5 block text-[11px] font-normal" style="color:#fbbf24">📅 Ya se ocultó por fecha</span>';
+      if (+p.hideAt > now) return `<span class="mt-0.5 block text-[11px] font-normal" style="color:#fbbf24">📅 Se oculta el ${f(p.hideAt)}</span>`;
+      return '';
+    }
+    const r2 = v => +(+v).toFixed(2);
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-dup]'); if (!b || STAFF) return;
+      const src = products.find(x => x.id === b.dataset.dup); if (!src) return;
+      const next = Math.max(0, ...products.map(x => +String(x.id).split('-')[1]).filter(n => !isNaN(n))) + 1;
+      const copy = JSON.parse(JSON.stringify(src)); delete copy.raffle; delete copy.comboOf; delete copy.showAt; delete copy.hideAt;
+      copy.id = 'P-' + String(next).padStart(3, '0'); copy.name = String(src.name) + ' (copia)'; copy.active = false;
+      products.unshift(copy); store.set('products', products); renderProducts(); renderProdTools();
+      toast('📄 Copia creada y oculta. Cámbiale el nombre y el precio, y actívala.'); openProductForm(copy);
+    });
+
+    // ---- Cambiar precios en lote ----
+    var ptDraft = { cat: '', pct: '', round: '' };
+    const ptTargets = () => products.filter(x => !x.raffle && !(+x.giftValue > 0) && (!ptDraft.cat || x.cat === ptDraft.cat));
+    const ptNew = v => { let x = +v * (1 + (+ptDraft.pct || 0) / 100); if (ptDraft.round === '05') x = Math.round(x * 20) / 20; else if (ptDraft.round === '99') x = Math.max(0.99, Math.floor(x) + 0.99); else if (ptDraft.round === '1') x = Math.max(1, Math.round(x)); return Math.max(0.01, r2(x)); };
+    function ptUndo() { try { return JSON.parse(localStorage.getItem('nr_price_undo') || 'null'); } catch (_) { return null; } }
+    function renderPriceTool() {
+      const box = $('#priceToolBox'); if (!box) return;
+      const cats = [...new Set(products.map(x => x.cat).filter(Boolean))], list = ptTargets(), pct = +ptDraft.pct || 0, u = ptUndo();
+      box.innerHTML = `<h3 class="font-semibold">📈 Cambiar precios en lote</h3><p class="mt-0.5 text-xs text-muted">Sube o baja de una vez todos los precios de una categoría (también sus paquetes y el precio en Bs fijo). No toca gift cards ni sorteos.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-3"><label class="block"><span class="mb-1.5 block text-xs text-muted">Categoría</span><select id="ptCat" class="field py-2 text-sm"><option value="">Todas</option>${cats.map(c => `<option ${c === ptDraft.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Porcentaje (ej. 5 sube, -5 baja)</span><input id="ptPct" type="number" step="0.5" min="-90" max="500" inputmode="decimal" value="${esc(ptDraft.pct)}" placeholder="5" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Redondear</span><select id="ptRound" class="field py-2 text-sm">${[['', 'No redondear'], ['05', 'A 5 centavos ($1.25)'], ['99', 'Terminar en .99'], ['1', 'Al dólar entero']].map(([v, l]) => `<option value="${v}" ${v === ptDraft.round ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
+        ${pct ? `<ul class="mt-3 space-y-1 text-sm">${list.slice(0, 5).map(x => `<li class="flex justify-between gap-3 rounded-lg border border-white/5 px-3 py-2"><span class="min-w-0 truncate">${esc(x.name)}</span><span class="shrink-0">${money(x.price)} → <b style="color:${pct > 0 ? '#34d399' : '#fbbf24'}">${money(ptNew(x.price))}</b></span></li>`).join('')}${list.length > 5 ? `<li class="px-3 text-xs text-muted">y ${list.length - 5} más…</li>` : ''}</ul>` : ''}
+        <div class="mt-4 flex flex-wrap gap-2"><button type="button" data-ptapply class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold" ${pct && list.length ? '' : 'disabled style="opacity:.5"'}>Aplicar a ${list.length} producto${list.length === 1 ? '' : 's'}</button>
+          ${u ? `<button type="button" data-ptundo class="rounded-xl border border-amber-500/40 px-4 py-2.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/10">↩ Deshacer el último cambio (${new Date(u.t).toLocaleString('es', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })})</button>` : ''}</div>`;
+    }
+    // ---- Calculadora de precio ----
+    var calc = { cost: '', margin: '30', fee: '0' };
+    function calcOut() {
+      const c = +calc.cost || 0, m = +calc.margin || 0, f = Math.min(90, Math.max(0, +calc.fee || 0)); if (!(c > 0)) return '';
+      const price = c * (1 + m / 100) / (1 - f / 100), feeAmt = price * f / 100, gain = price - feeAmt - c;
+      return `<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">${[['Véndelo a', money(price), '#00e5ff'], ['Ganas por venta', money(gain), '#34d399'], ['Se va en comisión', money(feeAmt), '']].map(([l, v, col]) => `<div class="rounded-xl border border-white/5 bg-white/[.03] p-3"><p class="text-xs text-muted">${l}</p><p class="mt-1 font-display text-xl font-bold" ${col ? `style="color:${col}"` : ''}>${v}</p></div>`).join('')}</div>`;
+    }
+    function renderCalc() {
+      const box = $('#calcBox'); if (!box) return;
+      box.innerHTML = `<h3 class="font-semibold">🧮 Calculadora de precio</h3><p class="mt-0.5 text-xs text-muted">Pon lo que te cuesta y cuánto quieres ganar. No guarda ni cambia nada: es solo para sacar la cuenta.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-3"><label class="block"><span class="mb-1.5 block text-xs text-muted">Te cuesta ($)</span><input data-calc="cost" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(calc.cost)}" placeholder="3.00" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Quieres ganar (%)</span><input data-calc="margin" type="number" min="0" step="1" inputmode="decimal" value="${esc(calc.margin)}" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Comisión del pago (%)</span><input data-calc="fee" type="number" min="0" max="90" step="0.1" inputmode="decimal" value="${esc(calc.fee)}" class="field py-2 text-sm" /></label></div><div id="calcOut">${calcOut()}</div>`;
+    }
+    // ---- Programar productos ----
+    var schDraft = { id: '', show: '', hide: '' };
+    const toLocalDT2 = t => { const d = new Date(+t - new Date(+t).getTimezoneOffset() * 6e4); return d.toISOString().slice(0, 16); };
+    function renderSched() {
+      const box = $('#schedBox'); if (!box) return;
+      const sched = products.filter(x => +x.showAt > 0 || +x.hideAt > 0), opts = products.filter(x => !x.raffle);
+      box.innerHTML = `<h3 class="font-semibold">📅 Programar productos</h3><p class="mt-0.5 text-xs text-muted">Haz que un producto aparezca o se oculte solo en una fecha. Tiene que estar en "Activo" para que salga cuando le toque. Los clientes lo ven al abrir o recargar la tienda.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-3"><label class="block"><span class="mb-1.5 block text-xs text-muted">Producto</span><select id="schProd" class="field py-2 text-sm"><option value="">Elige…</option>${opts.map(x => `<option value="${esc(x.id)}" ${x.id === schDraft.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Aparece el (opcional)</span><input id="schShow" type="datetime-local" value="${esc(schDraft.show)}" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Se oculta el (opcional)</span><input id="schHide" type="datetime-local" value="${esc(schDraft.hide)}" class="field py-2 text-sm" /></label></div>
+        <button type="button" data-schsave class="btn-primary mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar programación</button>
+        <ul class="mt-4 space-y-1.5 text-sm">${sched.map(x => `<li class="flex items-center justify-between gap-3 rounded-lg border border-white/5 px-3 py-2"><span class="min-w-0"><span class="block truncate font-medium">${esc(x.name)}</span>${schedChip(x)}${x.active ? '' : '<span class="block text-[11px] text-rose-300">Está en Oculto: actívalo para que salga</span>'}</span><button type="button" data-schdel="${esc(x.id)}" class="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-muted hover:text-white">Quitar</button></li>`).join('') || '<li class="text-muted">Ningún producto programado.</li>'}</ul>`;
+    }
+    // ---- Cuentas de streaming disponibles ----
+    const accounts = () => (Array.isArray(priv().accounts) ? priv().accounts : []).filter(a => a && a.id);
+    const baseId = id => String(id || '').split('~')[0];
+    const accFree = pid => accounts().filter(a => !a.used && a.prod === baseId(pid));
+    var accDraft = { prod: '', email: '', pass: '', profile: '', pin: '', note: '' }, accShow = false, accPending = [];
+    function accPickHTML(i, idx, d) {
+      if (!accPickHTML.q) { accPending = []; accPickHTML.q = true; Promise.resolve().then(() => { accPickHTML.q = false; }); }   // cada vez que se abre la entrega se empieza de cero
+      if (STAFF || (d && d.email)) return '';
+      const free = accFree(i.id); if (!free.length) return '';
+      return `<button type="button" data-accuse="${esc(idx)}" data-accprod="${esc(baseId(i.id))}" class="mt-3 w-full rounded-xl border border-neon/40 py-2.5 text-xs font-semibold text-neon hover:bg-neon/10">🗝️ Usar una cuenta guardada (${free.length} disponible${free.length === 1 ? '' : 's'})</button>`;
+    }
+    function renderAcc() {
+      const box = $('#accBox'); if (!box) return;
+      const list = accounts(), prods = products.filter(x => !x.raffle && !(+x.giftValue > 0)), by = new Map();
+      list.forEach(a => { const k = a.prod; (by.get(k) || by.set(k, []).get(k)).push(a); });
+      const inp = (k, l, ph, type) => `<label class="block"><span class="mb-1.5 block text-xs text-muted">${l}</span><input data-acc="${k}" ${type ? `type="${type}"` : ''} value="${esc(accDraft[k])}" placeholder="${ph}" autocomplete="off" autocapitalize="none" spellcheck="false" class="field py-2 text-sm" /></label>`;
+      box.innerHTML = `<div class="flex flex-wrap items-center justify-between gap-3"><div><h3 class="font-semibold">🗝️ Cuentas disponibles</h3><p class="mt-0.5 text-xs text-muted">Guarda aquí las cuentas o perfiles que tienes listos. Al entregar un pedido de ese producto te sale un botón para usar una, sin escribirla otra vez. Solo las ves tú.</p></div><button type="button" data-accshow class="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:border-neon/40">${accShow ? 'Ocultar claves' : 'Ver claves'}</button></div>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2"><label class="block sm:col-span-2"><span class="mb-1.5 block text-xs text-muted">Producto</span><select data-acc="prod" class="field py-2 text-sm"><option value="">Elige…</option>${prods.map(x => `<option value="${esc(x.id)}" ${x.id === accDraft.prod ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+          ${inp('email', 'Correo / usuario', 'cuenta@correo.com')}${inp('pass', 'Contraseña', 'clave')}${inp('profile', 'Perfil / pantalla (opcional)', 'Perfil 3')}${inp('pin', 'PIN (opcional)', '1234')}<div class="sm:col-span-2">${inp('note', 'Nota para el cliente (opcional)', 'No cambies la contraseña')}</div></div>
+        <button type="button" data-accadd class="btn-primary mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar cuenta</button>
+        <div class="mt-5 space-y-4">${[...by.entries()].map(([pid, arr]) => { const pr = products.find(x => x.id === pid), free = arr.filter(a => !a.used).length; return `<div><p class="text-sm font-semibold">${esc(pr ? pr.name : 'Producto borrado')} <span class="ml-1 rounded-full px-2 py-0.5 text-[11px] font-semibold" style="background:${free ? 'rgba(16,185,129,.15)' : 'rgba(251,113,133,.15)'};color:${free ? '#6ee7b7' : '#fda4af'}">${free} disponible${free === 1 ? '' : 's'}</span></p>
+          <ul class="mt-2 space-y-1.5 text-xs">${arr.slice().sort((a, b) => !!a.used - !!b.used).map(a => `<li class="flex items-center justify-between gap-3 rounded-lg border border-white/5 px-3 py-2 ${a.used ? 'opacity-60' : ''}"><span class="min-w-0"><span class="block truncate font-mono">${esc(a.email)}</span><span class="block truncate text-muted">🔒 ${accShow ? esc(a.pass) : '••••••'}${a.profile ? ' · ' + esc(a.profile) : ''}${a.pin ? ' · PIN ' + (accShow ? esc(a.pin) : '••') : ''}</span>${a.used ? `<span class="block" style="color:#fbbf24">Entregada en ${esc(a.used)}</span>` : ''}</span>
+            <span class="flex shrink-0 gap-1">${a.used ? `<button type="button" data-accfree="${esc(a.id)}" class="rounded-lg border border-white/10 px-2.5 py-1.5 text-muted hover:text-white" title="Volver a dejarla disponible">Liberar</button>` : ''}<button type="button" data-accdel="${esc(a.id)}" class="rounded-lg border border-white/10 px-2.5 py-1.5 text-muted hover:text-rose-300" title="Borrar">✕</button></span></li>`).join('')}</ul></div>`; }).join('') || '<p class="text-sm text-muted">Todavía no has guardado cuentas.</p>'}</div>`;
+    }
+    function renderProdTools() { if (STAFF) return; try { renderPriceTool(); renderCalc(); renderSched(); renderAcc(); } catch (er) { console.warn(er); } }
+    document.addEventListener('input', e => {
+      const t = e.target, d = t.dataset || {};
+      if (t.id === 'ptPct') { ptDraft.pct = t.value; clearTimeout(renderPriceTool.tm); renderPriceTool.tm = setTimeout(() => { const pos = t.value.length; renderPriceTool(); const n = $('#ptPct'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } }, 500); }
+      if (d.calc) { calc[d.calc] = t.value; const o = $('#calcOut'); if (o) o.innerHTML = calcOut(); }
+      if (d.acc && d.acc !== 'prod') accDraft[d.acc] = t.value;
+      if (t.id === 'schShow') schDraft.show = t.value; if (t.id === 'schHide') schDraft.hide = t.value;
+    });
+    document.addEventListener('change', e => {
+      const t = e.target;
+      if (t.id === 'ptCat') { ptDraft.cat = t.value; renderPriceTool(); }
+      if (t.id === 'ptRound') { ptDraft.round = t.value; renderPriceTool(); }
+      if (t.dataset && t.dataset.acc === 'prod') accDraft.prod = t.value;
+      if (t.id === 'schProd') { schDraft.id = t.value; const x = products.find(y => y.id === t.value); schDraft.show = x && +x.showAt > 0 ? toLocalDT2(x.showAt) : ''; schDraft.hide = x && +x.hideAt > 0 ? toLocalDT2(x.hideAt) : ''; renderSched(); }
+      if (t.id === 'schShow') schDraft.show = t.value; if (t.id === 'schHide') schDraft.hide = t.value;
+    });
+    document.addEventListener('click', e => {
+      const t = e.target; if (STAFF) return;
+      if (t.closest('[data-ptapply]')) {
+        const list = ptTargets(), pct = +ptDraft.pct || 0; if (!pct || !list.length) return;
+        if (pct < -90 || pct > 500) return toast('El porcentaje debe estar entre -90 y 500', 'warn');
+        if (!confirm(`¿${pct > 0 ? 'Subir' : 'Bajar'} ${Math.abs(pct)}% el precio de ${list.length} producto${list.length === 1 ? '' : 's'}${ptDraft.cat ? ' de ' + ptDraft.cat : ''}?\n\nPodrás deshacerlo con el botón "Deshacer".`)) return;
+        const undo = { t: Date.now(), items: list.map(x => ({ id: x.id, price: x.price, old: x.old ?? null, priceBs: x.priceBs ?? null, packages: x.packages ? JSON.parse(JSON.stringify(x.packages)) : null })) };
+        try { localStorage.setItem('nr_price_undo', JSON.stringify(undo)); } catch (_) {}
+        const k = 1 + pct / 100;
+        list.forEach(x => { x.price = ptNew(x.price); if (+x.old > 0) x.old = r2(+x.old * k); if (+x.priceBs > 0) x.priceBs = r2(+x.priceBs * k);
+          if (Array.isArray(x.packages)) x.packages.forEach(q => { if (!q) return; if (+q.price > 0) q.price = ptNew(q.price); if (+q.priceBs > 0) q.priceBs = r2(+q.priceBs * k); if (+q.old > 0) q.old = r2(+q.old * k); }); });
+        store.set('products', products); ptDraft.pct = ''; renderProducts(); renderPriceTool(); toast(`📈 Precios actualizados en ${list.length} producto${list.length === 1 ? '' : 's'}`);
+      }
+      if (t.closest('[data-ptundo]')) {
+        const u = ptUndo(); if (!u || !confirm('¿Devolver esos productos al precio que tenían antes del último cambio en lote?')) return;
+        let n = 0; u.items.forEach(it => { const x = products.find(y => y.id === it.id); if (!x) return; x.price = it.price; x.old = it.old; if (it.priceBs != null) x.priceBs = it.priceBs; if (it.packages) x.packages = it.packages; n++; });
+        try { localStorage.removeItem('nr_price_undo'); } catch (_) {}
+        store.set('products', products); renderProducts(); renderPriceTool(); toast(`↩ Precios devueltos en ${n} producto${n === 1 ? '' : 's'}`);
+      }
+      if (t.closest('[data-schsave]')) {
+        const x = products.find(y => y.id === schDraft.id); if (!x) return toast('Elige un producto', 'warn');
+        const sh = schDraft.show ? new Date(schDraft.show).getTime() || 0 : 0, hd = schDraft.hide ? new Date(schDraft.hide).getTime() || 0 : 0;
+        if (!sh && !hd) return toast('Pon al menos una fecha', 'warn');
+        if (sh && hd && hd <= sh) return toast('La fecha de ocultar debe ser después de la de aparecer', 'warn');
+        if (hd && hd <= Date.now()) return toast('La fecha de ocultar ya pasó', 'warn');
+        if (sh) x.showAt = sh; else delete x.showAt; if (hd) x.hideAt = hd; else delete x.hideAt;
+        store.set('products', products); schDraft = { id: '', show: '', hide: '' }; renderProducts(); renderSched(); toast('📅 Programación guardada' + (x.active ? '' : '. Ojo: el producto está en Oculto, actívalo.'), x.active ? 'ok' : 'warn');
+      }
+      const sd = t.closest('[data-schdel]'); if (sd) { const x = products.find(y => y.id === sd.dataset.schdel); if (x) { delete x.showAt; delete x.hideAt; store.set('products', products); renderProducts(); renderSched(); toast('Programación quitada'); } }
+      if (t.closest('[data-accshow]')) { accShow = !accShow; renderAcc(); }
+      if (t.closest('[data-accadd]')) {
+        const a = { prod: accDraft.prod, email: accDraft.email.trim(), pass: accDraft.pass.trim(), profile: accDraft.profile.trim(), pin: accDraft.pin.trim(), note: accDraft.note.trim() };
+        if (!a.prod) return toast('Elige el producto', 'warn'); if (!a.email || !a.pass) return toast('Faltan el correo y la contraseña', 'warn');
+        if (accounts().some(y => !y.used && y.prod === a.prod && y.email === a.email && (y.profile || '') === a.profile)) return toast('Esa cuenta (o perfil) ya está guardada', 'warn');
+        savePriv({ accounts: [...accounts(), { id: 'A' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t: Date.now(), used: null, ...a }].slice(-400) });
+        accDraft = { ...accDraft, profile: '', pin: '' }; renderAcc(); toast('🗝️ Cuenta guardada. Para otro perfil de la misma cuenta, cambia solo el perfil y el PIN.');
+      }
+      const af = t.closest('[data-accfree]'); if (af) { savePriv({ accounts: accounts().map(a => a.id === af.dataset.accfree ? { ...a, used: null } : a) }); renderAcc(); toast('Cuenta disponible otra vez'); }
+      const ad = t.closest('[data-accdel]'); if (ad && confirm('¿Borrar esta cuenta guardada?')) { savePriv({ accounts: accounts().filter(a => a.id !== ad.dataset.accdel) }); renderAcc(); toast('Cuenta borrada'); }
+      const use = t.closest('[data-accuse]');
+      if (use) {
+        const taken = accPending.map(x => x.id), a = accFree(use.dataset.accprod).find(y => !taken.includes(y.id)); if (!a) return toast('Ya no quedan cuentas guardadas de este producto', 'warn');
+        const idx = use.dataset.accuse; ['email', 'pass', 'profile', 'pin', 'note'].forEach(k => { const el = [...document.querySelectorAll('#dvBody [data-dv]')].find(n => n.dataset.dv === idx && n.dataset.k === k); if (el) el.value = a[k] || ''; });
+        accPending.push({ id: a.id, order: dv.id }); use.textContent = '✓ Cuenta puesta: ' + a.email; use.disabled = true;
+      }
+    });
+    // al guardar la entrega, marca como usadas las cuentas que de verdad quedaron en el pedido
+    $('#dvSave').addEventListener('click', () => {
+      const pend = accPending.slice(); if (!pend.length) return;
+      setTimeout(() => {
+        try {
+          const list = accounts(); let ch = false;
+          pend.forEach(pd => { const a = list.find(x => x.id === pd.id), o = orders.find(x => x.id === pd.order); if (!a || !o || a.used) return;
+            if ((o.items || []).some(i => (i.delivery || []).some(d => d.email === a.email && d.pass === a.pass && (d.profile || '') === (a.profile || '')))) { a.used = o.id; ch = true; } });
+          if (ch) { savePriv({ accounts: list }); accPending = accPending.filter(x => !pend.some(y => y.id === x.id)); renderAcc(); }
+        } catch (er) { console.warn(er); }
+      }, 400);
+    }, true);
+    window.addEventListener('storage', e => {
+      if (!['nradmin_products', 'nradmin_priv'].includes(e.key) || !$('[data-panel="productos"]') || $('[data-panel="productos"]').classList.contains('hidden')) return;
+      const a = document.activeElement; if (a && a.closest && (a.closest('#priceToolBox') || a.closest('#calcBox') || a.closest('#schedBox') || a.closest('#accBox'))) return;
+      renderProdTools();
+    });
+
+    /* ================= Cola de trabajo · Etiquetas y notas privadas · Aprobar varios · Avisos de espera ================= */
+    var O_TAGS = { urgente: ['🔥', 'Urgente', '#fb7185'], problema: ['⚠️', 'Con problema', '#fbbf24'], espera: ['⏳', 'Esperando al cliente', '#7dd3fc'] };
+    var bulkSel = new Set(), pendWarned = new Set();
+    function inQueue(o) { return o.status === 'Pendiente' || o.status === 'Pagado'; }
+    function oMeta(id) { try { const m = priv().onotes; return (m && m[id]) || {}; } catch (_) { return {}; } }
+    function cNote(email) { try { const m = priv().cnotes; return (m && m[String(email || '').toLowerCase()]) || ''; } catch (_) { return ''; } }
+    function pendMin() { try { const v = priv().pendMin; return v === undefined || v === null || v === '' ? 30 : Math.max(0, +v || 0); } catch (_) { return 30; } }
+    function waitTxt(ms) { const m = Math.max(0, Math.floor(ms / 6e4)); return m < 60 ? m + ' min' : m < 2880 ? Math.floor(m / 60) + ' h' : Math.floor(m / 1440) + ' d'; }
+    function waitChip(o) {
+      if (!inQueue(o)) return '';
+      const ms = Date.now() - (+o.date || 0), late = o.status === 'Pendiente' && pendMin() > 0 && ms > pendMin() * 6e4;
+      return `<span class="mt-1 block text-[11px] font-semibold" style="color:${late ? '#fb7185' : '#8fa3c8'};white-space:nowrap;font-family:inherit">${late ? '🔴' : '⏱'} hace ${waitTxt(ms)}</span>`;
+    }
+    function oChips(o) {
+      const m = oMeta(o.id), t = O_TAGS[m.g], cn = cNote(o.userEmail);
+      return (t ? `<span class="mt-1 block text-[10px] font-semibold" style="color:${t[2]};white-space:nowrap;font-family:inherit">${t[0]} ${t[1]}</span>` : '') + (m.n || cn ? `<span class="mt-0.5 block text-[10px] text-muted" style="font-family:inherit;white-space:nowrap" title="${esc((m.n || '') + (cn ? ' · Cliente: ' + cn : ''))}">📝 nota</span>` : '');
+    }
+    function oMetaBox(o) {
+      if (STAFF) return '';
+      const m = oMeta(o.id), cn = cNote(o.userEmail);
+      return `<div class="mb-4 rounded-2xl border border-white/10 p-4" style="background:rgba(255,255,255,.02)"><p class="mb-2 text-xs uppercase tracking-widest text-muted">🔒 Solo para ti · el cliente no lo ve</p>
+        <div class="flex flex-wrap gap-2">${Object.entries(O_TAGS).map(([k, t]) => `<button type="button" data-otag="${k}" data-oid="${esc(o.id)}" class="rounded-full border px-3 py-1.5 text-xs font-semibold transition" style="border-color:${m.g === k ? t[2] : 'rgba(255,255,255,.12)'};color:${m.g === k ? t[2] : '#9ca3af'};background:${m.g === k ? 'rgba(255,255,255,.06)' : 'transparent'}">${t[0]} ${t[1]}</button>`).join('')}</div>
+        <label class="mt-3 block"><span class="mb-1.5 block text-xs text-muted">Nota de este pedido</span><textarea id="omNote" rows="2" maxlength="300" placeholder="Ej. Dijo que paga en la tarde" class="field resize-y text-sm">${esc(m.n || '')}</textarea></label>
+        ${o.userEmail ? `<label class="mt-3 block"><span class="mb-1.5 block text-xs text-muted">Nota del cliente (sale en todos sus pedidos)</span><textarea id="omCNote" rows="2" maxlength="300" placeholder="Ej. Cliente fijo, siempre paga bien" class="field resize-y text-sm">${esc(cn)}</textarea></label>` : ''}
+        <button type="button" data-ometasave="${esc(o.id)}" class="mt-3 rounded-xl border border-neon/40 px-4 py-2 text-sm font-semibold text-neon hover:bg-neon/10">Guardar notas</button></div>`;
+    }
+    function saveOMeta(id, tag) {
+      const o = orders.find(x => x.id === id); if (!o || STAFF) return;
+      const on = { ...(priv().onotes || {}) }, cn = { ...(priv().cnotes || {}) }, cur = on[id] || {};
+      const n = $('#omNote') ? $('#omNote').value.trim().slice(0, 300) : (cur.n || '');
+      const g = tag === undefined ? (cur.g || '') : (cur.g === tag ? '' : tag);
+      if (n || g) on[id] = { ...(n ? { n } : {}), ...(g ? { g } : {}) }; else delete on[id];
+      const alive = new Set(orders.map(x => x.id)); Object.keys(on).forEach(k => { if (!alive.has(k)) delete on[k]; });   // no guardar notas de pedidos ya borrados
+      const em = String(o.userEmail || '').toLowerCase();
+      if (em && $('#omCNote')) { const v = $('#omCNote').value.trim().slice(0, 300); if (v) cn[em] = v; else delete cn[em]; }
+      savePriv({ onotes: on, cnotes: cn }); renderOrders(); openOrder(id);
+    }
+    function renderBulk() {
+      const bar = $('#bulkBar'); if (!bar) return;
+      const pend = orders.filter(o => o.status === 'Pendiente'); [...bulkSel].forEach(id => { if (!pend.some(o => o.id === id)) bulkSel.delete(id); });
+      const show = (orderFilter === 'Cola' || orderFilter === 'Pendiente') && pend.length > 0;
+      bar.className = show ? 'flex flex-wrap items-center gap-2 border-t border-white/5 px-5 py-3 text-sm' : 'hidden';
+      bar.innerHTML = show ? `<span class="text-muted">${bulkSel.size ? `<b class="text-white">${bulkSel.size}</b> seleccionado${bulkSel.size === 1 ? '' : 's'}` : 'Marca varios pedidos pendientes para aprobarlos de una vez'}</span>
+        <button type="button" data-bulkall class="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:border-neon/40">${bulkSel.size === pend.length ? 'Quitar todos' : 'Marcar todos (' + pend.length + ')'}</button>
+        ${bulkSel.size ? `<button type="button" data-bulkok class="btn-primary rounded-lg px-3 py-1.5 text-xs font-semibold">✓ Aprobar pago de ${bulkSel.size}</button>` : ''}` : '';
+    }
+    document.addEventListener('change', e => { const c = e.target.closest('[data-bulk]'); if (!c) return; c.checked ? bulkSel.add(c.dataset.bulk) : bulkSel.delete(c.dataset.bulk); renderBulk(); });
+    document.addEventListener('click', e => {
+      const t = e.target;
+      if (t.closest('[data-bulkall]')) { const pend = orders.filter(o => o.status === 'Pendiente'); if (bulkSel.size === pend.length) bulkSel.clear(); else pend.forEach(o => bulkSel.add(o.id)); renderOrders(); }
+      if (t.closest('[data-bulkok]')) {
+        const list = orders.filter(o => bulkSel.has(o.id) && o.status === 'Pendiente'); if (!list.length) return;
+        const tot = list.reduce((a, o) => a + (+o.amount || 0), 0);
+        if (!confirm(`¿Aprobar el pago de ${list.length} pedido${list.length === 1 ? '' : 's'} (${money(tot)})?\n\nHazlo solo si ya revisaste que cada pago llegó.`)) return;
+        list.forEach(o => { try { setOrderStatus(o, 'Pagado'); } catch (er) { console.warn(er); } });
+        bulkSel.clear(); renderOrders(); toast(`✓ ${list.length} pago${list.length === 1 ? '' : 's'} aprobado${list.length === 1 ? '' : 's'}`);
+      }
+      const tg = t.closest('[data-otag]'); if (tg) saveOMeta(tg.dataset.oid, tg.dataset.otag);
+      const sv = t.closest('[data-ometasave]'); if (sv) { saveOMeta(sv.dataset.ometasave); toast('📝 Notas guardadas'); }
+      if (t.closest('[data-pendsave]')) { const v = Math.max(0, Math.min(1440, Math.floor(+($('#pendMinIn').value) || 0))); savePriv({ pendMin: v }); renderPendBox(); renderOrders(); toast(v ? `⏱️ Te aviso si un pago lleva más de ${v} min sin revisar` : 'Aviso de espera apagado'); }
+    });
+    function renderPendBox() {
+      const box = $('#pendBox'); if (!box) return;
+      box.innerHTML = `<h3 class="font-semibold">⏱️ Aviso de pagos sin revisar</h3><p class="mt-0.5 text-xs text-muted">Si un pedido pendiente pasa de este tiempo, el panel te avisa con sonido y lo marca en rojo en Pedidos → "Por atender". Pon 0 para apagarlo.</p>
+        <div class="mt-3 flex flex-wrap items-end gap-2"><label class="block"><span class="mb-1.5 block text-xs text-muted">Minutos</span><input id="pendMinIn" type="number" min="0" max="1440" step="5" inputmode="numeric" value="${pendMin()}" class="field w-32 py-2 text-sm" /></label><button type="button" data-pendsave class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar</button></div>`;
+    }
+    function checkPendingAlerts() {
+      const lim = pendMin(); if (!lim || (STAFF && !can('orders'))) return;
+      const late = orders.filter(o => o.status === 'Pendiente' && Date.now() - (+o.date || 0) > lim * 6e4), fresh = late.filter(o => !pendWarned.has(o.id));
+      [...pendWarned].forEach(id => { if (!late.some(o => o.id === id)) pendWarned.delete(id); });
+      if (!fresh.length) return;
+      fresh.forEach(o => pendWarned.add(o.id));
+      liveAlert({ emoji: '🔴', title: fresh.length === 1 ? 'Pago sin revisar' : fresh.length + ' pagos sin revisar', label: 'Ver cola', text: fresh.length === 1 ? `${fresh[0].id} de ${fresh[0].client || ''} lleva ${waitTxt(Date.now() - fresh[0].date)} esperando.` : `Llevan más de ${lim} min esperando. El más viejo: ${waitTxt(Date.now() - Math.min(...fresh.map(o => +o.date)))}.`, onOpen: () => { orderFilter = 'Cola'; showView('pedidos'); renderOrders(); } });
+    }
+    setTimeout(() => { try { checkPendingAlerts(); } catch (_) {} }, 6000);
+    setInterval(() => { try { if (!$('#appView').classList.contains('hidden')) { checkPendingAlerts(); if ($('[data-panel="pedidos"]') && !$('[data-panel="pedidos"]').classList.contains('hidden') && !document.querySelector('#allOrders select:focus')) renderOrders(); } } catch (_) {} }, 60000);
+
+    /* ---------- Comprobante en grande: acercar y datos del pago ---------- */
+    function imgOpenFor(id) {
+      const img = $('#imgFull'), m = $('#imgModal'), cap = $('#imgCap');
+      img.style.cssText = 'cursor:zoom-in'; m.style.overflow = ''; m.style.alignItems = ''; m.style.justifyContent = ''; $('#imgHint').style.display = '';
+      const o = id ? (orders.find(x => x.id === id) || (store.get('topups', []) || []).find(x => x.id === id)) : null;
+      if (!o) { cap.className = 'hidden'; cap.innerHTML = ''; return; }
+      const bs = o.amountBs ? String(o.amountBs).replace(/^Bs\.?\s*/i, '') : '';
+      cap.className = ''; cap.innerHTML = `<div class="flex items-center justify-between gap-3"><div class="min-w-0"><p class="truncate"><b>${esc(o.id)}</b> · ${esc(o.client || '')}</p><p style="color:#9fb3d9">Debe decir: <b class="text-white">${money(o.amount)}</b>${bs ? ' · <b class="text-white">Bs ' + esc(bs) + '</b>' : ''}</p>${o.ref ? `<p style="color:#9fb3d9">Referencia: <b class="font-mono text-white" style="user-select:all">${esc(o.ref)}</b></p>` : ''}</div>${o.ref ? cpBtn(String(o.ref), 'Referencia') : ''}</div>`;
+    }
+    $('#imgFull').addEventListener('click', e => {
+      const img = e.currentTarget, m = $('#imgModal'), big = img.dataset.big === '1';
+      if (big) { img.dataset.big = ''; img.style.cssText = 'cursor:zoom-in'; m.style.overflow = ''; m.style.alignItems = ''; m.style.justifyContent = ''; }
+      else { img.dataset.big = '1'; img.style.cssText = 'cursor:zoom-out;max-width:none;max-height:none;width:230%;flex-shrink:0;border-radius:8px'; m.style.overflow = 'auto'; m.style.alignItems = 'flex-start'; m.style.justifyContent = 'flex-start'; $('#imgHint').style.display = 'none'; }
+    });
+
+    /* ================= Meta del mes · Gastos · Ganancia por producto ================= */
+    const expenses = () => (Array.isArray(priv().expenses) ? priv().expenses : []).filter(x => x && +x.amount > 0);
+    var expDraft = { label: '', amount: '', day: '' }, goalEdit = false;
+    function finMonth() {
+      const m0 = monthStart(0), valid = orders.filter(o => validOrder(o) && o.date >= m0);
+      const sales = valid.reduce((a, o) => a + (+o.amount || 0), 0);
+      const known = valid.map(o => ({ o, c: orderCost(o) })).filter(x => x.c != null);
+      const gross = known.reduce((a, x) => a + (+x.o.amount || 0) - x.c, 0);
+      const exp = expenses().filter(x => +x.t >= m0), expT = exp.reduce((a, x) => a + (+x.amount || 0), 0);
+      return { valid, sales, known, gross, exp, expT, missing: valid.length - known.length };
+    }
+    function renderGoal() {
+      const box = $('#goalBox'); if (!box) return;
+      const goal = +priv().goal || 0, f = finMonth(), now = new Date(), days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(), day = now.getDate();
+      const pct = goal ? Math.min(100, f.sales / goal * 100) : 0, proj = day ? f.sales / day * days : 0, left = Math.max(0, goal - f.sales), perDay = days - day > 0 ? left / (days - day) : left;
+      box.innerHTML = `<div class="flex flex-wrap items-center justify-between gap-3"><div><h3 class="font-semibold">🎯 Meta del mes</h3><p class="text-xs text-muted">Cuánto quieres vender este mes y cómo vas.</p></div><button type="button" data-goaledit class="shrink-0 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-neutral-200 hover:border-neon/40">${goal ? 'Cambiar meta' : 'Poner meta'}</button></div>
+        ${goalEdit ? `<div class="mt-3 flex flex-wrap items-end gap-2"><label class="block"><span class="mb-1.5 block text-xs text-muted">Meta de ventas del mes ($)</span><input id="goalIn" type="number" min="0" step="1" inputmode="decimal" value="${goal || ''}" placeholder="Ej. 300" class="field w-40 py-2 text-sm" /></label><button type="button" data-goalsave class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar</button></div>` : ''}
+        ${goal ? `<div class="mt-4"><div class="flex items-end justify-between gap-3"><p class="font-display text-2xl font-bold">${money(f.sales)} <span class="text-sm font-normal text-muted">de ${money(goal)}</span></p><p class="font-display text-xl font-bold" style="color:${pct >= 100 ? '#34d399' : '#00e5ff'}">${pct.toFixed(0)}%</p></div>
+          <div class="mt-2 overflow-hidden rounded-full" style="height:12px;background:rgba(255,255,255,.08)"><div style="height:100%;width:${pct}%;border-radius:999px;background:${pct >= 100 ? 'linear-gradient(90deg,#10b981,#34d399)' : 'linear-gradient(90deg,#0066FF,#00e5ff)'}"></div></div>
+          <p class="mt-2 text-xs text-muted">${pct >= 100 ? '🎉 ¡Meta cumplida! Llevas ' + money(f.sales - goal) + ' por encima.' : `Te faltan <b class="text-white">${money(left)}</b> · necesitas vender unos <b class="text-white">${money(perDay)}</b> por día · a este ritmo cerrarías el mes en <b class="text-white">${money(proj)}</b>.`}</p></div>` : (goalEdit ? '' : '<p class="mt-3 text-sm text-muted">Todavía no has puesto una meta.</p>')}`;
+    }
+    function renderExp() {
+      const box = $('#expBox'); if (!box) return;
+      const f = finMonth(), net = f.gross - f.expT;
+      const kpi = (l, v, n, col) => `<div class="rounded-xl border border-white/5 bg-white/[.03] p-3"><p class="text-xs text-muted">${l}</p><p class="mt-1 font-display text-xl font-bold" ${col ? `style="color:${col}"` : ''}>${v}</p>${n ? `<p class="text-[11px] text-muted">${n}</p>` : ''}</div>`;
+      box.innerHTML = `<h3 class="font-semibold">🧮 Gastos y ganancia real del mes</h3><p class="mt-0.5 text-xs text-muted">Anota lo que gastas (publicidad, comisiones, internet…). Solo lo ves tú.</p>
+        <div class="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-4">${kpi('Ventas del mes', money(f.sales))}${kpi('Ganancia de productos', money(f.gross), f.missing ? `Faltan costos en ${f.missing} pedido${f.missing === 1 ? '' : 's'}` : 'Ventas menos lo que te cuestan')}${kpi('Gastos del mes', money(f.expT))}${kpi('Te queda limpio', money(net), 'Ganancia menos gastos', net >= 0 ? '#34d399' : '#fb7185')}</div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-4"><label class="block sm:col-span-2"><span class="mb-1.5 block text-xs text-muted">¿En qué gastaste?</span><input id="expLabel" maxlength="60" value="${esc(expDraft.label)}" placeholder="Ej. Publicidad en Instagram" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Monto ($)</span><input id="expAmount" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(expDraft.amount)}" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Día</span><input id="expDay" type="date" value="${esc(expDraft.day || dayKey(Date.now()))}" class="field py-2 text-sm" /></label></div>
+        <button type="button" data-expadd class="btn-primary mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold">Agregar gasto</button>
+        <ul class="mt-4 space-y-1.5 text-sm">${f.exp.slice().sort((a, b) => b.t - a.t).map(x => `<li class="flex items-center justify-between gap-3 rounded-lg border border-white/5 px-3 py-2"><span class="min-w-0"><span class="block truncate">${esc(x.label)}</span><span class="text-xs text-muted">${new Date(+x.t).toLocaleDateString('es', { day: '2-digit', month: 'short' })}</span></span><span class="flex shrink-0 items-center gap-2"><b>${money(x.amount)}</b><button type="button" data-expdel="${esc(x.id)}" class="rounded-lg p-1.5 text-muted hover:text-rose-300" title="Borrar">✕</button></span></li>`).join('') || '<li class="text-muted">Sin gastos anotados este mes.</li>'}</ul>`;
+    }
+    function renderRank() {
+      const box = $('#rankBox'); if (!box) return;
+      const f = finMonth(), m = new Map();
+      f.valid.forEach(o => (o.items || []).forEach(i => {
+        if (i.tickets) return;
+        const k = String(i.id || i.name), x = m.get(k) || { name: i.name || k, u: 0, rev: 0, prof: 0, known: true };
+        const q = +i.qty || 1, c = costOf(i.id); x.u += q; x.rev += (+i.price || 0) * q; if (c == null) x.known = false; else x.prof += ((+i.price || 0) - c) * q; m.set(k, x);
+      }));
+      const rows = [...m.values()].sort((a, b) => (b.known ? b.prof : -1e9) - (a.known ? a.prof : -1e9) || b.rev - a.rev).slice(0, 15);
+      box.innerHTML = `<h3 class="font-semibold">🏅 Ganancia por producto (este mes)</h3><p class="mt-0.5 text-xs text-muted">Cuáles te dejan más dinero, no solo cuáles se venden más. Usa el precio de lista, sin descontar cupones.</p>
+        <div class="mt-4 overflow-x-auto"><table class="tbl compact w-full"><thead><tr><th>Producto</th><th>Cant.</th><th>Ganancia</th></tr></thead><tbody>${rows.map(x => `<tr><td class="text-sm" style="white-space:normal">${esc(x.name)}<span class="block text-xs text-muted">Vendió ${money(x.rev)}</span></td><td>${x.u}</td><td class="font-semibold" ${x.known ? `style="color:${x.prof >= 0 ? '#34d399' : '#fb7185'}"` : ''}>${x.known ? money(x.prof) : '<span class="text-xs font-normal text-muted">falta el costo</span>'}</td></tr>`).join('') || '<tr><td colspan="3" class="text-sm text-muted">Todavía no hay ventas este mes.</td></tr>'}</tbody></table></div>`;
+    }
+    function renderFinExtras() { if (STAFF) return; try { renderGoal(); renderExp(); renderRank(); } catch (er) { console.warn(er); } }
+    document.addEventListener('input', e => {
+      if (e.target.id === 'expLabel') expDraft.label = e.target.value;
+      if (e.target.id === 'expAmount') expDraft.amount = e.target.value;
+      if (e.target.id === 'expDay') expDraft.day = e.target.value;
+    });
+    document.addEventListener('click', e => {
+      const t = e.target;
+      if (t.closest('[data-goaledit]')) { goalEdit = !goalEdit; renderGoal(); }
+      if (t.closest('[data-goalsave]')) { const v = Math.max(0, +($('#goalIn').value) || 0); savePriv({ goal: +v.toFixed(2) }); goalEdit = false; renderGoal(); toast(v ? '🎯 Meta guardada' : 'Meta quitada'); }
+      if (t.closest('[data-expadd]')) {
+        const label = String(expDraft.label || '').trim().slice(0, 60), amount = +(+expDraft.amount || 0).toFixed(2);
+        if (!label) return toast('Escribe en qué gastaste', 'warn');
+        if (!(amount > 0)) return toast('Pon el monto del gasto', 'warn');
+        const day = expDraft.day || dayKey(Date.now()), ts = new Date(day + 'T12:00:00').getTime() || Date.now();
+        savePriv({ expenses: [...expenses(), { id: 'G' + Date.now().toString(36), t: ts, label, amount }].slice(-600) });
+        expDraft = { label: '', amount: '', day: '' }; renderExp(); toast('🧮 Gasto anotado');
+      }
+      const dl = t.closest('[data-expdel]'); if (dl && confirm('¿Borrar este gasto?')) { savePriv({ expenses: expenses().filter(x => x.id !== dl.dataset.expdel) }); renderExp(); toast('Gasto borrado'); }
+    });
+    window.addEventListener('storage', e => {
+      if (!['nradmin_priv', 'nradmin_orders'].includes(e.key)) return;
+      const a = document.activeElement; if (a && a.closest && (a.closest('#expBox') || a.closest('#goalBox'))) return;
+      renderFinExtras(); if (e.key === 'nradmin_priv') { try { renderLog(); } catch (_) {} }
+    });
+
+    /* ================= Copia de seguridad ================= */
+    const BACKUP_KEYS = ['settings', 'products', 'banners', 'coupons', 'orders', 'users', 'topups', 'giftcards', 'services', 'reviews', 'reports', 'walletAdj', 'waitlist', 'staff', 'priv'];
+    function renderBackup() {
+      const box = $('#backupBox'); if (!box) return;
+      let last = 0; try { last = +localStorage.getItem('nr_last_backup') || 0; } catch (_) {}
+      const days = last ? Math.floor((Date.now() - last) / 864e5) : null;
+      box.innerHTML = `<h3 class="font-semibold">💾 Copia de seguridad</h3><p class="mt-0.5 text-xs text-muted">Descarga un archivo con todo: productos, pedidos, clientes, cupones, configuración, costos y gastos. Guárdalo en tu Drive o correo. Es privado: no lo compartas.</p>
+        <p class="mt-3 rounded-xl border ${days === null || days > 7 ? 'border-amber-500/40 bg-amber-500/10 text-amber-200' : 'border-white/10 text-muted'} px-3 py-2 text-xs">${days === null ? 'Todavía no has descargado ninguna copia desde este teléfono.' : days === 0 ? '✅ Última copia: hoy.' : `Última copia: hace ${days} día${days === 1 ? '' : 's'}.${days > 7 ? ' Te conviene descargar una nueva.' : ''}`}</p>
+        <button type="button" data-backup class="btn-primary mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold">Descargar copia ahora</button>
+        <p class="mt-2 text-[11px] text-muted">La copia es para guardar tus datos. Si algún día hay que restaurarla, se hace con cuidado y a mano; no hay botón para eso a propósito, para que nadie borre la tienda por error.</p>`;
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('[data-backup]') || STAFF) return;
+      try {
+        const data = { app: 'NR Digital', version: 1, date: new Date().toISOString(), data: {} };
+        BACKUP_KEYS.forEach(k => { data.data[k] = store.get(k, null); });
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' }), a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'respaldo-nr-' + dayKey(Date.now()) + '.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+        try { localStorage.setItem('nr_last_backup', String(Date.now())); } catch (_) {}
+        renderBackup(); toast(`💾 Copia descargada (${(blob.size / 1024).toFixed(0)} KB)`);
+      } catch (er) { console.warn(er); toast('No se pudo crear la copia', 'err'); }
+    });
+
+    /* ================= Historial de cambios ================= */
+    var AUD = undefined;
+    const SET_NAMES = { sale: 'la oferta general', vip: 'el Club VIP', soon: 'la pantalla "Muy pronto"', faq: 'las preguntas frecuentes', top: 'el top de compradores', daily: 'el producto del día', raffle: 'el sorteo mensual', extraPays: 'los métodos de pago', closed: 'el modo mantenimiento', name: 'el nombre de la tienda', phone: 'el WhatsApp', logo: 'el logo', rate: 'la tasa', social: 'el aviso de compras recientes' };
+    function audSnap() {
+      const pr = {}; (store.get('products', []) || []).forEach(x => { if (x && x.id) pr[x.id] = { n: x.name, p: +x.price, a: x.active !== false, k: (x.packages || []).map(k => k && [k.label, +k.price]) }; });
+      const st = {}; Object.entries(store.get('settings', {}) || {}).forEach(([k, v]) => { st[k] = JSON.stringify(v); });
+      return { pr, st, cp: (store.get('coupons', []) || []).filter(Boolean).map(c => String(c.code)), sf: (store.get('staff', []) || []).filter(Boolean).map(s => [s.uid, s.name || s.email, !!s.active]), od: (store.get('orders', []) || []).map(o => o.id) };
+    }
+    function audAdd(lines) {
+      if (!lines.length) return;
+      const now = Date.now(), log = (Array.isArray(priv().log) ? priv().log : []);
+      savePriv({ log: [...lines.slice(0, 8).map(x => ({ t: now, by: actor(), x: String(x).slice(0, 140) })), ...log].slice(0, 200) });
+    }
+    function auditSet(k, v) {
+      if (AUD === undefined || STAFF || !['products', 'settings', 'coupons', 'staff', 'orders'].includes(k)) return;
+      let human = false; try { human = !!(navigator.userActivation && navigator.userActivation.isActive); } catch (_) {}
+      const old = AUD, lines = [];
+      if (human) {
+        if (k === 'products') {
+          const cur = {}; (v || []).forEach(x => { if (x && x.id) cur[x.id] = x; });
+          Object.keys(cur).forEach(id => { const o = old.pr[id], x = cur[id]; if (!o) return lines.push('Creó el producto "' + x.name + '" (' + money(x.price) + ')');
+            if (o.p !== +x.price) lines.push('Cambió el precio de "' + x.name + '": ' + money(o.p) + ' → ' + money(x.price));
+            if (o.n !== x.name) lines.push('Renombró "' + o.n + '" a "' + x.name + '"');
+            if (o.a !== (x.active !== false)) lines.push((x.active !== false ? 'Mostró' : 'Ocultó') + ' el producto "' + x.name + '"');
+            const nk = JSON.stringify((x.packages || []).map(q => q && [q.label, +q.price])); if (nk !== JSON.stringify(o.k) && o.p === +x.price && o.n === x.name) lines.push('Cambió los paquetes de "' + x.name + '"'); });
+          Object.keys(old.pr).forEach(id => { if (!cur[id]) lines.push('Borró el producto "' + old.pr[id].n + '"'); });
+        } else if (k === 'settings') {
+          const cur = v || {}, keys = new Set([...Object.keys(cur), ...Object.keys(old.st)]);
+          keys.forEach(key => { if (key === 'saleLog') return; if (JSON.stringify(cur[key]) !== old.st[key]) lines.push('Cambió ' + (SET_NAMES[key] || 'la configuración (' + key + ')')); });
+        } else if (k === 'coupons') {
+          const cur = (v || []).filter(Boolean).map(c => String(c.code));
+          cur.filter(c => !old.cp.includes(c)).forEach(c => lines.push('Creó el cupón ' + c)); old.cp.filter(c => !cur.includes(c)).forEach(c => lines.push('Borró el cupón ' + c));
+        } else if (k === 'staff') {
+          const cur = (v || []).filter(Boolean);
+          cur.forEach(s => { const o = old.sf.find(x => x[0] === s.uid); if (!o) lines.push('Agregó al empleado ' + (s.name || s.email)); else if (o[2] !== !!s.active) lines.push((s.active ? 'Activó' : 'Desactivó') + ' al empleado ' + (s.name || s.email)); });
+          old.sf.forEach(o => { if (!cur.some(s => s.uid === o[0])) lines.push('Quitó al empleado ' + o[1]); });
+        } else if (k === 'orders') {
+          const cur = new Set((v || []).map(o => o.id)), gone = old.od.filter(id => !cur.has(id));
+          if (gone.length) lines.push(gone.length === 1 ? 'Borró el pedido ' + gone[0] : 'Borró ' + gone.length + ' pedidos');
+        }
+      }
+      setTimeout(() => { try { AUD = audSnap(); } catch (_) {} }, 0);
+      if (lines.length) setTimeout(() => { try { audAdd(lines); renderLog(); } catch (_) {} }, 0);
+    }
+    function renderLog() {
+      const box = $('#logBox'); if (!box) return;
+      const log = Array.isArray(priv().log) ? priv().log : [];
+      box.innerHTML = `<h3 class="font-semibold">📜 Historial de cambios</h3><p class="mt-0.5 text-xs text-muted">Lo que se cambió en productos, precios, cupones, empleados y configuración, y cuándo. Guarda los últimos 200 cambios hechos desde ahora.</p>
+        <ul class="mt-4 space-y-1.5 text-xs" style="max-height:340px;overflow-y:auto">${log.map(l => `<li class="flex justify-between gap-3 rounded-lg border border-white/5 px-3 py-2"><span><b class="text-white">${esc(l.by || 'Dueño')}</b> · ${esc(l.x)}</span><span class="shrink-0 text-muted">${new Date(+l.t).toLocaleString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></li>`).join('') || '<li class="text-muted">Todavía no hay cambios registrados.</li>'}</ul>`;
+    }
+    window.addEventListener('storage', e => { if (['nradmin_products', 'nradmin_settings', 'nradmin_coupons', 'nradmin_staff', 'nradmin_orders'].includes(e.key)) setTimeout(() => { try { AUD = audSnap(); } catch (_) {} }, 0); });
+    setTimeout(() => { try { AUD = audSnap(); } catch (_) {} }, 1500);
+
     /* ================= Empleados ================= */
     const STAFF_PERMS = [['orders', '📦 Pedidos', 'Ver pedidos, verificar pagos y entregar'], ['topups', '💰 Recargas de Ncoins', 'Aprobar o rechazar recargas de saldo'], ['services', '📺 Vencimientos', 'Cuentas de streaming y renovaciones']];
     const staffList = () => (store.get('staff', []) || []).filter(x => x && x.uid);
@@ -4076,7 +4509,7 @@ window.NR_FIREBASE = {
           <div class="mt-3 flex flex-wrap gap-2"><input id="staffEmailIn" type="email" autocapitalize="none" value="${esc(staffEmail)}" placeholder="correo del empleado" class="field min-w-0 flex-1 py-2 text-sm" /><button data-staffadd class="btn-primary rounded-xl px-4 py-2.5 text-sm font-semibold">Agregar</button></div></div>
         <div class="mt-4 space-y-3">${list.map(s => `<div class="rounded-2xl border ${s.active ? 'border-neon/30' : 'border-white/10 opacity-70'} p-4">
           <div class="flex items-center justify-between gap-3"><div class="min-w-0"><p class="truncate font-semibold">${esc(s.name || s.email)}</p><p class="truncate text-xs text-muted">${esc(s.email)} · ${s.active ? '<span class="text-emerald-400">Activo</span>' : '<span class="text-rose-300">Desactivado</span>'}</p></div>
-            <span class="flex shrink-0 items-center gap-2"><button data-stafftog="${esc(s.uid)}" aria-label="Activar o desactivar">${sw(s.active)}</button><button data-staffdel="${esc(s.uid)}" class="rounded-lg p-1.5 text-muted hover:text-rose-300" title="Quitar"><i data-lucide="trash-2" class="h-4 w-4"></i></button></span></div>
+            <span class="flex shrink-0 items-center gap-2"><button type="button" class="shrink-0" data-stafftog="${esc(s.uid)}" aria-label="Activar o desactivar">${sw(s.active)}</button><button data-staffdel="${esc(s.uid)}" class="rounded-lg p-1.5 text-muted hover:text-rose-300" title="Quitar"><i data-lucide="trash-2" class="h-4 w-4"></i></button></span></div>
           <div class="mt-3 space-y-2">${STAFF_PERMS.map(([k, l, d]) => `<label class="flex cursor-pointer items-start gap-3 text-sm"><input type="checkbox" data-staffperm="${k}" data-uid="${esc(s.uid)}" ${s.perms && s.perms[k] ? 'checked' : ''} class="mt-0.5 h-4 w-4 shrink-0 accent-[#0066FF]" /><span>${l}<span class="block text-xs text-muted">${d}</span></span></label>`).join('')}</div></div>`).join('') || '<p class="text-sm text-muted">Todavía no tienes empleados.</p>'}</div>
         ${list.length ? `<div class="mt-5"><p class="text-sm font-medium text-neutral-300">🕒 Lo último que hicieron</p><ul class="mt-2 space-y-1.5 text-xs" style="max-height:260px;overflow-y:auto">${acts.map(a => `<li class="flex justify-between gap-3 rounded-lg border border-white/5 px-3 py-2"><span><b class="text-white">${esc(a.by)}</b> · ${esc(a.txt)}</span><span class="shrink-0 text-muted">${new Date(a.t).toLocaleString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></li>`).join('') || '<li class="text-muted">Todavía no han hecho cambios.</li>'}</ul></div>` : ''}`;
       icons();
@@ -4126,7 +4559,7 @@ window.NR_FIREBASE = {
       soonDraft = soonDraft || { at: +cur.at || 0, title: cur.title || '', msg: cur.msg || '' };
       const on = cur.on === true, passed = on && +cur.at > 0 && +cur.at <= Date.now();
       const link = cur.key ? location.href.replace(/[^/]*$/, '').replace(/\?.*$/, '') + '?ver=' + cur.key : '';
-      box.innerHTML = `<div class="flex items-start justify-between gap-3"><div><h3 class="font-semibold">🚀 Pantalla "Muy pronto"</h3><p class="mt-0.5 text-xs text-muted">Tapa la tienda con una cuenta regresiva hasta el día que abres. La gente puede crear su cuenta, pero todavía no comprar.</p></div><button data-soontog aria-label="Prender o apagar">${sw(on)}</button></div>
+      box.innerHTML = `<div class="flex items-start justify-between gap-3"><div><h3 class="font-semibold">🚀 Pantalla "Muy pronto"</h3><p class="mt-0.5 text-xs text-muted">Tapa la tienda con una cuenta regresiva hasta el día que abres. La gente puede crear su cuenta, pero todavía no comprar.</p></div><button type="button" class="shrink-0" data-soontog aria-label="Prender o apagar">${sw(on)}</button></div>
         <p class="mt-3 rounded-xl border ${on && !passed ? 'border-amber-500/40 bg-amber-500/10 text-amber-200' : 'border-white/10 text-muted'} px-3 py-2 text-xs">${!on ? 'Apagada: la tienda se ve normal.' : passed ? '✅ Ya llegó la fecha: la tienda está abierta. Puedes apagar el interruptor.' : '🚀 PRENDIDA: los clientes ven "Muy pronto" y no pueden comprar' + (+cur.at ? '. Se abre sola el ' + new Date(+cur.at).toLocaleString('es', { day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }) : ' hasta que la apagues') + '.'}</p>
         <div class="mt-4 grid gap-3 sm:grid-cols-2"><label class="block"><span class="mb-1.5 block text-xs text-muted">Día y hora de apertura (vacío = sin cuenta regresiva)</span><input id="soonAt" type="datetime-local" value="${soonDraft.at ? toLocalDT(soonDraft.at) : ''}" class="field py-2 text-sm" /></label>
           <label class="block"><span class="mb-1.5 block text-xs text-muted">Título</span><input id="soonTitleIn" maxlength="50" value="${esc(soonDraft.title)}" placeholder="Abrimos nuestra tienda" class="field py-2 text-sm" /></label></div>
@@ -4143,7 +4576,7 @@ window.NR_FIREBASE = {
     function renderTopCfg() {
       const box = $('#topCfgBox'); if (!box) return;
       const cfg = (store.get('settings', {}) || {}).top || {}, on = cfg.on === true, prev = on ? topBuyers().top : [];
-      box.innerHTML = `<div class="flex items-start justify-between gap-3"><div><h3 class="font-semibold">🏆 Top compradores del mes</h3><p class="mt-0.5 text-xs text-muted">Muestra en la tienda quiénes más compraron este mes. Los nombres salen tapados (Car*** M.) y no se ve cuánto gastaron, solo cuántas compras.</p></div><button data-toptog aria-label="Prender o apagar">${sw(on)}</button></div>
+      box.innerHTML = `<div class="flex items-start justify-between gap-3"><div><h3 class="font-semibold">🏆 Top compradores del mes</h3><p class="mt-0.5 text-xs text-muted">Muestra en la tienda quiénes más compraron este mes. Los nombres salen tapados (Car*** M.) y no se ve cuánto gastaron, solo cuántas compras.</p></div><button type="button" class="shrink-0" data-toptog aria-label="Prender o apagar">${sw(on)}</button></div>
         ${on ? `<label class="mt-4 flex items-center gap-2 text-sm text-neutral-300">Mostrar los primeros <select id="topN" class="field w-auto py-1.5 text-sm">${[3, 5, 10].map(n => `<option ${(+cfg.n || 5) === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
         <ol class="mt-3 space-y-1.5 text-sm">${prev.map((x, i) => `<li class="flex justify-between rounded-lg border border-white/5 px-3 py-2"><span>${i + 1}. ${esc(x.n)}</span><span class="text-muted">${x.c} compra${x.c === 1 ? '' : 's'}</span></li>`).join('') || '<li class="text-muted">Todavía no hay compras completadas este mes.</li>'}</ol>` : ''}`;
     }
@@ -4197,7 +4630,35 @@ window.NR_FIREBASE = {
       if (e.key === 'nradmin_settings') { if (!soonDraft || document.activeElement.closest && !document.activeElement.closest('#soonBox')) { soonDraft = null; renderSoonBox(); } renderTopCfg(); }
       if (e.key === 'nradmin_orders') renderTopCfg();
     });
-    function renderCfgExtras() { if (STAFF) return; try { renderStaff(); renderSoonBox(); renderTopCfg(); renderFaqBox(); } catch (er) { console.warn(er); } }
+    function renderCfgExtras() { if (STAFF) return; try { renderStaff(); renderSoonBox(); renderTopCfg(); renderFaqBox(); renderPendBox(); renderBackup(); renderLog(); } catch (er) { console.warn(er); } }
+
+    /* ---------- ID de jugador ordenado y con botón de copiar ---------- */
+    function splitPlayerId(v) {
+      const s = String(v || '').trim(), m = s.match(/^(.*?)\s*·\s*(Servidor|Zona|Server)\s*[:#]?\s*(.+)$/i);
+      return m ? { id: m[1].trim(), server: m[3].trim(), label: m[2][0].toUpperCase() + m[2].slice(1).toLowerCase() } : { id: s, server: '', label: 'Servidor' };
+    }
+    const CP_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+    const cpBtn = (val, what) => `<button type="button" data-cp="${esc(val)}" data-cpwhat="${esc(what)}" class="flex shrink-0 items-center gap-1.5 rounded-lg border border-neon/40 px-3 py-2 text-xs font-semibold text-neon transition hover:bg-neon/10 active:scale-95">${CP_ICON}Copiar</button>`;
+    function idBox(v) {
+      const d = splitPlayerId(v);
+      const line = (label, val, what) => `<div class="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5" style="background:rgba(255,255,255,.04)"><div class="min-w-0"><p class="text-[11px] uppercase text-muted" style="letter-spacing:.08em;white-space:nowrap">${label}</p><p class="font-mono text-lg font-bold leading-tight text-white" style="overflow-wrap:anywhere;user-select:all;-webkit-user-select:all">${esc(val)}</p></div>${cpBtn(val, what)}</div>`;
+      return `<div class="mt-2 rounded-2xl border border-neon/30 p-2.5" style="background:rgba(0,229,255,.04)"><p class="mb-2 px-1 text-xs font-semibold text-neon">🎮 Datos para la recarga</p><div class="space-y-2">${line('ID de jugador', d.id, 'ID')}${d.server ? line(d.label, d.server, d.label) : ''}</div>${d.server ? `<button type="button" data-cp="${esc(d.id + ' (' + d.server + ')')}" data-cpwhat="ID y ${esc(d.label.toLowerCase())}" class="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/10 py-2.5 text-xs font-semibold text-neutral-200 transition hover:border-neon/40 active:scale-95">${CP_ICON}<span style="white-space:nowrap">Copiar los dos juntos</span></button>` : ''}</div>`;
+    }
+    function copyTxt(t) {
+      return new Promise((res, rej) => {
+        const fb = () => { try { const ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length); const ok = document.execCommand('copy'); ta.remove(); ok ? res() : rej(); } catch (_) { rej(); } };
+        if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) navigator.clipboard.writeText(t).then(res, fb); else fb();
+      });
+    }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-cp]'); if (!b) return;
+      const t = b.dataset.cp;
+      copyTxt(t).then(() => {
+        toast('📋 Copiado · ' + (b.dataset.cpwhat || 'Texto') + ': ' + t, 'ok');
+        const old = b.innerHTML; b.innerHTML = '✓ Copiado'; b.style.borderColor = '#10b981'; b.style.color = '#6ee7b7';
+        setTimeout(() => { b.innerHTML = old; b.style.borderColor = ''; b.style.color = ''; }, 1400);
+      }, () => toast('No se pudo copiar. Mantén presionado el número para copiarlo.', 'warn'));
+    });
 
     /* ---------- Stock bajo y clientes esperando ---------- */
     const lowN = () => Math.max(1, +prefs.lowStockN || 5);

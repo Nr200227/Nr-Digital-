@@ -402,8 +402,9 @@
 
   </main>
 
+  <style>@media (max-width:1023px){ .ft-pad{ padding-bottom:10rem !important; } }</style>
   <footer class="border-t border-white/10 bg-ink-900">
-    <div class="mx-auto max-w-7xl px-4 py-6 text-center text-xs text-muted sm:px-6 lg:px-8">
+    <div class="ft-pad mx-auto max-w-7xl px-4 py-6 text-center text-xs text-muted sm:px-6 lg:px-8">
       <nav class="mb-3 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm"><a href="#comprar" class="hover:text-neon">Cómo comprar</a><a href="#faq" class="hover:text-neon">Preguntas</a><a href="#garantia" class="hover:text-neon">Garantía</a><a href="#contacto" class="hover:text-neon">Horario y contacto</a><a href="#terminos" class="hover:text-neon">Términos y privacidad</a><a href="#vip" data-vipnav class="hidden hover:text-neon">Club VIP</a></nav>
       <p>© <span id="year"></span> NR Digital. Todos los derechos reservados.</p>
     </div>
@@ -1613,7 +1614,7 @@ window.NR_FIREBASE = {
       return { id, emoji: String(L.emoji || d[0]), name: String(L.name || d[1]), color: d[2], show: L.show !== false, pct: Math.max(0, Math.min(90, +L.pct || 0)), perks: String(L.perks || '').split('\n').map(x => x.trim()).filter(Boolean) };
     }
     function myVip() { try { if (!current || !current.vip || vipCfg().on !== true) return null; return vipInfo(current.vip); } catch (_) { return null; } }
-    const loadCatalog = () => { const sl = saleNow(), vp = myVip(); return adminProducts().filter(p => p.active && !(p.raffle && +p.raffle.drawAt && Date.now() > +p.raffle.drawAt)).flatMap(p => {
+    const loadCatalog = () => { const sl = saleNow(), vp = myVip(); return adminProducts().filter(p => p.active && !(p.raffle && +p.raffle.drawAt && Date.now() > +p.raffle.drawAt) && !(+p.showAt > Date.now()) && !(+p.hideAt > 0 && +p.hideAt <= Date.now())).flatMap(p => {
       const off = saleFor(sl, p) && !p.raffle, vOff = !!vp && vp.pct > 0 && !(+p.giftValue > 0) && !p.raffle, any = off || vOff;
       // oferta primero y luego el descuento VIP (cada paso redondeado a centavos, igual que el panel)
       const adj = v => { let x = +v; if (off) x = salePrice(x, sl); if (vOff) x = +(x * (1 - vp.pct / 100)).toFixed(2); return x; };
@@ -2139,7 +2140,7 @@ window.NR_FIREBASE = {
         const ci = catInfo(c), items = list.filter(p => p.cat === c);
         return `<section>
           <div class="mb-3 flex items-end justify-between gap-3">
-            <h2 class="font-display text-xl font-extrabold uppercase leading-none tracking-tight text-neon sm:text-2xl">${ci && ci.icon ? `<span class="mr-1.5">${esc(ci.icon)}</span>` : ''}${esc(c)}</h2>
+            <h2 class="font-display text-xl font-extrabold uppercase leading-none tracking-tight text-neon sm:text-2xl">${(ci && ci.icon) || CAT_FALLBACK[String(c).toLowerCase()] ? `<span class="mr-1.5">${esc((ci && ci.icon) || CAT_FALLBACK[String(c).toLowerCase()])}</span>` : ''}${esc(c)}</h2>
             <button type="button" data-seemore="${esc(c)}" class="shrink-0 text-sm font-semibold text-neutral-200 transition hover:text-neon">Ver más ›</button>
           </div>
           <div class="relative" data-row>
@@ -4018,6 +4019,7 @@ const GAME_INFO = [
       toast(on ? '❤️ Guardado en tus favoritos' : 'Quitado de favoritos'); try { renderProducts(); } catch (_) {}
       return on;
     }
+    var CAT_FALLBACK = { sorteos: '🎟️', combos: '🧩', 'gift cards': '🎁' };
     function favsHTML() {
       const ids = favList(); if (!ids.length) return '';
       const list = ids.map(id => SHOWN().find(p => String(p.id) === id)).filter(p => p && !p.raffle).slice(0, 12); if (!list.length) return '';
