@@ -1668,6 +1668,8 @@ window.NR_FIREBASE = {
     const STATUS = {
       Pendiente:   'bg-amber-500/15 text-amber-400 ring-amber-500/30',
       Pagado:      'bg-sky-500/15 text-sky-400 ring-sky-500/30',
+      Procesando:  'bg-neon/15 text-neon ring-neon/30',
+      'En espera': 'bg-white/10 text-neutral-300 ring-white/10',
       Completado:  'bg-emerald-500/15 text-emerald-400 ring-emerald-500/30',
       Rechazado:   'bg-rose-500/15 text-rose-400 ring-rose-500/30',
       Reembolsado: 'bg-rose-500/15 text-rose-400 ring-rose-500/30',
@@ -1683,7 +1685,9 @@ window.NR_FIREBASE = {
       return `<div class="flex items-center gap-3"><span class="w-10 font-semibold ${txt}">${n}</span><span class="h-1.5 w-20 overflow-hidden rounded-full bg-white/10"><span class="block h-full ${color}" style="width:${Math.max(pct, n ? 4 : 0)}%"></span></span></div>`;
     };
     const fmtDate = t => new Date(t).toLocaleString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-    const validOrder = o => o.status === 'Pagado' || o.status === 'Completado';
+    // Pago ya verificado pero todavía sin entregar: Pagado → Procesando / En espera → Completado
+    const PAID_OPEN = ['Pagado', 'Procesando', 'En espera'];
+    const validOrder = o => PAID_OPEN.includes(o.status) || o.status === 'Completado';
     // Número para wa.me: convierte 0412-1234567 (Venezuela) a 584121234567
     const waNum = phone => { let d = String(phone || '').replace(/\D/g, ''); if (d.startsWith('00')) d = d.slice(2); if (d.length === 11 && d.startsWith('0')) d = '58' + d.slice(1); return d.length >= 10 ? d : ''; };
     const METHODS = { saldo: '🟡 Ncoins', pagomovil: '📱 Pago Móvil', binance: '🔶 Binance Pay' };
@@ -2652,9 +2656,11 @@ window.NR_FIREBASE = {
         pushClientNotif(o.userEmail, { icon: '✅', title: same ? `Suscripción activa por ${d0[0]} días` : 'Suscripciones activas',
           text: `${its.map((i, k) => i.name + (same ? '' : ` (${d0[k]} días)`)).join(', ')}. Tus datos de acceso ya están en tu pedido ${o.id}.`, action: { type: 'order', orderId: o.id } });
       }
-      if ((status === 'Pagado' || status === 'Completado') && !o.giftGenerated && priceShort(o) && !confirm(`⚠️ El pedido ${o.id} pagó ${money(o.amount)} pero los productos valen ${money(expectedAmount(o))}.\n\n¿Generar la gift card de todos modos?`)) toast('No se generó la gift card: el monto no cuadra', 'warn');
-      else if (status === 'Pagado' || status === 'Completado') { const g = makeGiftCards(o); if (g.length) toast(`🎁 ${g.length} gift card${g.length === 1 ? ' generada' : 's generadas'}: ${g.map(c => c.code).join(', ')}`); }
+      if ((PAID_OPEN.includes(status) || status === 'Completado') && !o.giftGenerated && priceShort(o) && !confirm(`⚠️ El pedido ${o.id} pagó ${money(o.amount)} pero los productos valen ${money(expectedAmount(o))}.\n\n¿Generar la gift card de todos modos?`)) toast('No se generó la gift card: el monto no cuadra', 'warn');
+      else if (PAID_OPEN.includes(status) || status === 'Completado') { const g = makeGiftCards(o); if (g.length) toast(`🎁 ${g.length} gift card${g.length === 1 ? ' generada' : 's generadas'}: ${g.map(c => c.code).join(', ')}`); }
       if (isOut) voidGiftCards(o);
+      if (status === 'Procesando') pushClientNotif(o.userEmail, { icon: '⚙️', title: 'Tu pedido está en proceso', text: `Ya estamos trabajando en tu pedido ${o.id}. Te avisamos apenas esté listo.`, action: { type: 'order', orderId: o.id } });
+      if (status === 'En espera') pushClientNotif(o.userEmail, { icon: '⏸️', title: 'Tu pedido está en espera', text: `Tu pedido ${o.id} quedó en espera por un momento. Tu pago está seguro y te avisamos apenas avance.`, action: { type: 'order', orderId: o.id } });
       saveOrders(); saveProducts();
       renderOrders(); renderProducts(); renderKpis(); renderChart(); renderDonut(); renderClients(); renderFinance(); icons();
       if ($('#orderModal').classList.contains('flex')) openOrder(o.id);
@@ -2749,11 +2755,13 @@ window.NR_FIREBASE = {
       const actions = [];
       if (o.status === 'Pendiente') actions.push(act('Pagado', '✓ Aprobar pago', 'btn-primary'), act('Rechazado', 'Rechazar pago', 'border border-rose-500/40 text-rose-300 hover:bg-rose-500/10'));
       const allRenew = streamItems(o).length && streamItems(o).every(i => i.renew);
-      if (o.status === 'Pagado') actions.push(act('Completado', needsDelivery(o) ? '🔑 Entregar datos de acceso' : allRenew ? '🔁 Confirmar renovación' : '✓ Marcar entregado', 'btn-primary'));
+      if (PAID_OPEN.includes(o.status)) actions.push(act('Completado', needsDelivery(o) ? '🔑 Entregar datos de acceso' : allRenew ? '🔁 Confirmar renovación' : '✓ Marcar entregado', 'btn-primary'));
+      if (PAID_OPEN.includes(o.status) && o.status !== 'Procesando') actions.push(act('Procesando', '⚙️ Procesando', 'border border-neon/40 text-neon hover:bg-neon/10'));
+      if (PAID_OPEN.includes(o.status) && o.status !== 'En espera') actions.push(act('En espera', '⏸️ En espera', 'border border-white/15 text-neutral-200 hover:bg-white/5'));
       if (o.status === 'Pendiente' && streamItems(o).length) actions.push(`<button data-deliver="${esc(o.id)}" class="rounded-xl border border-neon/40 px-4 py-2.5 text-sm font-semibold text-neon hover:bg-neon/10">🔑 Aprobar y entregar datos</button>`);
       if (!RELEASED.includes(o.status) && !streamItems(o).length && o.items.some(i => !(+i.giftValue > 0))) actions.push(`<button data-deliverany="${esc(o.id)}" class="rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-neutral-200 hover:bg-white/5">🔑 Enviar datos de acceso al cliente</button>`);
       if (o.status === 'Completado' && streamItems(o).length) actions.push(`<button data-editdelivery="${esc(o.id)}" class="rounded-xl border border-neon/40 px-4 py-2.5 text-sm font-semibold text-neon hover:bg-neon/10">🔑 Editar datos de acceso</button>`);
-      if (o.status === 'Pagado' || o.status === 'Completado') actions.push(act('Reembolsado', o.method === 'saldo' ? 'Reembolsar a su saldo' : 'Marcar reembolsado', 'border border-rose-500/40 text-rose-300 hover:bg-rose-500/10'));
+      if (PAID_OPEN.includes(o.status) || o.status === 'Completado') actions.push(act('Reembolsado', o.method === 'saldo' ? 'Reembolsar a su saldo' : 'Marcar reembolsado', 'border border-rose-500/40 text-rose-300 hover:bg-rose-500/10'));
       if (RELEASED.includes(o.status)) actions.push(act('Pendiente', 'Volver a pendiente', 'border border-white/10 text-neutral-300 hover:bg-white/5'));
       actions.push(`<button data-delorder="${esc(o.id)}" class="ml-auto rounded-xl border border-rose-500/30 px-4 py-2.5 text-sm font-semibold text-rose-300 hover:bg-rose-500/10">🗑️ Borrar pedido</button>`);
       $('#omCode').textContent = o.id;
@@ -4303,7 +4311,7 @@ window.NR_FIREBASE = {
     /* ================= Cola de trabajo · Etiquetas y notas privadas · Aprobar varios · Avisos de espera ================= */
     var O_TAGS = { urgente: ['🔥', 'Urgente', '#fb7185'], problema: ['⚠️', 'Con problema', '#fbbf24'], espera: ['⏳', 'Esperando al cliente', '#7dd3fc'] };
     var bulkSel = new Set(), pendWarned = new Set();
-    function inQueue(o) { return o.status === 'Pendiente' || o.status === 'Pagado'; }
+    function inQueue(o) { return o.status === 'Pendiente' || PAID_OPEN.includes(o.status); }
     function oMeta(id) { try { const m = priv().onotes; return (m && m[id]) || {}; } catch (_) { return {}; } }
     function cNote(email) { try { const m = priv().cnotes; return (m && m[String(email || '').toLowerCase()]) || ''; } catch (_) { return ''; } }
     function pendMin() { try { const v = priv().pendMin; return v === undefined || v === null || v === '' ? 30 : Math.max(0, +v || 0); } catch (_) { return 30; } }
@@ -4880,7 +4888,7 @@ window.NR_FIREBASE = {
     const blSeen = new Set();
     function checkBlacklist() {
       if (!blList().length) return;
-      [...orders.filter(o => o.status === 'Pendiente' || o.status === 'Pagado'), ...store.get('topups', []).filter(t => t.status === 'Pendiente')].forEach(o => {
+      [...orders.filter(o => o.status === 'Pendiente' || PAID_OPEN.includes(o.status)), ...store.get('topups', []).filter(t => t.status === 'Pendiente')].forEach(o => {
         if (blSeen.has(o.id)) return; blSeen.add(o.id); const hit = blMatch(o); if (!hit) return;
         liveAlert({ emoji: '⛔', title: 'Compra de la lista negra', label: 'Ver', text: `${o.client || ''} (${hit.v}) hizo ${o.id}. Motivo: ${hit.note || '—'}`, onOpen: () => { if (o.items) { showView('pedidos'); openOrder(o.id); } else showView('billetera'); } });
       });
@@ -5096,7 +5104,7 @@ window.NR_FIREBASE = {
     document.addEventListener('click', e => {
       const b = e.target.closest('[data-delorder]'); if (!b) return;
       const o = orders.find(x => x.id === b.dataset.delorder); if (!o) return;
-      const warn = ['Pendiente', 'Pagado'].includes(o.status) ? `\n\n⚠️ Este pedido está "${o.status}": todavía no se ha entregado.` : '';
+      const warn = ['Pendiente', ...PAID_OPEN].includes(o.status) ? `\n\n⚠️ Este pedido está "${o.status}": todavía no se ha entregado.` : '';
       if (!confirm(`¿Borrar el pedido ${o.id} de ${o.client}?${warn}\n\nNo se puede deshacer.`)) return;
       deleteOrders([o.id]); closeModal('orderModal'); toast(`Pedido ${o.id} borrado`);
     });
@@ -5180,7 +5188,7 @@ window.NR_FIREBASE = {
         }
         if (applyStock(o)) { changedOrders = true; changedProducts = true; }
         if (applyRenewals(o)) changedOrders = true;
-        if ((o.status === 'Pagado' || o.status === 'Completado') && !o.giftGenerated && o.items.some(i => +i.giftValue > 0 || +((prodOf(i.id) || {}).giftValue) > 0)) {
+        if ((PAID_OPEN.includes(o.status) || o.status === 'Completado') && !o.giftGenerated && o.items.some(i => +i.giftValue > 0 || +((prodOf(i.id) || {}).giftValue) > 0)) {
           if (priceShort(o)) {   // monto menor al precio: la gift card NO se genera sola, la decides tú
             if (!o.giftHeld) { o.giftHeld = true; changedOrders = true; liveAlert({ emoji: '🎁', title: 'Gift card retenida', label: 'Ver pedido', text: `${o.id} · ${o.client}: el monto pagado no cuadra con el precio. Revísalo antes de entregar.`, onOpen: () => { showView('pedidos'); openOrder(o.id); } }); }
             return;
