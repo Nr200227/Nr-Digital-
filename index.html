@@ -674,6 +674,22 @@
       <a id="soonWa" href="#" target="_blank" rel="noopener" class="hidden font-semibold text-emerald-300" style="margin-top:14px;font-size:14px">💬 Escríbenos por WhatsApp</a>
     </div>
   </div>
+  <div id="closedScreen" class="hidden" style="position:fixed;inset:0;z-index:79;overflow-y:auto;background:radial-gradient(700px 420px at 50% 0%,rgba(99,102,241,.32),transparent 70%),radial-gradient(520px 380px at 50% 100%,rgba(0,229,255,.12),transparent 70%),#05080f">
+    <div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 22px;text-align:center">
+      <span data-brandlogo class="grid place-items-center font-display font-extrabold text-white" style="width:96px;height:96px;border-radius:24px;border:2px solid #818cf8;box-shadow:0 0 44px rgba(99,102,241,.55);background:#0b1020;font-size:38px">N</span>
+      <p id="clsName" class="font-display font-extrabold text-white" style="margin-top:16px;font-size:24px;letter-spacing:.02em"></p>
+      <p class="font-display font-extrabold" style="margin-top:20px;font-size:13px;letter-spacing:.3em;color:#a5b4fc">🌙 TIENDA CERRADA</p>
+      <h1 id="clsTitle" class="font-display font-extrabold text-white" style="margin-top:8px;font-size:32px;line-height:1.12;max-width:440px"></h1>
+      <p id="clsLead" class="text-muted" style="margin-top:14px;font-size:13px;letter-spacing:.08em"></p>
+      <div id="clsClock" style="margin-top:10px;display:flex;gap:10px;justify-content:center"></div>
+      <p id="clsDate" class="text-neutral-300" style="margin-top:12px;font-size:14px"></p>
+      <p id="clsMsg" class="text-neutral-300" style="margin-top:14px;font-size:15px;line-height:1.55;max-width:420px;white-space:pre-line"></p>
+      <div style="margin-top:22px;width:100%;max-width:400px;padding:14px 16px;border-radius:16px;border:1px solid rgba(244,63,94,.5);background:rgba(244,63,94,.12);text-align:left;font-size:14px;line-height:1.5;color:#fecdd3">
+        <b style="display:block;color:#fff;font-size:15px;margin-bottom:4px">⚠️ No hagas ningún pago ahora</b>Mientras estamos cerrados no se pueden hacer pedidos. Si pagas ahora, tu pago no queda registrado en ningún pedido. Espera a que abramos.</div>
+      <button type="button" id="clsBrowse" class="btn-primary w-full rounded-xl py-3.5 font-semibold" style="margin-top:22px;max-width:400px">Solo quiero ver el catálogo</button>
+      <a id="clsWa" href="#" target="_blank" rel="noopener" class="hidden font-semibold text-emerald-300" style="margin-top:14px;font-size:14px">💬 Escríbenos por WhatsApp</a>
+    </div>
+  </div>
   <div id="authModal" class="modal fixed inset-0 z-[85] hidden items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
     <div class="glass max-h-[92vh] w-full max-w-md overflow-y-auto rounded-3xl p-6 shadow-glow-lg sm:p-8">
       <div class="flex items-start justify-between gap-4">
@@ -2532,7 +2548,21 @@ const GAME_INFO = [
         + row('Binance Pay ID', st.bnId) + row('Usuario / correo', st.bnUser)
         + `<div class="mt-2 border-t border-white/10 pt-2">${row('Monto a enviar', money(usd).replace('$', '') + ' USDT', true)}</div>`;
     }
+    function payShut() {   // la tienda no recibe pedidos ahora: no mostramos datos para pagar
+      try {
+        if (!storeOnline) return ['🛠️ Tienda en mantenimiento', 'Vuelve en unos minutos.'];
+        if (soonNow()) return ['🚀 Todavía no abrimos', 'Muy pronto podrás comprar.'];
+        const cs = closedState(); if (!cs.closed) return null;
+        const at = nextOpenAt(cs), msg = (cs.st.closedMsg || '').trim();
+        return ['🌙 Estamos cerrados', (at ? ('Abrimos ' + openWhen(at)).replace(/\.?$/, '. ') : '') + (msg ? msg + ' ' : '') + 'Los datos para pagar aparecen aquí cuando abramos.'];
+      } catch (_) { return null; }
+    }
     function renderPay(px) {
+      const shut = payShut();
+      if (shut) {
+        $('#' + px + 'Pay').innerHTML = `<div data-payshut style="padding:16px;border-radius:14px;border:1px solid rgba(244,63,94,.5);background:rgba(244,63,94,.12);font-size:14px;line-height:1.5;color:#fecdd3"><b style="display:block;color:#fff;font-size:15px">${shut[0]}</b><span style="display:block;margin-top:4px">⚠️ <b style="color:#fff">No hagas ningún pago ahora.</b> ${esc(shut[1])}</span></div>`;
+        return;
+      }
       syncMethods();
       const st = pay[px], amount = payAmount[px](), methods = [...(px === 'wa' ? ['pagomovil', 'binance'] : ['saldo', 'pagomovil', 'binance']), ...extraPays().map(m => m.id)];
       if (st.method && !methods.includes(st.method)) st.method = methods[0];
@@ -3442,7 +3472,7 @@ const GAME_INFO = [
     }
     function closedState() {
       const st = settings();
-      if (st.closed) return { closed: true, why: 'manual', st };
+      if (st.closed && !(+st.closedUntil > 0 && +st.closedUntil <= Date.now())) return { closed: true, why: 'manual', st };
       const h = st.hours; if (!h || !h.on) return { closed: false, st };
       const n = caracasNow(), o = toMin(h.open), c = toMin(h.close), days = Array.isArray(h.days) && h.days.length ? h.days : [0, 1, 2, 3, 4, 5, 6];
       const inTime = o <= c ? (n.min >= o && n.min < c) : (n.min >= o || n.min < c);
@@ -3450,8 +3480,8 @@ const GAME_INFO = [
     }
     function closedText() {
       const cs = closedState(); if (!cs.closed) return '';
-      const h = cs.st.hours, msg = (cs.st.closedMsg || '').trim();
-      return '🌙 Estamos cerrados' + (msg ? ' · ' + msg : (h && h.on ? ` · Atendemos de ${fmt12(h.open)} a ${fmt12(h.close)}` : ' · Vuelve pronto'));
+      const h = cs.st.hours, msg = (cs.st.closedMsg || '').trim(), at = nextOpenAt(cs);
+      return '🌙 Estamos cerrados · no hagas pagos ahora' + (msg ? ' · ' + msg : at ? ' · Abrimos ' + openWhen(at) : (h && h.on ? ` · Atendemos de ${fmt12(h.open)} a ${fmt12(h.close)}` : ' · Vuelve pronto'));
     }
     function renderClosedBanner() {
       const t = storeOnline ? closedText() : '';
@@ -3505,7 +3535,7 @@ const GAME_INFO = [
         loadSession(); renderAccount(); renderSanctionBanner();
         if (current && $('#walletModal').classList.contains('flex')) renderWallet();
       }
-      if (e.key === 'nradmin_settings' && !PUB) { setWaFloat(); renderSocial(); renderInfo(); refreshCatalog(); renderBanners(); renderClosedBanner(); applyLogo(); }
+      if (e.key === 'nradmin_settings' && !PUB) { setWaFloat(); renderSocial(); renderInfo(); refreshCatalog(); renderBanners(); renderClosedBanner(); renderClosedScreen(); applyLogo(); }
       if (e.key === 'nradmin_banners' && !PUB) renderBanners();
       if (e.key === 'nradmin_feed') renderAvg();
       if (e.key === 'nradmin_reviews' && game.id && $('#gameModal').classList.contains('flex')) $('#gmReviews').innerHTML = reviewsHTML(game.id);
@@ -3994,6 +4024,52 @@ const GAME_INFO = [
     });
     setInterval(() => { if (soonShown || soonCfg().on === true) renderSoon(); }, 1000);
 
+    // ---- Pantalla "Tienda cerrada" (cierre a mano o por horario) ----
+    function nextOpenAt(cs) {
+      cs = cs || closedState(); if (!cs.closed) return 0;
+      const st = cs.st, now = Date.now();
+      if (cs.why === 'manual') return +st.closedUntil > now ? +st.closedUntil : 0;
+      const h = st.hours; if (!h || !h.on) return 0;
+      const n = caracasNow(), o = toMin(h.open), days = Array.isArray(h.days) && h.days.length ? h.days : [0, 1, 2, 3, 4, 5, 6], base = Math.floor(now / 6e4) * 6e4;
+      for (let d = 0; d <= 7; d++) { const diff = d * 1440 + o - n.min; if (diff > 0 && days.includes((n.day + d) % 7)) return base + diff * 6e4; }
+      return 0;
+    }
+    function openWhen(at) {
+      const f = o => new Date(at).toLocaleString('es', { timeZone: 'America/Caracas', ...o });
+      const day = t => new Date(t).toLocaleDateString('en-CA', { timeZone: 'America/Caracas' }), now = Date.now();
+      const hr = f({ hour: 'numeric', minute: '2-digit', hour12: true });
+      return day(at) === day(now) ? 'hoy a las ' + hr : day(at) === day(now + 864e5) ? 'mañana a las ' + hr : 'el ' + f({ weekday: 'long', day: 'numeric', month: 'long' }) + ' a las ' + hr;
+    }
+    var closedShown = false, closedSeen = '', lastShut = '';
+    try { closedSeen = sessionStorage.getItem('nr_closed_seen') || ''; } catch (_) {}
+    function closedKey(cs) { return cs.why === 'manual' ? 'm' + (+cs.st.closedAt || 0) : 'h' + new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' }); }
+    function renderClosedScreen() {
+      const el = $('#closedScreen'); if (!el) return;
+      let cs = { closed: false }; try { cs = closedState(); } catch (_) {}
+      const cfgOn = cs.st ? cs.st.closedScreen !== false : true;
+      const show = storeOnline && !soonNow() && cs.closed && cfgOn && closedSeen !== closedKey(cs);
+      const shutSig = JSON.stringify(payShut());
+      if (shutSig !== lastShut) { lastShut = shutSig; ['co', 'gm', 'wa'].forEach(px => { try { const box = $('#' + px + 'Pay'); if (box && box.innerHTML.trim()) renderPay(px); } catch (_) {} }); }
+      if (!show) { if (closedShown) { closedShown = false; el.classList.add('hidden'); document.documentElement.style.overflow = ''; } return; }
+      if (!closedShown) { closedShown = true; el.classList.remove('hidden'); document.documentElement.style.overflow = 'hidden'; }
+      const st = cs.st, at = nextOpenAt(cs), ms = Math.max(0, at - Date.now());
+      $('#clsName').textContent = st.name || 'NR Digital';
+      $('#clsTitle').textContent = st.closedTitle || 'Ahora estamos cerrados';
+      const cell = (n, l) => `<span style="min-width:64px;padding:11px 6px;border-radius:16px;border:1px solid rgba(129,140,248,.45);background:rgba(99,102,241,.16)"><b class="font-display" style="display:block;font-size:28px;line-height:1;color:#fff">${String(n).padStart(2, '0')}</b><small style="display:block;margin-top:5px;font-size:10px;letter-spacing:.14em;color:#a5b4fc">${l}</small></span>`;
+      $('#clsLead').textContent = at ? 'ABRIMOS EN' : '';
+      $('#clsClock').innerHTML = at ? (ms >= 864e5 ? cell(Math.floor(ms / 864e5), 'DÍAS') : '') + cell(Math.floor(ms / 36e5) % 24, 'HORAS') + cell(Math.floor(ms / 6e4) % 60, 'MIN') + cell(Math.floor(ms / 1e3) % 60, 'SEG') : '';
+      const h = st.hours;
+      $('#clsDate').textContent = at ? 'Volvemos ' + openWhen(at) : (h && h.on ? `Atendemos de ${fmt12(h.open)} a ${fmt12(h.close)}` : 'Volvemos muy pronto');
+      $('#clsMsg').textContent = (st.closedMsg || '').trim();
+      const ph = String(st.phone || '').replace(/\D/g, ''), wa = $('#clsWa');
+      wa.classList.toggle('hidden', !ph); if (ph) wa.href = waLink('Hola, quiero saber a qué hora abren');
+    }
+    $('#clsBrowse').addEventListener('click', () => {
+      try { const cs = closedState(); closedSeen = closedKey(cs); sessionStorage.setItem('nr_closed_seen', closedSeen); } catch (_) {}
+      renderClosedScreen(); toast('🌙 Puedes ver el catálogo. Los pedidos y pagos se activan cuando abramos.');
+    });
+    setInterval(renderClosedScreen, 1000);
+
     // ---- Preguntas frecuentes escritas desde el panel ----
     var FAQ_DEFAULT = null;
     function renderFaq() {
@@ -4128,7 +4204,7 @@ const GAME_INFO = [
     if (CLOUD) SNAPDB.get().then(v => {
       if (!v || NRCloud.ready('products')) return;
       SNAP = v; PRODUCTS = loadCatalog(); cleanCart();
-      setWaFloat(); renderSocial(); renderInfo(); renderBanners(); renderClosedBanner();
+      setWaFloat(); renderSocial(); renderInfo(); renderBanners(); renderClosedBanner(); renderClosedScreen();
       renderFilters(); renderProducts(); renderCart(); applyLogo();
     });
     (async () => {

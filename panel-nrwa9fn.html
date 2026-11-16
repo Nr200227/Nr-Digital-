@@ -716,6 +716,7 @@
           <div id="qrBox" class="panel rounded-2xl p-5"></div>
           <div id="staffBox" class="panel rounded-2xl p-5"></div>
           <div id="soonBox" class="panel rounded-2xl p-5"></div>
+          <div id="closedBox" class="panel rounded-2xl p-5"></div>
           <div id="topCfgBox" class="panel rounded-2xl p-5"></div>
           <div id="faqBox" class="panel rounded-2xl p-5"></div>
           <div id="pendBox" class="panel rounded-2xl p-5"></div>
@@ -1940,7 +1941,7 @@ window.NR_FIREBASE = {
     const toMin = t => { const [h, m] = String(t || '0:0').split(':').map(Number); return (h || 0) * 60 + (m || 0); };
     function closedState(st) {
       st = st || getSettings();
-      if (st.closed) return { closed: true, why: 'manual' };
+      if (st.closed && !(+st.closedUntil > 0 && +st.closedUntil <= Date.now())) return { closed: true, why: 'manual', until: +st.closedUntil || 0 };
       const h = st.hours; if (!h || !h.on) return { closed: false };
       const n = caracasNow(), o = toMin(h.open), c = toMin(h.close), days = Array.isArray(h.days) && h.days.length ? h.days : [0, 1, 2, 3, 4, 5, 6];
       const inDay = days.includes(n.day), inTime = o <= c ? (n.min >= o && n.min < c) : (n.min >= o || n.min < c);
@@ -1955,13 +1956,15 @@ window.NR_FIREBASE = {
       $('#closedBar').classList.toggle('hidden', !cs.closed);
       $('#closedBar').innerHTML = cs.why === 'horario'
         ? `🌙 Cerrado por <b>horario</b> (${esc(st.hours.open)}–${esc(st.hours.close)}). Los clientes ven el catálogo, pero no pueden hacer pedidos ni recargas.`
-        : '🌙 La tienda está <b>CERRADA</b>: los clientes ven el catálogo, pero no pueden hacer pedidos ni recargas.';
+        : `🌙 La tienda está <b>CERRADA</b>${cs.until ? ' hasta el <b>' + esc(new Date(cs.until).toLocaleString('es', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })) + '</b> (abre sola)' : ''}: los clientes ven el aviso de cerrado y no pueden hacer pedidos ni recargas.`;
+      try { renderClosedBox(); } catch (_) {}   // todavía no existe al arrancar
     }
     $('#closedToggle').addEventListener('click', () => {
       const st = getSettings(), cs = closedState(st);
       if (cs.why === 'horario') { showView('config'); setTimeout(() => $('#hoursCard').scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); return toast('Está cerrado por el horario automático. Cámbialo o apágalo aquí.', 'warn'); }
-      store.set('settings', { ...store.get('settings', {}), closed: !st.closed }); renderClosed();
-      toast(!st.closed ? '🌙 Tienda CERRADA: no se reciben pedidos' : '☀️ Tienda ABIERTA: ya se reciben pedidos', !st.closed ? 'warn' : 'ok');
+      const closing = !cs.closed;
+      store.set('settings', { ...store.get('settings', {}), closed: closing, closedUntil: 0, ...(closing ? { closedAt: Date.now() } : {}) }); renderClosed();
+      toast(closing ? '🌙 Tienda CERRADA: no se reciben pedidos' : '☀️ Tienda ABIERTA: ya se reciben pedidos', closing ? 'warn' : 'ok');
     });
     setInterval(renderClosed, 60000);
 
@@ -3928,7 +3931,7 @@ window.NR_FIREBASE = {
     const raffleProducts = () => products.filter(x => x.raffle);
     const raffleEntries = id => { const out = []; orders.filter(o => validOrder(o)).forEach(o => o.items.forEach(i => { if (i.id === id) (i.tickets && i.tickets.length ? i.tickets : Array.from({ length: i.qty }, (_, k) => o.id.slice(-4) + k)).forEach(t => out.push({ t, o })); })); return out; };
     const pendingTix = id => orders.filter(o => o.status === 'Pendiente').reduce((a, o) => a + o.items.filter(i => i.id === id).reduce((b, i) => b + i.qty, 0), 0);
-    const drawLabel = t => t ? new Date(+t).toLocaleString('es-VE', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'Sin fecha';
+    const drawLabel = t => t ? new Date(+t).toLocaleString('es-VE', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true }) : 'Sin fecha';
     function renderTix() {
       const box = $('#tixBox'); if (!box) return;
       const L1 = 'mb-1.5 block text-xs text-muted', list = raffleProducts().sort((a, b) => (b.raffle.createdAt || 0) - (a.raffle.createdAt || 0));
@@ -4619,6 +4622,36 @@ window.NR_FIREBASE = {
         ${on && link ? `<div class="mt-4 rounded-xl border border-white/10 p-3"><p class="text-xs text-muted">🔑 Enlace secreto para que <b class="text-white">tú</b> veas y pruebes la tienda mientras está tapada (no lo compartas):</p><p class="mt-1 font-mono text-xs text-neon" style="word-break:break-all">${esc(link)}</p><button data-sooncopy="${esc(link)}" class="mt-2 rounded-lg border border-neon/40 px-3 py-1.5 text-xs font-semibold text-neon hover:bg-neon/10">Copiar enlace</button></div>` : ''}`;
       icons();
     }
+    var clsDraft = null;
+    function renderClosedBox() {
+      const box = $('#closedBox'); if (!box || STAFF) return;
+      const st = getSettings(), cs = closedState(st), on = st.closedScreen !== false;
+      if (box.contains(document.activeElement) && clsDraft) return;   // no le borres lo que está escribiendo
+      clsDraft = { title: st.closedTitle || '', msg: st.closedMsg || '', until: +st.closedUntil > Date.now() ? +st.closedUntil : 0 };
+      const fmt = t => new Date(t).toLocaleString('es', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', hour12: true });
+      const stTxt = !cs.closed ? '☀️ <b>Abierta</b>: los clientes compran normal.' : cs.why === 'horario' ? '🌙 <b>Cerrada por horario</b>: abre sola en tu hora de apertura.' : '🌙 <b>Cerrada a mano</b>' + (cs.until ? ' hasta el ' + esc(fmt(cs.until)) + ' (abre sola)' : ': ábrela con el botón Abierto / Cerrado.');
+      box.innerHTML = `<div class="flex items-start justify-between gap-3"><div><h3 class="font-semibold">🌙 Aviso de tienda cerrada</h3><p class="mt-0.5 text-xs text-muted">Cuando la tienda está cerrada (a mano o por horario) le sale al cliente una pantalla grande que dice que no pague. Además, mientras está cerrada <b class="text-white">no se muestran tus datos de Pago Móvil ni Binance</b>.</p></div><button type="button" data-clsscreen class="switch shrink-0 ${on ? 'on' : ''}" aria-label="Pantalla de cerrado"></button></div>
+        <p class="mt-3 rounded-xl border ${cs.closed ? 'bg-indigo-500/10' : 'border-white/10 text-muted'} px-3 py-2 text-xs" style="${cs.closed ? 'border-color:rgba(129,140,248,.45);color:#e0e7ff' : ''}">${stTxt}${on ? '' : ' · Pantalla grande apagada: solo sale la franja de arriba.'}</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2"><label class="block"><span class="mb-1.5 block text-xs text-muted">Título</span><input id="clsTitleIn" maxlength="50" value="${esc(clsDraft.title)}" placeholder="Ahora estamos cerrados" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Mensaje (el mismo del horario)</span><input id="clsMsgIn" maxlength="140" value="${esc(clsDraft.msg)}" placeholder="Ej. Volvemos mañana a las 8:00 AM 🙌" class="field py-2 text-sm" /></label></div>
+        <button type="button" data-clssave class="btn-primary mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold">Guardar textos</button>
+        <div class="mt-4 rounded-xl border border-white/10 p-3"><p class="text-sm font-semibold">Cerrar ahora y abrir sola</p><p class="mt-0.5 text-xs text-muted">Elige cuándo vuelves. El cliente ve la cuenta regresiva y la tienda se abre sola a esa hora.</p>
+          <div class="mt-3 flex flex-wrap items-end gap-2"><input id="clsUntil" type="datetime-local" value="${clsDraft.until ? toLocalDT(clsDraft.until) : ''}" class="field w-auto py-2 text-sm" />
+          <button type="button" data-clsclose class="shrink-0 rounded-xl border px-4 py-2.5 text-sm font-semibold" style="border-color:rgba(129,140,248,.55);color:#e0e7ff">🌙 Cerrar hasta esa hora</button>
+          ${cs.closed && cs.why === 'manual' ? '<button type="button" data-clsopen class="shrink-0 rounded-xl border border-emerald-500/40 px-4 py-2.5 text-sm font-semibold text-emerald-300 hover:bg-emerald-500/10">☀️ Abrir ya</button>' : ''}</div></div>`;
+    }
+    document.addEventListener('click', e => {
+      const t = e.target; if (!t.closest || !t.closest('#closedBox')) return;
+      const set = patch => { store.set('settings', { ...store.get('settings', {}), ...patch }); clsDraft = null; renderClosed(); renderClosedBox(); };
+      if (t.closest('[data-clsscreen]')) { const on = getSettings().closedScreen === false; set({ closedScreen: on }); toast(on ? '🌙 Pantalla de cerrado prendida' : 'Pantalla de cerrado apagada: solo sale la franja de arriba', on ? 'ok' : 'warn'); }
+      if (t.closest('[data-clssave]')) { const msg = $('#clsMsgIn').value.trim().slice(0, 140); set({ closedTitle: $('#clsTitleIn').value.trim().slice(0, 50), closedMsg: msg }); if ($('#hrMsg')) $('#hrMsg').value = msg; toast('🌙 Textos guardados'); }
+      if (t.closest('[data-clsclose]')) {
+        const v = $('#clsUntil').value, at = v ? new Date(v).getTime() || 0 : 0;
+        if (!at || at <= Date.now()) return toast('Elige una fecha y hora futura para volver a abrir', 'warn');
+        set({ closed: true, closedAt: Date.now(), closedUntil: at }); toast('🌙 Tienda CERRADA hasta la hora que elegiste', 'warn');
+      }
+      if (t.closest('[data-clsopen]')) { set({ closed: false, closedUntil: 0 }); toast('☀️ Tienda ABIERTA: ya se reciben pedidos', 'ok'); }
+    });
     function saveSoon(patch) {
       const st = store.get('settings', {}) || {}, cur = st.soon || {};
       const key = cur.key || Math.random().toString(36).slice(2, 10);
@@ -4678,10 +4711,10 @@ window.NR_FIREBASE = {
       }
     });
     window.addEventListener('storage', e => {
-      if (e.key === 'nradmin_settings') { if (!soonDraft || document.activeElement.closest && !document.activeElement.closest('#soonBox')) { soonDraft = null; renderSoonBox(); } renderTopCfg(); }
+      if (e.key === 'nradmin_settings') { renderClosedBox(); if (!soonDraft || document.activeElement.closest && !document.activeElement.closest('#soonBox')) { soonDraft = null; renderSoonBox(); } renderTopCfg(); }
       if (e.key === 'nradmin_orders') renderTopCfg();
     });
-    function renderCfgExtras() { if (STAFF) return; try { renderStaff(); renderSoonBox(); renderTopCfg(); renderFaqBox(); renderPendBox(); renderBackup(); renderLog(); } catch (er) { console.warn(er); } }
+    function renderCfgExtras() { if (STAFF) return; try { renderStaff(); renderSoonBox(); renderClosedBox(); renderTopCfg(); renderFaqBox(); renderPendBox(); renderBackup(); renderLog(); } catch (er) { console.warn(er); } }
 
     /* ---------- ID de jugador ordenado y con botón de copiar ---------- */
     function splitPlayerId(v) {
