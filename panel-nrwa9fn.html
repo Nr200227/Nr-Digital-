@@ -571,6 +571,7 @@
           <div><p class="text-sm text-muted">Promociones</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Ofertas y cupones</h2></div>
           <div id="saleCard" class="panel rounded-2xl p-5"></div>
           <div id="itemSaleBox" class="panel rounded-2xl p-5"></div>
+          <div id="dealBox" class="panel rounded-2xl p-5"></div>
           <div class="grid gap-6 xl:grid-cols-2"><div id="dailyBox" class="panel rounded-2xl p-5"></div><div id="socialBox" class="panel rounded-2xl p-5"></div></div>
           <div id="comboBox" class="panel rounded-2xl p-5"></div>
           <div class="panel rounded-2xl p-5">
@@ -1902,7 +1903,7 @@ window.NR_FIREBASE = {
       if (name === 'clientes') { renderClients(); store.set('clientsSeenAt', Date.now()); renderNewClientsBadge(); }
       if (name === 'pedidos') renderOrders();
       if (name === 'productos') renderProducts();
-      if (name === 'cupones') { renderSale(); renderItemSales(); renderOfferExtras(); renderCoupons(); }
+      if (name === 'cupones') { renderSale(); renderItemSales(); renderDeals(); renderOfferExtras(); renderCoupons(); }
       if (name === 'vip') { renderVip(); renderTix(); }
       if (name === 'config') renderCfgExtras();
       if (name === 'finanzas') renderFinExtras();
@@ -4145,6 +4146,77 @@ window.NR_FIREBASE = {
     });
     window.addEventListener('storage', e => { if (['nradmin_settings', 'nradmin_products'].includes(e.key) && $('#itemSaleBox') && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#itemSaleBox'))) { try { renderItemSales(); } catch (_) {} } });
 
+    /* ================= Descuento solo para un cliente ================= */
+    var dlDraft = { q: '', email: '', where: '', pct: '', until: '', msg: '' };
+    const dealActive = d => d && +d.pct > 0 && !+d.endAt && (!+d.until || Date.now() <= +d.until);
+    const dealWhere = d => d.scope === 'item' ? ((products.find(x => x.id === d.pid) || {}).name || 'un producto') : d.scope === 'cat' ? d.cat : 'toda la tienda';
+    function dlUserOpts() {
+      const q = dlDraft.q.trim().toLowerCase(), list = users().filter(u => u.email && (!q || (String(u.name || '') + ' ' + u.email + ' ' + String(u.phone || '')).toLowerCase().includes(q)))
+        .sort((a, b) => String(a.name || a.email).localeCompare(String(b.name || b.email))).slice(0, 200);
+      if (dlDraft.email && !list.some(u => u.email === dlDraft.email)) { const u = userByEmail(dlDraft.email); if (u) list.unshift(u); }
+      return `<option value="">${list.length ? 'Elige el cliente…' : 'No hay clientes con ese nombre'}</option>` + list.map(u => `<option value="${esc(u.email)}" ${u.email === dlDraft.email ? 'selected' : ''}>${esc(u.name || u.email)} · ${esc(u.email)}</option>`).join('');
+    }
+    function renderDeals() {
+      const box = $('#dealBox'); if (!box || STAFF) return;
+      if (box.contains(document.activeElement) && document.activeElement.id === 'dlFind') return;
+      const cats = [...new Set(products.filter(x => !x.raffle && !(+x.giftValue > 0)).map(x => x.cat).filter(Boolean))], opts = products.filter(x => !x.raffle && !(+x.giftValue > 0));
+      const act = []; users().forEach(u => (Array.isArray(u.deals) ? u.deals : []).forEach(d => { if (dealActive(d)) act.push([u, d]); }));
+      act.sort((a, b) => (+b[1].at || 0) - (+a[1].at || 0));
+      box.innerHTML = `<h3 class="font-semibold">🎁 Descuento solo para un cliente</h3><p class="mt-0.5 text-xs text-muted">Eliges al cliente y solo él ve ese descuento: le sale una tarjeta "Solo para ti" y los precios ya rebajados. Los demás clientes no ven nada. Si ese producto también tiene otra oferta, se usa la más alta.</p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Buscar cliente</span><input id="dlFind" value="${esc(dlDraft.q)}" placeholder="Nombre, correo o teléfono" autocomplete="off" class="field py-2 text-sm" /></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">Cliente</span><select id="dlUser" class="field py-2 text-sm">${dlUserOpts()}</select></label>
+          <label class="block"><span class="mb-1.5 block text-xs text-muted">¿En qué?</span><select id="dlWhere" class="field py-2 text-sm"><option value="">Toda la tienda</option>
+            <optgroup label="Una categoría">${cats.map(c => `<option value="cat:${esc(c)}" ${dlDraft.where === 'cat:' + c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</optgroup>
+            <optgroup label="Un producto">${opts.map(x => `<option value="item:${esc(x.id)}" ${dlDraft.where === 'item:' + x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</optgroup></select></label>
+          <div class="grid grid-cols-2 gap-3"><label class="block"><span class="mb-1.5 block text-xs text-muted">Descuento (%)</span><input id="dlPct" type="number" min="1" max="90" step="1" inputmode="numeric" value="${esc(dlDraft.pct)}" placeholder="10" class="field py-2 text-sm" /></label>
+            <label class="block"><span class="mb-1.5 block text-xs text-muted">Hasta (opcional)</span><input id="dlUntil" type="date" min="${toInputDate(Date.now())}" value="${esc(dlDraft.until)}" class="field py-2 text-sm" /></label></div>
+        </div>
+        <label class="mt-3 block"><span class="mb-1.5 block text-xs text-muted">Mensaje para el cliente (opcional)</span><input id="dlMsg" maxlength="120" value="${esc(dlDraft.msg)}" placeholder="Ej. Gracias por ser cliente fiel 🙌" class="field py-2 text-sm" /></label>
+        <button type="button" data-dladd class="btn-primary mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold">🎁 Darle el descuento</button>
+        <p class="mt-5 text-sm font-medium text-neutral-300">Descuentos activos (${act.length})</p>
+        ${act.length ? `<ul class="mt-2 space-y-1.5 text-sm">${act.map(([u, d]) => `<li class="flex items-center justify-between gap-3 rounded-lg border px-3 py-2" style="border-color:rgba(232,121,249,.35)"><span class="min-w-0"><b>${esc(u.name || u.email)}</b> <b style="color:#f0abfc">-${+d.pct}%</b> en ${esc(dealWhere(d))}<span class="block truncate text-xs text-muted">${esc(u.email)}${+d.until ? ' · hasta el ' + fmtDay(+d.until) : ' · sin fecha de fin'}</span></span><button type="button" data-dldel="${esc(u.email)}|${esc(d.id)}" class="shrink-0 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-muted hover:text-white">Quitar</button></li>`).join('')}</ul>` : '<p class="mt-1 text-xs text-muted">Todavía no le has dado descuento a ningún cliente.</p>'}`;
+    }
+    function saveDeals(email, fn) {
+      const list = users(), u = list.find(x => x.email === email); if (!u) return null;
+      const now = Date.now(), keep = d => d && ((!+d.endAt && (!+d.until || +d.until > now - 60 * DAYMS)) || +d.endAt > now - 60 * DAYMS);   // guarda 60 días de historial para revisar precios de pedidos viejos
+      u.deals = fn((Array.isArray(u.deals) ? u.deals : []).filter(keep)); store.set('users', list); return u;
+    }
+    document.addEventListener('input', e => {
+      if (e.target.id === 'dlFind') { dlDraft.q = e.target.value; const sel = $('#dlUser'); if (sel) sel.innerHTML = dlUserOpts(); }
+      if (e.target.id === 'dlPct') dlDraft.pct = e.target.value;
+      if (e.target.id === 'dlMsg') dlDraft.msg = e.target.value;
+    });
+    document.addEventListener('change', e => {
+      if (e.target.id === 'dlUser') dlDraft.email = e.target.value;
+      if (e.target.id === 'dlWhere') dlDraft.where = e.target.value;
+      if (e.target.id === 'dlUntil') dlDraft.until = e.target.value;
+    });
+    document.addEventListener('click', e => {
+      if (STAFF) return;
+      if (e.target.closest('[data-dladd]')) {
+        const u0 = userByEmail(dlDraft.email); if (!u0) return toast('Elige el cliente', 'warn');
+        const pct = Math.round(+dlDraft.pct || 0); if (!(pct >= 1 && pct <= 90)) return toast('El descuento debe estar entre 1 y 90%', 'warn');
+        const until = dlDraft.until ? fromInputDate(dlDraft.until) + DAYMS - 1 : 0; if (until && until < Date.now()) return toast('Esa fecha ya pasó', 'warn');
+        const w = dlDraft.where, d = { id: 'D' + Date.now().toString(36), pct, scope: w.startsWith('item:') ? 'item' : w.startsWith('cat:') ? 'cat' : 'all', until, at: Date.now(), msg: String(dlDraft.msg || '').trim().slice(0, 120) };
+        if (d.scope === 'item') d.pid = w.slice(5); if (d.scope === 'cat') d.cat = w.slice(4);
+        if (d.scope === 'item' && !products.some(x => x.id === d.pid)) return toast('Ese producto ya no existe', 'warn');
+        const now = Date.now();   // si ya tenía uno igual (mismo producto o categoría), el nuevo lo reemplaza
+        const u = saveDeals(u0.email, a => [...a.map(x => dealActive(x) && x.scope === d.scope && (x.pid || '') === (d.pid || '') && (x.cat || '') === (d.cat || '') ? { ...x, endAt: now } : x), d]);
+        if (!u) return;
+        pushClientNotif(u.email, { icon: '🎁', title: `¡Tienes ${pct}% de descuento solo para ti!`, text: `${d.msg ? d.msg + ' · ' : ''}Es en ${dealWhere(d)}${until ? ' y vale hasta el ' + fmtDay(until) : ''}. Ya está aplicado en los precios: solo compra normal.` });
+        dlDraft = { q: '', email: '', where: '', pct: '', until: '', msg: '' }; renderDeals();
+        toast(`🎁 ${u.name || u.email}: -${pct}% en ${dealWhere(d)}. Solo él lo ve.`);
+      }
+      const dl = e.target.closest('[data-dldel]');
+      if (dl) {
+        const [email, id] = dl.dataset.dldel.split('|'), now = Date.now();
+        const u = saveDeals(email, a => a.map(x => x.id === id ? { ...x, endAt: now } : x)); if (!u) return;
+        renderDeals(); toast(`Descuento quitado a ${u.name || u.email}`);
+      }
+    });
+    window.addEventListener('storage', e => { if (['nradmin_users', 'nradmin_products'].includes(e.key) && $('#dealBox') && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#dealBox'))) { try { renderDeals(); } catch (_) {} } });
+
     /* ================= Herramientas de productos: duplicar · precios en lote · calculadora · programar · cuentas ================= */
     function schedChip(p) {
       const now = Date.now(), f = t => new Date(+t).toLocaleString('es', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
@@ -4933,7 +5005,20 @@ window.NR_FIREBASE = {
     const saleLive = sl => sl.on && +sl.pct > 0 && (!+sl.until || Date.now() <= +sl.until);
     let saleDraft = null;
     // % de oferta que tenía una categoría en un momento dado (para revisar montos de pedidos viejos)
-    function salePctAt(t, cat, pid) {
+    // Descuento de un cliente en ese momento (también los que ya quitaste, para no marcar como "precio alterado" pedidos viejos)
+    function dealPctAt(t, email, cat, pid) {
+      const u = email && userByEmail(email), a = u && Array.isArray(u.deals) ? u.deals : [], id = String(pid || '').split('~')[0], M = 3 * 60000; let best = 0;
+      a.forEach(d => {
+        if (!d || !(+d.pct > 0)) return;
+        const to = Math.min(+d.until || Infinity, +d.endAt || Infinity);
+        if (t < (+d.at || 0) - M || t > to + M) return;
+        const ok = d.scope === 'item' ? d.pid === id : d.scope === 'cat' ? d.cat === cat : true;
+        if (ok && +d.pct > best) best = +d.pct;
+      });
+      return best;
+    }
+    function salePctAt(t, cat, pid, email) { const a = pubPctAt(t, cat, pid), b = email ? dealPctAt(t, email, cat, pid) : 0; return b > a ? b : a; }
+    function pubPctAt(t, cat, pid) {
       const st = store.get('settings', {}) || {}, sl = st.sale || {}, M = 3 * 60000;
       if (pid) {   // oferta propia del producto: manda sobre la general (igual que en la tienda)
         const id = String(pid).split('~')[0], iw = [...(Array.isArray(st.itemSales) ? st.itemSales : []).map(x => ({ id: x.id, pct: x.pct, from: x.since || 0, to: +x.until || Infinity })), ...(Array.isArray(st.itemSaleLog) ? st.itemSaleLog : [])];
@@ -5198,7 +5283,7 @@ window.NR_FIREBASE = {
     const expectedAmount = o => {
       let full = 0, base = 0;
       const vpct = o.vip ? Math.min(+o.vip.pct || 0, vipPctOf(userByEmail(o.userEmail))) : 0;
-      o.items.forEach(i => { const k = pkgOf(i.id), p = prodOf(i.id), gift = +i.giftValue > 0 || +((p || {}).giftValue) > 0 || !!((p || {}).raffle) || !!i.tickets, pct = gift ? 0 : salePctAt(o.date, i.cat || (p || {}).cat, i.id), u = k ? +k.price : p ? +p.price : +i.price || 0;
+      o.items.forEach(i => { const k = pkgOf(i.id), p = prodOf(i.id), gift = +i.giftValue > 0 || +((p || {}).giftValue) > 0 || !!((p || {}).raffle) || !!i.tickets, pct = gift ? 0 : salePctAt(o.date, i.cat || (p || {}).cat, i.id, o.userEmail), u = k ? +k.price : p ? +p.price : +i.price || 0;
         let x = pct ? +(u * (1 - pct / 100)).toFixed(2) : u; if (vpct && !gift) x = +(x * (1 - vpct / 100)).toFixed(2);
         const v = x * i.qty; full += v; if (!gift) base += v; });
       const c = o.coupon && coupons().find(x => x.code === o.coupon.code);
