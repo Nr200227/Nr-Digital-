@@ -69,6 +69,8 @@
       .inv-grid > .inv-prev { position: sticky; top: 84px; }
     }
     @media (max-width: 1279px) { .inv-grid > * + * { margin-top: 1.5rem; } }
+    #adGrid.ad-free > .inv-prev { position: static; }
+    @media (max-width: 1279px) { #adGrid.ad-free { display: flex; flex-direction: column; } #adGrid.ad-free > .inv-prev { order: -1; margin-top: 0; } #adGrid.ad-free > #adForm { margin-top: 1.5rem; } }
 </style>
 
   <style>
@@ -304,6 +306,7 @@
         <a href="#" data-view="vip" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><span class="grid h-5 w-5 place-items-center text-base leading-none">👑</span>Club VIP y sorteo</a>
         <a href="#" data-view="vencimientos" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="calendar-clock" class="h-5 w-5"></i>Vencimientos<span id="svBadge" class="ml-auto hidden rounded-full bg-amber-500/15 px-2 py-0.5 text-[11px] font-bold text-amber-400">0</span></a>
         <a href="#" data-view="facturas" class="owner-only nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><span class="grid h-5 w-5 place-items-center text-base" style="line-height:1">🧾</span>Facturar</a>
+        <a href="#" data-view="publicidad" class="owner-only nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><span class="grid h-5 w-5 place-items-center text-base" style="line-height:1">🎨</span>Publicidad</a>
         <a href="#" data-view="finanzas" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="credit-card" class="h-5 w-5"></i>Finanzas / Ingresos</a>
         <a href="#" data-view="monitor" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="gauge" class="h-5 w-5"></i>Monitor Bs<span class="ml-auto rounded-full bg-neon/10 px-2 py-0.5 text-[10px] font-bold text-neon">PRIVADO</span></a>
         <a href="#" data-view="config" class="nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted hover:bg-white/5 hover:text-white"><i data-lucide="settings" class="h-5 w-5"></i>Configuración</a>
@@ -663,6 +666,16 @@
             </div>
             <p class="mt-2 text-xs text-muted">En el celular, "Enviar por WhatsApp" abre para compartir la imagen: elige WhatsApp y el chat del cliente. Al enviar o descargar, la factura se guarda sola.</p></div></div>
           <div id="invHist" class="panel rounded-2xl p-5"></div>
+        </section>
+        <section data-panel="publicidad" class="view hidden space-y-6">
+          <div><p class="text-sm text-muted">Para tus estados de WhatsApp e Instagram</p><h2 class="font-display text-2xl font-bold sm:text-3xl">🎨 Publicidad</h2></div>
+          <div id="adModes" class="grid grid-cols-2 gap-2"></div>
+          <div id="adGrid" class="inv-grid"><div id="adForm" class="panel rounded-2xl p-5"></div>
+          <div class="inv-prev panel rounded-2xl p-5"><div class="flex items-center justify-between gap-3"><h3 class="font-semibold">Vista previa</h3><span class="text-xs text-muted">Así se descarga</span></div>
+            <div id="adStage" class="mt-3 overflow-hidden rounded-2xl border border-white/10" style="position:relative;user-select:none;-webkit-user-select:none"></div>
+            <div id="afSelBox"></div>
+            <div class="mt-4 grid gap-2 sm:grid-cols-2"><button type="button" data-adshare class="btn-primary rounded-xl py-3 text-sm font-semibold">📤 Compartir / subir</button><button type="button" data-addl class="rounded-xl border border-white/15 py-3 text-sm font-semibold hover:bg-white/5">⬇️ Descargar imagen</button></div>
+            <p id="adTip" class="mt-2 text-xs text-muted"></p></div></div>
         </section>
         <section data-panel="finanzas" class="view hidden space-y-6">
           <div><p class="text-sm text-muted">Reportes</p><h2 class="font-display text-2xl font-bold sm:text-3xl">Finanzas / Ingresos</h2></div>
@@ -1937,6 +1950,7 @@ window.NR_FIREBASE = {
       if (name === 'config') renderCfgExtras();
       if (name === 'finanzas') renderFinExtras();
       if (name === 'facturas') renderInvoices();
+      if (name === 'publicidad') renderAds();
       if (name === 'productos') renderProdTools();
       if (name === 'resenas') renderReviews();
       $$('.view').forEach(v => v.classList.toggle('hidden', v.dataset.panel !== name));
@@ -4246,6 +4260,642 @@ window.NR_FIREBASE = {
       }
     });
     window.addEventListener('storage', e => { if (['nradmin_users', 'nradmin_products'].includes(e.key) && $('#dealBox') && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#dealBox'))) { try { renderDeals(); } catch (_) {} } });
+
+    /* ================= Generador de publicidad (estados, Instagram) ================= */
+    const AD_PAL = [
+      { n: 'Neón azul', a: '#00e5ff', b: '#2f7bff', c: '#ff3cac', bg: '#050a17' },
+      { n: 'Fucsia', a: '#ff4fd8', b: '#9dff3c', c: '#00e5ff', bg: '#12021a' },
+      { n: 'Rojo cine', a: '#ff2b2b', b: '#ffb02e', c: '#ffd77a', bg: '#1a0303' },
+      { n: 'Fuego', a: '#ffd23f', b: '#ff5a00', c: '#ff2a00', bg: '#1a0500' },
+      { n: 'Morado gamer', a: '#b98cff', b: '#00e5ff', c: '#8a3cff', bg: '#06021a' },
+      { n: 'Verde', a: '#39ff88', b: '#00c2ff', c: '#d9ffe6', bg: '#03140a' },
+      { n: 'Dorado', a: '#ffd77a', b: '#ffb800', c: '#fff3c4', bg: '#120d02' },
+      { n: 'Atardecer', a: '#ff9f43', b: '#ff2d55', c: '#ffd1dc', bg: '#0b1026' }
+    ];
+    const AD_PLAT = ['Netflix', 'Disney+', 'HBO Max', 'Prime Video', 'Paramount+', 'Crunchyroll', 'Spotify', 'YouTube Premium', 'ViX', 'Apple TV', 'Canva Pro', 'CapCut Pro', 'ChatGPT Plus', 'Flujo TV', 'IPTV'];
+    const AD_GAMES = ['Free Fire', 'Roblox', 'Mobile Legends', 'Blood Strike', 'Genshin', 'Valorant', 'PUBG Mobile', 'Call of Duty', 'Fortnite', 'Steam', 'PlayStation', 'Xbox'];
+    const AD_CSS = `
+.ad *{box-sizing:border-box;margin:0;padding:0}
+.ad{position:relative;overflow:hidden;color:#fff;font-family:Poppins,'Segoe UI',Roboto,Arial,sans-serif;width:1080px}
+.ad .A{position:absolute}.ad .C{position:absolute;left:0;right:0;text-align:center}
+.ad .k{font-weight:800;line-height:.95;letter-spacing:-.01em}
+.ad .nr{position:absolute;display:flex;align-items:center;gap:16px;z-index:30}
+.ad .nr .ic{width:88px;height:88px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:38px;letter-spacing:-1px;background:linear-gradient(145deg,#0a1a3d,#04070f);box-shadow:0 0 0 3px #00e5ff,0 0 34px rgba(0,229,255,.6);overflow:hidden;color:#bff7ff}
+.ad .nr .ic img{width:100%;height:100%;object-fit:cover}
+.ad .nr b{display:block;font-size:40px;font-weight:800;letter-spacing:.05em;line-height:1;color:#fff;text-shadow:0 0 18px rgba(0,229,255,.55)}
+.ad .nr i{display:block;font-style:normal;font-size:17px;letter-spacing:.32em;color:#9fc4ff;margin-top:7px;font-weight:600}
+.ad .nr.dk b{color:#0a1530;text-shadow:none}.ad .nr.dk i{color:#30405f}
+.ad .chips{display:grid;gap:16px}
+.ad .chip{display:flex;align-items:center;justify-content:center;height:92px;border-radius:22px;font-weight:800;font-size:30px;text-align:center;line-height:1.05;padding:0 10px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25)}
+.ad .btn{display:inline-block;padding:26px 54px;border-radius:999px;font-weight:800;font-size:38px}
+.ad .ben{display:flex;gap:14px}.ad .ben div{flex:1;padding:20px 8px;border-radius:22px;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.18);font-size:23px;font-weight:700;text-align:center;line-height:1.15}
+.ad .ben div b{display:block;font-size:48px;margin-bottom:6px}
+.ad .lan{position:absolute;width:120px;z-index:5}.ad .lan .r{width:4px;height:140px;margin:0 auto;background:#5a4a30}
+.ad .lan .t{width:80px;height:26px;margin:0 auto;border-radius:10px 10px 4px 4px;background:#5b4523}
+.ad .lan .bd{width:120px;height:150px;border-radius:30px;background:radial-gradient(circle at 50% 55%,#fff6c9 0,#ffcf5a 25%,#e08a12 55%,#5b3608 100%);box-shadow:0 0 90px 30px rgba(255,190,70,.5);border:6px solid #4a3412}
+.ad .lan .bt{width:70px;height:18px;margin:-2px auto 0;border-radius:4px 4px 12px 12px;background:#3a2c14}
+.ad .gem{position:absolute;transform:rotate(45deg);border-radius:30px;background:linear-gradient(135deg,#bffbff,#25c8ff 40%,#0062ff 75%,#002a8a);box-shadow:0 0 80px rgba(60,200,255,.8),inset -20px -20px 40px rgba(0,20,90,.7),inset 20px 20px 40px rgba(255,255,255,.5)}
+.ad .row{display:flex;justify-content:space-between;align-items:center;padding:20px 36px;border-radius:26px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);font-size:44px;font-weight:700;margin-top:16px}
+.ad .row .p{font-size:52px;font-weight:800}
+.ad .foot{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:24px;font-weight:600;color:rgba(255,255,255,.75);z-index:31}
+`;
+    const adChips = (list, cols, chipCss) => `<div class="chips" style="grid-template-columns:repeat(${cols},1fr)">${list.map(n => `<div class="chip" style="${chipCss || ''}">${esc(n)}</div>`).join('')}</div>`;
+    const adLan = (x, y) => `<div class="lan" style="left:${x}px;top:${y}px"><div class="r"></div><div class="t"></div><div class="bd"></div><div class="bt"></div></div>`;
+    const adBtn = (txt, css) => txt ? `<span class="btn" style="${css}">${esc(txt)}</span>` : '';
+    // Cada diseño: textos por defecto y qué partes usa (chips = plataformas/juegos, prices = lista del catálogo, one = un producto con precio)
+    const AD_TPL = [
+      { id: 'neon', n: 'Ventas de cuentas (neón)', d: { t1: 'VENTAS', t2: 'DE CUENTAS', t3: 'STREAMING', cta: 'Escríbenos ahora 💬' }, chips: 'plat', max: 6, pal: 1,
+        bg: P => `radial-gradient(700px 500px at 50% 10%,${P.a}55,transparent 70%),radial-gradient(800px 600px at 50% 100%,${P.c}40,transparent 70%),${P.bg}`,
+        r: (d, P) => `<div class="C" style="top:190px"><p class="k" style="font-size:150px;color:${P.a};text-shadow:0 0 12px ${P.a},0 0 50px ${P.a}">${esc(d.t1)}</p><p style="font-size:52px;font-weight:800;letter-spacing:.3em;margin-top:6px">${esc(d.t2)}</p><p class="k" style="font-size:128px;font-style:italic;color:${P.b};text-shadow:0 0 12px ${P.b},0 0 50px ${P.b}">${esc(d.t3)}</p></div>
+          <div class="A" style="left:70px;right:70px;top:720px">${adChips(d.chips.slice(0, 6), 3, `border-color:${P.c};box-shadow:0 0 20px ${P.c}77`)}</div>
+          <div class="A ben" style="left:70px;right:70px;top:990px"><div><b>✅</b>100% confiables</div><div><b>⚡</b>Entrega inmediata</div><div><b>🔒</b>Cuentas seguras</div><div><b>🎧</b>Soporte</div></div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:${P.a};color:#000;box-shadow:0 0 40px ${P.a}`)}</div>` },
+      { id: 'lantern', n: 'Súper precios (linternas)', d: { t1: 'TENEMOS', t2: 'Súper', t3: 'PRECIOS', cta: '¡COMPRA TU PERFIL AHORA!' }, chips: 'plat', max: 9, pal: 2, nrPos: 'top:44px;left:300px',
+        bg: P => `radial-gradient(600px 500px at 50% 45%,${P.a}55,transparent 70%),radial-gradient(900px 400px at 50% 110%,${P.a}66,transparent 70%),${P.bg}`,
+        r: (d, P) => `${adLan(60, -40)}${adLan(900, -40)}<div class="C" style="top:240px"><p class="k" style="font-size:170px;color:${P.a};text-shadow:0 6px 0 #00000088,0 12px 0 #00000055,0 0 60px ${P.a}99">${esc(d.t1)}</p><p style="font-family:Georgia,serif;font-size:90px;font-style:italic;margin-top:-20px;transform:rotate(-6deg)">${esc(d.t2)}</p><p class="k" style="font-size:170px;color:${P.a};text-shadow:0 6px 0 #00000088,0 12px 0 #00000055,0 0 60px ${P.a}99;margin-top:-10px">${esc(d.t3)}</p></div>
+          <div class="A" style="left:80px;right:80px;top:760px">${adChips(d.chips.slice(0, 9), 3, `background:rgba(0,0,0,.45);border-color:${P.b};color:${P.c};height:86px;font-size:27px`)}</div>
+          <div class="A" style="left:20px;bottom:80px;font-size:120px">🍿</div><div class="A" style="right:30px;bottom:120px;font-size:110px;transform:rotate(15deg)">🍿</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:#fff;color:#8a0000;font-size:34px`)}</div>` },
+      { id: 'spot', n: 'Accede (reflectores de cine)', d: { t1: 'ELIGE TU PLATAFORMA FAVORITA', t2: 'ACCEDE', t3: 'A TU ENTRETENIMIENTO', sub: 'sin límites', cta: 'Pide tu pantalla hoy 🎬' }, pal: 2, nrPos: 'top:44px;right:44px',
+        bg: P => `radial-gradient(500px 300px at 50% 0%,rgba(255,255,255,.22),transparent 70%),linear-gradient(180deg,${P.bg},#2a0610 60%,#0a0205)`,
+        r: (d, P) => `${[[120, P.a, -18], [330, P.b, -6], [560, '#00e5ff', 6], [780, P.c, 18]].map(([x, c, r]) => `<div class="A" style="top:-100px;left:${x}px;width:180px;height:900px;background:linear-gradient(180deg,${c},transparent 80%);transform:rotate(${r}deg);transform-origin:top center;opacity:.5"></div>`).join('')}
+          <div class="C" style="top:160px"><p style="font-size:28px;letter-spacing:.35em;font-weight:700;color:${P.c}">${esc(d.t1)}</p></div>
+          <div class="C" style="top:620px"><p class="k" style="font-size:220px;text-shadow:0 0 30px rgba(255,255,255,.5),0 10px 0 #555">${esc(d.t2)}</p><p style="font-size:60px;font-weight:800;color:${P.a};margin-top:6px">${esc(d.t3)}</p><p style="font-family:Georgia,serif;font-size:92px;font-style:italic">${esc(d.sub)}</p></div>
+          <div class="A" style="left:30px;top:420px;font-size:100px">🍿</div><div class="A" style="right:40px;top:460px;font-size:90px">🎬</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:linear-gradient(90deg,${P.a},${P.b})`)}</div>` },
+      { id: 'hoy', n: 'HOY las ventas', d: { t1: 'HOY', t2: 'LAS VENTAS', t3: 'DE LAS PLATAFORMAS', cta: '💬 Escríbenos AHORA' }, chips: 'plat', max: 4, pal: 2,
+        bg: P => `radial-gradient(700px 500px at 80% 30%,${P.a}55,transparent 70%),linear-gradient(160deg,#0b0b14,${P.bg})`,
+        r: (d, P) => `<div class="A" style="left:70px;top:200px;font-size:110px">📅</div><div class="A" style="left:220px;top:180px"><p class="k" style="font-size:180px;font-style:italic">${esc(d.t1)}</p></div>
+          <div class="C" style="top:400px"><p class="k" style="font-size:140px;font-style:italic;color:${P.a};text-shadow:0 8px 0 #00000088">${esc(d.t2)}</p><p style="font-size:54px;font-weight:800">${esc(d.t3)}</p></div>
+          <div class="A" style="left:90px;right:90px;top:690px">${adChips(d.chips.slice(0, 4), 2, `height:108px;font-size:36px;border-color:${P.b};box-shadow:0 0 22px ${P.b}88`)}</div>
+          <div class="A ben" style="left:70px;right:70px;top:960px"><div><b>🎞️</b>Películas y series</div><div><b>🛡️</b>Cuentas seguras</div><div><b>🔐</b>Con PIN personal</div></div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, 'background:#25d366;color:#04230f')}</div>` },
+      { id: 'fav', n: 'Elige tu favorita', d: { t1: 'ELIGE TU', t2: 'FAVORITA', cta: '¡COMPRA TU PERFIL AHORA!' }, chips: 'plat', max: 8, pal: 1, nrPos: 'top:44px;right:44px',
+        bg: P => `radial-gradient(800px 600px at 50% 40%,${P.a}cc 0,${P.a}44 50%,${P.bg} 100%)`,
+        r: (d, P) => `<div class="A" style="left:60px;top:200px;display:flex;flex-direction:column;gap:14px">${['📅 x 30 DÍAS', '⭐ CONFIABLE', '🛡️ GARANTÍA'].map(t => `<span style="background:#fff;color:#111;font-weight:800;font-size:32px;padding:10px 22px;border-radius:12px">${t}</span>`).join('')}</div>
+          <div class="A" style="right:90px;top:220px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#fff 0,#ffffffaa 20%,${P.a} 55%,transparent 72%)"></div>
+          <div class="C" style="top:560px"><p class="k" style="font-size:150px;color:#fff;text-shadow:0 6px 0 #00000077,0 0 40px ${P.a}">${esc(d.t1)}</p><p class="k" style="font-size:150px;color:#fff;text-shadow:0 6px 0 #00000077,0 0 40px ${P.a}">${esc(d.t2)}</p></div>
+          <div class="A" style="left:60px;right:60px;top:920px">${adChips(d.chips.slice(0, 8), 4, `height:80px;font-size:22px;background:rgba(0,0,0,.5);border-color:#fff`)}</div>
+          <div class="C" style="bottom:50px">${adBtn(d.cta, 'background:#fff;color:#7d0068;font-size:34px')}</div>` },
+      { id: 'tv', n: 'Tu pantalla Full HD (TV)', d: { t1: 'TU PANTALLA', t2: 'EN FULL HD', cta: 'Pide la tuya 🚀' }, pal: 0,
+        bg: P => `radial-gradient(900px 600px at 50% 0%,${P.b}88,transparent 70%),${P.bg}`,
+        r: (d, P) => `<div class="C" style="top:180px"><p class="k" style="font-size:110px">${esc(d.t1)}</p><p class="k" style="font-size:110px;color:${P.a};text-shadow:0 0 40px ${P.a}">${esc(d.t2)}</p></div>
+          <div class="A" style="left:150px;right:150px;top:470px;height:440px;border-radius:24px;background:#0a0a0a;border:14px solid #222;box-shadow:0 30px 80px rgba(0,0,0,.6)"><div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:18px;background:linear-gradient(180deg,#0d1b3a,#050a14)">${[['#ff5f6d', '#ffc371'], ['#2193b0', '#6dd5ed'], ['#cc2b5e', '#753a88'], ['#ee9ca7', '#ffdde1'], ['#42275a', '#734b6d'], ['#bdc3c7', '#2c3e50'], ['#de6262', '#ffb88c'], ['#06beb6', '#48b1bf'], ['#eb3349', '#f45c43'], ['#dd5e89', '#f7bb97'], ['#56ab2f', '#a8e063'], ['#614385', '#516395']].map(([a, b]) => `<div style="border-radius:10px;background:linear-gradient(160deg,${a},${b})"></div>`).join('')}</div></div>
+          <div class="A" style="left:430px;top:910px;width:220px;height:40px;background:#222;border-radius:0 0 20px 20px"></div>
+          <div class="A ben" style="left:70px;right:70px;top:1000px"><div><b>📆</b>Servicio 30 días</div><div><b>🖥️</b>Full calidad HD</div><div><b>📩</b>Entrega inmediata</div></div>
+          <div class="C" style="bottom:50px">${adBtn(d.cta, `background:linear-gradient(90deg,${P.b},${P.a})`)}</div>` },
+      { id: 'activos', n: 'Estamos activos', d: { t1: 'ESTAMOS', t2: 'Activos', t3: String(new Date().getFullYear()), sub: 'SERVICIOS DE STREAMING' }, chips: 'plat', max: 6, pal: 4,
+        bg: P => `radial-gradient(700px 600px at 50% 20%,${P.c}77,transparent 70%),${P.bg}`,
+        r: (d, P) => `<div class="C" style="top:190px"><p class="k" style="font-size:140px;font-style:italic;text-shadow:0 0 10px ${P.a},0 0 40px ${P.a}">${esc(d.t1)}</p><p style="font-family:Georgia,serif;font-style:italic;font-size:120px;color:${P.a};margin-top:-24px;text-shadow:0 0 20px ${P.a}">${esc(d.t2)}</p><p class="k" style="font-size:200px;color:transparent;-webkit-text-stroke:5px ${P.b};text-shadow:0 0 40px ${P.b}99">${esc(d.t3)}</p></div>
+          <div class="A" style="left:0;right:0;bottom:0;height:420px;opacity:.9;background:repeating-linear-gradient(90deg,#1b0c3a 0 60px,#2a1458 60px 64px,#120728 64px 140px,#241050 140px 150px);clip-path:polygon(0 40%,6% 40%,6% 20%,14% 20%,14% 35%,22% 35%,22% 10%,30% 10%,30% 30%,40% 30%,40% 0,48% 0,48% 25%,58% 25%,58% 15%,68% 15%,68% 38%,78% 38%,78% 8%,88% 8%,88% 28%,100% 28%,100% 100%,0 100%)"></div>
+          <div class="A" style="left:90px;right:90px;top:820px">${adChips(d.chips.slice(0, 6), 3, `border-radius:999px;border-color:${P.a};box-shadow:0 0 18px ${P.a};background:rgba(20,0,30,.75)`)}</div>
+          <div class="C" style="bottom:60px"><p style="font-size:62px;font-weight:800;font-style:italic;color:${P.a};text-shadow:0 0 20px ${P.a}">${esc(d.sub)}</p><p style="font-size:30px;font-weight:700;letter-spacing:.3em;margin-top:8px">▶ SOLICITA EL TUYO</p></div>` },
+      { id: 'combo', n: 'Combo 2 pantallas', d: { t1: '2 PANTALLAS', t2: '1 PRECIO', sub: 'Arma tu combo con las plataformas que quieras', cta: 'Pide tu combo ⚡' }, pal: 4, nrPos: 'top:44px;right:44px',
+        bg: P => `radial-gradient(800px 600px at 50% 60%,${P.c}55,transparent 70%),linear-gradient(160deg,${P.bg},#1d0b3a)`,
+        r: (d, P) => `<div class="A" style="left:70px;top:190px;background:${P.a};color:#1a1a1a;font-weight:800;font-size:34px;padding:12px 26px;border-radius:12px">🎁 COMBO</div>
+          <div class="A" style="left:70px;top:290px"><p class="k" style="font-size:146px">${esc(d.t1)}</p><p class="k" style="font-size:146px;color:${P.a}">${esc(d.t2)}</p></div>
+          <div class="A" style="left:120px;top:690px;width:380px;height:260px;border-radius:30px;background:linear-gradient(135deg,#ff416c,#ff4b2b);display:flex;align-items:center;justify-content:center;font-size:60px;font-weight:800;transform:rotate(-6deg)">🎬 ${esc((d.chips[0] || 'Pelis'))}</div>
+          <div class="A" style="right:120px;top:720px;width:380px;height:260px;border-radius:30px;background:linear-gradient(135deg,#7f00ff,#e100ff);display:flex;align-items:center;justify-content:center;font-size:60px;font-weight:800;transform:rotate(6deg)">📺 ${esc((d.chips[1] || 'Series'))}</div>
+          <div class="A" style="left:470px;top:760px;width:140px;height:140px;border-radius:50%;background:${P.a};color:#111;display:flex;align-items:center;justify-content:center;font-size:100px;font-weight:800;z-index:3">+</div>
+          <div class="C" style="top:1040px;font-size:38px;font-weight:600;color:#d8d8f0">${esc(d.sub)}</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:${P.a};color:#1a1a1a`)}</div>`, chips: 'plat', max: 2 },
+      { id: 'fire', n: 'Diamantes Free Fire (fuego)', d: { t1: 'DIAMANTES', t2: 'AL TOQUE 💎', t3: 'FREE FIRE · LATAM', cta: 'SOLO CON TU ID 🔥' }, pal: 3,
+        bg: P => `radial-gradient(900px 900px at 80% 110%,${P.b} 0,transparent 60%),radial-gradient(700px 700px at 0% 0%,${P.c}aa 0,transparent 60%),linear-gradient(160deg,${P.bg},#3a0a00 50%,#120200)`,
+        r: (d, P) => `<div class="A" style="left:-200px;right:-200px;top:540px;height:230px;background:linear-gradient(90deg,${P.a},${P.b});transform:rotate(-10deg);box-shadow:0 0 120px ${P.b}"></div>
+          <div class="C" style="top:580px;transform:rotate(-10deg);font-size:96px;font-weight:800;font-style:italic;color:#2a0600">${esc(d.t3)}</div>
+          <div class="A" style="left:70px;top:190px"><p class="k" style="font-size:146px;font-style:italic;text-shadow:0 10px 0 #7a1400">${esc(d.t1)}</p><p class="k" style="font-size:146px;font-style:italic;color:${P.a};text-shadow:0 10px 0 #7a1400">${esc(d.t2)}</p></div>
+          <div class="gem" style="left:390px;top:860px;width:300px;height:300px"></div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:${P.a};color:#2a0600;font-style:italic`)}</div>` },
+      { id: 'gamer', n: 'Recargas gamer (neón)', d: { t1: 'RECARGAS', t2: 'GAMER', cta: 'Recarga en minutos ⚡' }, chips: 'games', max: 6, pal: 4, nrPos: 'top:44px;right:44px',
+        bg: P => `radial-gradient(700px 500px at 50% 30%,${P.c}77,transparent 70%),repeating-linear-gradient(0deg,${P.b}10 0 2px,transparent 2px 60px),repeating-linear-gradient(90deg,${P.b}10 0 2px,transparent 2px 60px),${P.bg}`,
+        r: (d, P) => `<div class="C" style="top:200px;font-size:250px">🎮</div>
+          <div class="C" style="top:520px"><p class="k" style="font-size:130px;color:${P.a};text-shadow:0 0 30px ${P.c}">${esc(d.t1)}</p><p class="k" style="font-size:130px;color:${P.b};text-shadow:0 0 30px ${P.b}">${esc(d.t2)}</p></div>
+          <div class="A" style="left:80px;right:80px;top:850px">${adChips(d.chips.slice(0, 6), 3, `border-color:${P.c};box-shadow:0 0 18px ${P.c}99;font-size:27px`)}</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:linear-gradient(90deg,${P.c},${P.b})`)}</div>` },
+      { id: 'prices', n: '📋 Lista de precios (tu catálogo)', d: { t1: 'RECARGA', t2: 'AL INSTANTE', sub: 'Solo necesitas tu ID · sin contraseña', cta: 'Pide la tuya 🚀' }, prices: true, pal: 0,
+        bg: P => `radial-gradient(900px 700px at 50% -5%,${P.b}99,transparent 70%),radial-gradient(700px 600px at 100% 100%,${P.a}33,transparent 70%),${P.bg}`,
+        r: (d, P) => `<div class="A" style="left:80px;right:80px;top:180px"><span style="display:inline-block;padding:12px 30px;border-radius:999px;background:${P.a}22;border:3px solid ${P.a}99;color:${P.a};font-weight:800;font-size:30px;letter-spacing:.1em">${esc(d.pname || 'PRECIOS')}</span>
+          <p class="k" style="font-size:104px;margin-top:24px">${esc(d.t1)}</p><p class="k" style="font-size:104px;color:${P.a};text-shadow:0 0 40px ${P.a}aa">${esc(d.t2)}</p><p style="font-size:34px;color:#b8c7e6;margin-top:14px">${esc(d.sub)}</p>
+          ${d.rows.slice(0, 6).map((r, i) => `<div class="row" style="${i === 2 ? `border-color:${P.a};background:${P.a}1f` : ''}"><span>${esc(r[0])}</span><span class="p" style="color:${P.a}">${esc(r[1])}</span></div>`).join('')}</div>
+          <div class="C" style="bottom:50px">${adBtn(d.cta, `background:linear-gradient(90deg,${P.b},${P.a})`)}</div>` },
+      { id: 'ticket', n: '🎟️ Precio estrella (ticket)', d: { t1: 'FUNCIÓN EN CASA', t2: '1 PERFIL · 30 DÍAS', t3: '$3', sub: 'Películas · Series · Deportes', cta: 'Pide tu pantalla 🎬' }, one: true, pal: 2,
+        bg: P => `radial-gradient(800px 700px at 50% 35%,${P.a}55,transparent 70%),${P.bg}`,
+        fx: () => `<div style="position:absolute;left:0;top:0;bottom:0;width:200px;background:repeating-linear-gradient(90deg,#8e0f24 0 40px,#5c0716 40px 80px)"></div><div style="position:absolute;right:0;top:0;bottom:0;width:200px;background:repeating-linear-gradient(90deg,#5c0716 0 40px,#8e0f24 40px 80px)"></div>`,
+        r: (d, P) => `
+          <div class="C" style="top:200px;font-size:86px;font-weight:800;color:${P.c};text-shadow:0 0 40px ${P.b}">${esc(d.t1)}</div>
+          <div class="A" style="left:170px;right:170px;top:370px;height:680px;background:#f7e6c4;border-radius:40px;color:#3b0a14;text-align:center;padding-top:50px;box-shadow:0 40px 100px #000">
+           <p style="font-size:44px;letter-spacing:.3em;font-weight:800">ADMIT ONE</p><p class="k" style="font-size:78px;margin-top:20px;line-height:1.05">${esc(d.t2)}</p>
+           <div style="border-top:6px dashed #c9a46a;margin:40px 60px 0"></div><p class="k" style="font-size:210px;color:#b3122e;margin-top:26px">${esc(d.t3)}</p><p style="font-size:34px;font-weight:700;margin-top:10px">${esc(d.sub)}</p></div>
+          <div class="C" style="bottom:150px;font-size:110px">🍿</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:${P.c};color:#3b0a14`)}</div>` },
+      { id: 'flash', n: '⚡ Flash Sale', d: { t1: 'FLASH', t2: 'SALE', t3: 'SOLO HOY', sub: 'Precios bajos en recargas y pantallas ⚡' }, pal: 3, dark: true, nrPos: 'top:200px;left:60px',
+        bg: P => `${P.a}`,
+        r: (d, P) => `<div class="A" style="left:-100px;right:-100px;top:40px;height:100px;background:repeating-linear-gradient(45deg,#111 0 60px,${P.a} 60px 120px);transform:rotate(-4deg)"></div>
+          <div class="A" style="left:60px;top:330px;color:#111"><p class="k" style="font-size:240px;letter-spacing:-.04em">${esc(d.t1)}</p><p class="k" style="font-size:240px;letter-spacing:-.04em">${esc(d.t2)}</p></div>
+          <div class="A" style="right:70px;top:780px;width:380px;height:380px;background:#e5172f;display:flex;align-items:center;justify-content:center;text-align:center;font-size:76px;font-weight:800;line-height:1;clip-path:polygon(50% 0,61% 12%,77% 6%,80% 22%,96% 24%,90% 39%,100% 50%,90% 61%,96% 76%,80% 78%,77% 94%,61% 88%,50% 100%,39% 88%,23% 94%,20% 78%,4% 76%,10% 61%,0 50%,10% 39%,4% 24%,20% 22%,23% 6%,39% 12%)">${esc(d.t3)}</div>
+          <div class="A" style="left:70px;top:900px;width:520px;font-size:58px;font-weight:800;color:#111;line-height:1.1">${esc(d.sub)}</div>
+          <div class="A" style="left:-100px;right:-100px;bottom:40px;height:100px;background:repeating-linear-gradient(45deg,#111 0 60px,${P.a} 60px 120px);transform:rotate(3deg)"></div>` },
+      { id: 'black', n: 'Black Friday', d: { t1: 'BLACK', t2: 'FRIDAY', sub: 'Descuentos en recargas, pantallas y gift cards toda la semana', cta: 'Aprovecha ya 🛒' }, pal: 6,
+        bg: P => `radial-gradient(700px 400px at 50% 50%,${P.a}22,transparent 70%),#050505`,
+        r: (d, P) => `<div class="C" style="top:220px"><p class="k" style="font-size:200px">${esc(d.t1)}</p><p class="k" style="font-size:200px;color:transparent;-webkit-text-stroke:5px ${P.a}">${esc(d.t2)}</p></div>
+          <div class="A" style="left:240px;right:240px;top:690px;height:160px;border:5px solid ${P.a};display:flex;align-items:center;justify-content:center;font-size:72px;font-weight:800;color:${P.a};transform:rotate(-3deg)">${esc((getSettings().name || 'NR Digital').toUpperCase())}</div>
+          <div class="C" style="top:920px;font-size:48px;font-weight:700;padding:0 80px">${esc(d.sub)}</div>
+          <div class="C" style="bottom:60px">${adBtn(d.cta, `background:${P.a};color:#111`)}</div>` },
+      { id: 'xmas', n: 'Navidad', d: { t1: 'Esta Navidad', t2: 'REGALA', t3: 'ENTRETENIMIENTO', sub: 'Pantallas, recargas y gift cards para regalar', cta: 'Pide tu regalo 🎅' }, pal: 5, nrPos: 'top:44px;right:44px',
+        bg: () => 'radial-gradient(800px 600px at 50% 40%,#0f5a32 0,#073a20 60%,#031a0e 100%)',
+        r: d => `${[[80, 300, 50], [950, 260, 40], [160, 900, 36], [900, 980, 54], [500, 170, 30], [60, 1150, 40], [980, 640, 34]].map(([x, y, s]) => `<div class="A" style="left:${x}px;top:${y}px;font-size:${s}px">❄️</div>`).join('')}
+          <div class="C" style="top:210px"><p style="font-family:Georgia,serif;font-style:italic;font-size:110px;color:#ffd77a">${esc(d.t1)}</p><p class="k" style="font-size:130px;margin-top:10px">${esc(d.t2)}</p><p class="k" style="font-size:100px;color:#ff4d5e">${esc(d.t3)}</p></div>
+          <div class="C" style="top:740px;font-size:190px">🎁🎄🎮</div><div class="C" style="top:1000px;font-size:42px;font-weight:600;color:#d9ffe6">${esc(d.sub)}</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, 'background:#c8102e')}</div>` },
+      { id: 'open', n: 'Abierto', d: { t1: 'ABIERTO', t2: 'Ya estamos atendiendo 🙌', sub: 'Recargas · Pantallas · Gift cards', cta: 'Haz tu pedido ahora' }, pal: 5,
+        bg: P => `radial-gradient(700px 500px at 50% 40%,${P.a}44,transparent 70%),${P.bg}`,
+        r: (d, P) => `<div class="C" style="top:300px"><div style="display:inline-block;padding:56px 66px;border-radius:40px;border:8px solid ${P.a};box-shadow:0 0 40px ${P.a},inset 0 0 40px ${P.a}66"><p class="k" style="font-size:160px;color:${P.a};text-shadow:0 0 30px ${P.a}">${esc(d.t1)}</p></div></div>
+          <div class="C" style="top:720px;font-size:58px;font-weight:800">${esc(d.t2)}</div><div class="C" style="top:830px;font-size:40px;color:#ccc">${esc(d.sub)}</div>
+          <div class="C" style="bottom:60px">${adBtn(d.cta, `background:${P.a};color:#04230f`)}</div>` },
+      { id: 'closed', n: 'Ya cerramos', d: { t1: 'YA CERRAMOS', t2: 'por hoy 🌙', sub: 'Mañana volvemos con todo. Puedes dejar tu pedido por WhatsApp.', t3: '⚠️ No hagas pagos mientras estamos cerrados' }, pal: 0,
+        bg: () => 'radial-gradient(800px 600px at 70% 10%,rgba(99,102,241,.4),transparent 70%),#05071a',
+        r: d => `<div class="A" style="right:120px;top:180px;width:260px;height:260px;border-radius:50%;background:#ffe9a8;box-shadow:0 0 120px rgba(255,233,168,.6),inset -60px -20px 0 #e0c46a"></div>
+          <div class="C" style="top:520px"><p class="k" style="font-size:136px">${esc(d.t1)}</p><p style="font-family:Georgia,serif;font-style:italic;font-size:92px;color:#a5b4fc">${esc(d.t2)}</p></div>
+          <div class="C" style="top:860px;font-size:46px;font-weight:600;color:#c7d2fe;padding:0 90px">${esc(d.sub)}</div>
+          <div class="C" style="bottom:60px;font-size:34px;color:#fca5a5;font-weight:800">${esc(d.t3)}</div>` },
+      { id: 'steps', n: '¿Cómo comprar? (3 pasos)', d: { t1: '¿CÓMO', t2: 'COMPRAR?', sub: '¡Así de fácil! Sin contraseñas, solo tu ID' }, pal: 0,
+        bg: P => `radial-gradient(900px 600px at 50% 0%,${P.b}88,transparent 70%),${P.bg}`,
+        r: (d, P) => `<div class="C" style="top:200px"><p class="k" style="font-size:120px">${esc(d.t1)}</p><p class="k" style="font-size:120px;color:${P.a}">${esc(d.t2)}</p></div>
+          <div class="A" style="left:90px;right:90px;top:520px;display:flex;flex-direction:column;gap:30px">${[['1', '🛒', 'Elige tu producto'], ['2', '💳', 'Paga con Pago Móvil o Binance'], ['3', '⚡', 'Recibe al instante']].map(([n, e, t]) => `<div style="display:flex;align-items:center;gap:30px;padding:32px;border-radius:30px;background:rgba(255,255,255,.06);border:2px solid ${P.a}66"><span style="width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,${P.b},${P.a});display:flex;align-items:center;justify-content:center;font-size:60px;font-weight:800;flex:none">${n}</span><span style="font-size:70px">${e}</span><span style="font-size:42px;font-weight:700">${t}</span></div>`).join('')}</div>
+          <div class="C" style="bottom:56px;font-size:36px;color:#9db3d9">${esc(d.sub)}</div>` },
+      { id: 'pay', n: 'Paga como quieras', d: { t1: 'PAGA', t2: 'COMO', t3: 'QUIERAS' }, pal: 6, nrPos: 'top:44px;right:44px',
+        bg: P => `linear-gradient(160deg,#121212,${P.bg})`,
+        r: (d, P) => `<div class="A" style="left:80px;top:220px"><p class="k" style="font-size:130px">${esc(d.t1)}</p><p class="k" style="font-size:130px;color:${P.a}">${esc(d.t2)}</p><p class="k" style="font-size:130px;color:${P.a}">${esc(d.t3)}</p></div>
+          <div class="A" style="left:80px;right:80px;top:700px;display:flex;flex-direction:column;gap:24px">${['📱 Pago Móvil', '🪙 Binance (USDT)', '💳 Saldo NR'].map(t => `<div class="chip" style="height:130px;font-size:48px;justify-content:flex-start;padding-left:40px;background:${P.a}1f;border-color:${P.a}">${t}</div>`).join('')}</div>` },
+      { id: 'shield', n: 'Compra con garantía', d: { t1: 'COMPRA', t2: 'CON GARANTÍA', cta: 'Compra tranquilo 🤝' }, pal: 5,
+        bg: P => `radial-gradient(800px 600px at 50% 20%,${P.a}44,transparent 70%),${P.bg}`,
+        r: (d, P) => `<div class="C" style="top:200px;font-size:250px">🛡️</div>
+          <div class="C" style="top:540px"><p class="k" style="font-size:120px">${esc(d.t1)}</p><p class="k" style="font-size:120px;color:${P.a}">${esc(d.t2)}</p></div>
+          <div class="A ben" style="left:70px;right:70px;top:880px"><div><b>✔️</b>Soporte todo el mes</div><div><b>🔁</b>Reposición si falla</div><div><b>🧾</b>Recibo de tu compra</div></div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:${P.a};color:#04230f`)}</div>` },
+      { id: 'thanks', n: 'Gracias por confiar', d: { t1: 'GRACIAS', t2: 'POR CONFIAR', sub: 'Cada día más clientes recargan con nosotros', cta: '¡Únete tú también!' }, pal: 6,
+        bg: P => `radial-gradient(700px 500px at 50% 50%,${P.b}2e,transparent 70%),#0a0a14`,
+        r: (d, P) => `<div class="C" style="top:240px"><p class="k" style="font-size:120px">${esc(d.t1)}</p><p class="k" style="font-size:108px;color:${P.a}">${esc(d.t2)}</p><p style="font-size:58px;font-weight:700;margin-top:10px">en ${esc(getSettings().name || 'NR Digital')} 💙</p></div>
+          <div class="C" style="top:700px;font-size:120px;color:${P.a};letter-spacing:10px;text-shadow:0 0 30px ${P.b}">★★★★★</div>
+          <div class="C" style="top:880px;font-size:42px;font-weight:600;color:#cbd5e1">${esc(d.sub)}</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:linear-gradient(90deg,${P.b},${P.a});color:#3a2700`)}</div>` },
+      { id: 'stock', n: 'Ya llegó stock', d: { t1: 'YA', t2: 'LLEGÓ', t3: 'STOCK', sub: 'Pantallas y recargas disponibles hoy', cta: 'Aparta la tuya 🔥' }, pal: 7, nrPos: 'top:44px;right:44px',
+        bg: P => `radial-gradient(700px 600px at 80% 60%,${P.b}55,transparent 70%),#12040a`,
+        r: (d, P) => `<div class="A" style="left:80px;top:220px;background:${P.b};font-size:44px;font-weight:800;padding:14px 30px;border-radius:14px;transform:rotate(-4deg)">✨ NUEVO</div>
+          <div class="A" style="left:80px;top:340px"><p class="k" style="font-size:150px">${esc(d.t1)}</p><p class="k" style="font-size:150px;color:${P.b}">${esc(d.t2)}</p><p class="k" style="font-size:110px">${esc(d.t3)}</p></div>
+          <div class="A" style="right:80px;top:640px;font-size:270px;transform:rotate(10deg)">📦</div>
+          <div class="C" style="top:1000px;font-size:44px;font-weight:600;color:#ffd1dc">${esc(d.sub)}</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:${P.b}`)}</div>` },
+      { id: 'vip', n: 'Clientes VIP', d: { t1: 'CLIENTES', t2: 'VIP', sub: 'Mientras más compras, más descuento' }, pal: 6,
+        bg: P => `radial-gradient(700px 600px at 50% 30%,${P.b}44,transparent 70%),linear-gradient(180deg,${P.bg},#050402)`,
+        r: (d, P) => `<div class="C" style="top:190px;font-size:210px">👑</div>
+          <div class="C" style="top:460px"><p class="k" style="font-size:130px;color:${P.a};text-shadow:0 6px 0 #00000088">${esc(d.t1)}</p><p class="k" style="font-size:200px;color:transparent;-webkit-text-stroke:6px ${P.a}">${esc(d.t2)}</p></div>
+          <div class="A" style="left:90px;right:90px;top:900px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">${[['🥉', 'Bronce', '#e0a370'], ['🥈', 'Plata', '#e5e7eb'], ['🥇', 'Oro', '#ffd23f'], ['💎', 'Diamante', '#7df3ff']].map(([e, n, c]) => `<div class="chip" style="height:120px;font-size:27px;flex-direction:column;border-color:${c};color:${c}"><span style="font-size:44px">${e}</span>${n}</div>`).join('')}</div>
+          <div class="C" style="bottom:56px;font-size:40px;font-weight:700;color:${P.a}">${esc(d.sub)}</div>` },
+      { id: 'finde', n: 'Plan para el finde', d: { t1: 'PLAN PARA EL', t2: 'FINDE', t3: 'EN CASA', sub: 'Maratón de series y películas con tu pantalla', cta: 'Pídela hoy y disfruta 🎬' }, pal: 7,
+        bg: P => `radial-gradient(800px 600px at 50% 60%,${P.a}44,transparent 70%),linear-gradient(180deg,${P.bg},#1a1030)`,
+        r: (d, P) => `<div class="C" style="top:220px"><p style="font-size:44px;font-weight:800;letter-spacing:.3em;color:#7df3ff">${esc(d.t1)}</p><p class="k" style="font-size:150px;margin-top:10px">${esc(d.t2)}</p><p class="k" style="font-size:110px;color:${P.a}">${esc(d.t3)}</p></div>
+          <div class="C" style="top:700px;font-size:190px">🛋️🍿📺</div><div class="C" style="top:960px;font-size:44px;font-weight:600;padding:0 90px">${esc(d.sub)}</div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, `background:${P.a};color:#2b1300`)}</div>` },
+      { id: 'gift', n: 'Regala saldo (gift cards)', d: { t1: 'REGALA', t2: 'SALDO 🎁', t3: 'GIFT CARD', sub: 'Steam · PlayStation · Xbox · Nintendo', cta: 'Pídela por WhatsApp 💬' }, pal: 5, dark: true,
+        bg: () => 'radial-gradient(700px 600px at 100% 0%,#9cf0c0,transparent 70%),linear-gradient(180deg,#e9fff1,#b8f5d0)',
+        r: d => `<div class="A" style="left:80px;top:200px;color:#06281a"><p class="k" style="font-size:140px">${esc(d.t1)}</p><p class="k" style="font-size:140px;color:#0f9e52">${esc(d.t2)}</p></div>
+          <div class="A" style="left:110px;right:110px;top:590px;height:380px;border-radius:40px;background:linear-gradient(135deg,#111,#444);transform:rotate(-6deg);padding:44px"><p style="font-size:60px;font-weight:800">${esc(d.t3)}</p><p style="font-size:32px;opacity:.85">${esc(d.sub)}</p></div>
+          <div class="A" style="left:110px;right:110px;top:770px;height:380px;border-radius:40px;background:linear-gradient(135deg,#0f9e52,#06c);transform:rotate(4deg);padding:44px"><p style="font-size:60px;font-weight:800">ROBUX</p><p style="font-size:32px;opacity:.85">Directo a tu cuenta</p><div style="position:absolute;left:44px;bottom:50px;width:110px;height:84px;border-radius:14px;background:linear-gradient(135deg,#ffe08a,#c99a2e)"></div></div>
+          <div class="C" style="bottom:56px">${adBtn(d.cta, 'background:#06281a;color:#b8f5d0')}</div>` }
+    ];
+    const AD_FIELDS = [['t1', 'Título 1'], ['t2', 'Título 2'], ['t3', 'Título 3 / precio'], ['sub', 'Texto pequeño'], ['cta', 'Botón']];
+    var ad = null;
+    function adFresh(i, p) {
+      const T = AD_TPL[i], st = getSettings();
+      return { i, p: p == null ? T.pal : p, fmt: ad ? ad.fmt : 'feed', txt: { ...T.d }, chips: T.chips === 'games' ? AD_GAMES.slice(0, T.max || 6) : AD_PLAT.slice(0, T.max || 6), pid: ad ? ad.pid : '', contact: ad ? ad.contact : !!(st.phone || st.instagram) };
+    }
+    function adPriceProducts() { return products.filter(x => !x.raffle && !(+x.giftValue > 0) && ((x.packages || []).length || +x.price > 0)); }
+    function adRows(pid) {
+      if (pid === undefined) pid = ad.pid;
+      const x = products.find(z => z.id === pid) || adPriceProducts().find(z => (z.packages || []).length) || adPriceProducts()[0]; if (!x) return { rows: [], pname: '' };
+      const rows = (x.packages || []).length ? x.packages.map(k => [k.label, money(k.price)]) : [[x.name, money(x.price)]];
+      return { rows, pname: x.name.toUpperCase() };
+    }
+    function adHTML(pv) {
+      if (ad.mode === 'free') return afHTML(pv);
+      const T = AD_TPL[ad.i], P = AD_PAL[ad.p], st = getSettings(), story = ad.fmt === 'story', H = story ? 1920 : 1350;
+      const d = { ...T.d, ...ad.txt, chips: ad.chips, ...(T.prices ? adRows() : {}) };
+      const w0 = String(st.name || 'NR Digital').trim().split(/\s+/), ini = (w0[0] && w0[0].length <= 3 ? w0[0] : w0.map(w => w[0]).join('').slice(0, 2)).toUpperCase() || 'NR';
+      const logo = st.logo ? `<img src="${esc(st.logo)}" alt="" />` : esc(ini);
+      const badge = `<div class="nr${T.dark ? ' dk' : ''}" style="${T.nrPos || 'top:44px;left:44px'}"><div class="ic">${logo}</div><div><b>${esc((st.name || 'NR Digital').toUpperCase())}</b><i>RECARGAS · STREAMING</i></div></div>`;
+      const ph = String(st.phone || '').trim(), ig = String(st.instagram || '').trim().replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
+      const foot = ad.contact && (ph || ig) ? `<div class="foot" style="${T.dark ? 'color:#111' : ''}">${ph ? '💬 ' + esc(ph) : ''}${ph && ig ? '  ·  ' : ''}${ig ? '📸 @' + esc(ig.replace(/^@/, '')) : ''}</div>` : '';
+      const inner = `<div style="position:absolute;left:0;top:${story ? 285 : 0}px;width:1080px;height:1350px">${badge}${T.r(d, P)}</div>`;
+      return `<div class="ad" style="height:${H}px;background:${T.bg(P)}"><style>${AD_CSS}</style>${T.fx ? T.fx(P) : ''}${inner}${foot}</div>`;
+    }
+    function adPreview() {
+      const box = $('#adStage'); if (!box) return;
+      const w = box.clientWidth || 320, H = ad.fmt === 'story' ? 1920 : 1350, sc = w / 1080;
+      box.style.height = Math.round(H * sc) + 'px';
+      box.innerHTML = `<div id="adArt" style="transform:scale(${sc});transform-origin:0 0;width:1080px;height:${H}px">${adHTML(true)}</div>`;
+    }
+    function renderAdForm() {
+      const box = $('#adForm'); if (!box) return; const free = ad.mode === 'free', mb = $('#adModes'), gr = $('#adGrid');
+      if (mb) mb.innerHTML = [['tpl', '🧩 Plantillas listas'], ['free', '✏️ Diseño libre']].map(([v, l]) => `<button type="button" data-admode="${v}" class="rounded-xl border py-3 text-sm font-semibold ${(free ? 'free' : 'tpl') === v ? 'border-neon/40 bg-neon/10 text-neon' : 'border-white/15 text-muted hover:bg-white/5'}">${l}</button>`).join('');
+      if (gr) gr.classList.toggle('ad-free', free);
+      const tip = $('#adTip'); if (tip) tip.textContent = free ? 'Toca cualquier cosa en la imagen para moverla con el dedo. Lo que hagas se guarda solo como borrador en este equipo.' : 'Hay 25 diseños y 8 colores. Con "La de hoy" te sale una distinta cada día; con "Sorpréndeme", una al azar.';
+      if (free) { renderAfForm(box); renderAfSel(); return; }
+      renderAfSel(); const T = AD_TPL[ad.i], used = AD_FIELDS.filter(([k]) => T.d[k] != null);
+      const pool = T.chips === 'games' ? AD_GAMES : AD_PLAT, pp = adPriceProducts();
+      box.innerHTML = `<div style="display:flex;gap:8px;align-items:center"><button type="button" data-adnav="-1" class="shrink-0 rounded-xl border border-white/15 px-3 py-2.5 text-sm hover:bg-white/5">◀</button>
+          <select id="adTpl" class="field py-2.5 text-sm" style="flex:1 1 auto;min-width:0">${AD_TPL.map((t, i) => `<option value="${i}" ${i === ad.i ? 'selected' : ''}>${i + 1}. ${esc(t.n)}</option>`).join('')}</select>
+          <button type="button" data-adnav="1" class="shrink-0 rounded-xl border border-white/15 px-3 py-2.5 text-sm hover:bg-white/5">▶</button></div>
+        <div class="mt-3 grid grid-cols-2 gap-2"><button type="button" data-adrand class="rounded-xl border border-neon/40 py-2.5 text-sm font-semibold text-neon hover:bg-neon/10">🎲 Sorpréndeme</button><button type="button" data-adtoday class="rounded-xl border border-white/15 py-2.5 text-sm font-semibold hover:bg-white/5">📅 La de hoy</button></div>
+        <p class="mt-4 text-xs text-muted">Colores</p><div class="mt-2" style="display:flex;flex-wrap:wrap;gap:8px">${AD_PAL.map((p, i) => `<button type="button" data-adpal="${i}" title="${esc(p.n)}" aria-label="${esc(p.n)}" class="shrink-0" style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,${p.a},${p.b});box-shadow:${i === ad.p ? '0 0 0 3px #fff' : '0 0 0 1px rgba(255,255,255,.2)'}"></button>`).join('')}</div>
+        <p class="mt-4 text-xs text-muted">Formato</p><div class="mt-2 grid grid-cols-2 gap-2">${[['feed', '📷 Publicación 4:5'], ['story', '📱 Estado / historia 9:16']].map(([v, l]) => `<button type="button" data-adfmt="${v}" class="rounded-xl border py-2.5 text-sm font-semibold ${ad.fmt === v ? 'border-neon/40 text-neon' : 'border-white/15 text-muted'}">${l}</button>`).join('')}</div>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">${used.map(([k, l]) => `<label class="block"><span class="mb-1.5 block text-xs text-muted">${l}</span><input data-adtxt="${k}" value="${esc(ad.txt[k] != null ? ad.txt[k] : '')}" maxlength="60" class="field py-2 text-sm" /></label>`).join('')}</div>
+        ${T.prices ? `<label class="mt-3 block"><span class="mb-1.5 block text-xs text-muted">Producto (toma los precios reales de tu tienda)</span><select id="adProd" class="field py-2 text-sm">${pp.map(x => `<option value="${esc(x.id)}" ${x.id === (ad.pid || (pp.find(z => (z.packages || []).length) || pp[0] || {}).id) ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}
+        ${T.chips ? `<p class="mt-4 text-xs text-muted">${T.chips === 'games' ? 'Juegos' : 'Plataformas'} que salen (hasta ${T.max})</p><div class="mt-2" style="display:flex;flex-wrap:wrap;gap:6px">${pool.map(n => `<button type="button" data-adchip="${esc(n)}" class="shrink-0 rounded-full border px-3 py-1.5 text-xs ${ad.chips.includes(n) ? 'border-neon/40 text-neon' : 'border-white/15 text-muted'}">${esc(n)}</button>`).join('')}</div>` : ''}
+        <label class="mt-4 flex items-center gap-2 text-sm"><input type="checkbox" id="adContact" ${ad.contact ? 'checked' : ''} /> Poner mi WhatsApp e Instagram abajo</label>
+        <button type="button" data-afbase class="mt-4 w-full rounded-xl border border-neon/40 py-3 text-sm font-semibold text-neon hover:bg-neon/10">✏️ Editar esta a mi gusto (agregar textos, stickers, fotos)</button>`;
+    }
+    function renderAds() { if (STAFF) return; if (!ad) { const day = Math.floor(Date.now() / 864e5); ad = adFresh(day % AD_TPL.length, (day * 3) % AD_PAL.length); } renderAdForm(); adPreview(); }
+    function adSet(i, p) { const keep = ad ? { fmt: ad.fmt, contact: ad.contact, pid: ad.pid, free: ad.free, mode: 'tpl' } : {}; ad = adFresh(i, p); Object.assign(ad, keep); renderAdForm(); adPreview(); }
+    var adFontCss = null;
+    async function adFonts() {   // mete la letra Poppins dentro de la imagen para que se vea igual al descargar
+      if (adFontCss !== null) return adFontCss;
+      try {
+        const css = await (await fetch('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,600;0,700;0,800;1,800&display=swap')).text();
+        const urls = [...new Set(css.match(/https:[^)]+\.woff2/g) || [])].slice(0, 12); let out = css;
+        await Promise.all(urls.map(async u => { const b = await (await fetch(u)).blob(); const d = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); }); out = out.split(u).join(d); }));
+        adFontCss = out;
+      } catch (_) { adFontCss = ''; }
+      return adFontCss;
+    }
+    async function adImgsInline(node) {   // el logo debe ir dentro de la imagen
+      await Promise.all([...node.querySelectorAll('img')].map(async im => { const s = im.getAttribute('src') || ''; if (/^data:/.test(s)) return; try { const b = await (await fetch(s)).blob(); im.setAttribute('src', await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b); })); } catch (_) { im.remove(); } }));
+    }
+    async function adExport() {
+      const H = ad.fmt === 'story' ? 1920 : 1350, host = document.createElement('div');
+      host.innerHTML = adHTML(); const node = host.firstElementChild;
+      await adImgsInline(node);
+      const fonts = await adFonts(); if (fonts) { const s = document.createElement('style'); s.textContent = fonts; node.insertBefore(s, node.firstChild); }
+      node.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+      const xml = new XMLSerializer().serializeToString(node);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="${H}"><foreignObject x="0" y="0" width="1080" height="${H}">${xml}</foreignObject></svg>`;
+      const img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); await img.decode();
+      const cv = document.createElement('canvas'); cv.width = 1080; cv.height = H; cv.getContext('2d').drawImage(img, 0, 0);
+      return new Promise(r => cv.toBlob(r, 'image/png'));
+    }
+    function adName() { if (ad.mode === 'free') return `NR-mi-diseno-${new Date().toISOString().slice(0, 10)}-${ad.fmt === 'story' ? 'estado' : 'post'}.png`; return `NR-${AD_TPL[ad.i].id}-${AD_PAL[ad.p].n.replace(/\s+/g, '')}-${ad.fmt === 'story' ? 'estado' : 'post'}.png`; }
+    document.addEventListener('input', e => {
+      if (!ad || !e.target.closest || !e.target.closest('#adForm')) return;
+      const k = e.target.dataset && e.target.dataset.adtxt; if (k) { ad.txt[k] = e.target.value; adPreview(); }
+    });
+    document.addEventListener('change', e => {
+      if (!ad || !e.target.closest || !e.target.closest('#adForm')) return;
+      if (e.target.id === 'adTpl') adSet(+e.target.value);
+      if (e.target.id === 'adProd') { ad.pid = e.target.value; adPreview(); }
+      if (e.target.id === 'adContact') { ad.contact = e.target.checked; adPreview(); }
+    });
+    document.addEventListener('click', async e => {
+      if (STAFF || !ad || !e.target.closest) return;
+      const nav = e.target.closest('[data-adnav]'); if (nav) adSet((ad.i + +nav.dataset.adnav + AD_TPL.length) % AD_TPL.length);
+      if (e.target.closest('[data-adrand]')) { let i; do { i = Math.floor(Math.random() * AD_TPL.length); } while (i === ad.i && AD_TPL.length > 1); adSet(i, Math.floor(Math.random() * AD_PAL.length)); }
+      if (e.target.closest('[data-adtoday]')) { const day = Math.floor(Date.now() / 864e5); adSet(day % AD_TPL.length, (day * 3) % AD_PAL.length); toast('📅 Esta es la publicidad de hoy. Mañana te toca otra.'); }
+      const pal = e.target.closest('[data-adpal]'); if (pal) { ad.p = +pal.dataset.adpal; renderAdForm(); adPreview(); }
+      const fm = e.target.closest('[data-adfmt]'); if (fm) { if (ad.mode === 'free' && ad.fmt !== fm.dataset.adfmt) { const dy = fm.dataset.adfmt === 'story' ? 285 : -285; ad.free.items.forEach(L => { L.y += dy; }); afDraft(); } ad.fmt = fm.dataset.adfmt; renderAdForm(); adPreview(); }
+      const ch = e.target.closest('[data-adchip]');
+      if (ch) { const n = ch.dataset.adchip, T = AD_TPL[ad.i], max = T.max || 6; if (ad.chips.includes(n)) ad.chips = ad.chips.filter(x => x !== n); else if (ad.chips.length >= max) return toast(`Este diseño lleva máximo ${max}`, 'warn'); else ad.chips = [...ad.chips, n]; renderAdForm(); adPreview(); }
+      const dl = e.target.closest('[data-addl], [data-adshare]');
+      if (dl) {
+        if (dl.disabled) return; dl.disabled = true; const old = dl.textContent; dl.textContent = '⏳ Creando imagen…';
+        try {
+          const blob = await adExport(), name = adName();
+          if (dl.hasAttribute('data-adshare')) { const file = new File([blob], name, { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); } catch (_) {} return; } }
+          const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+          toast('⬇️ Imagen descargada, lista para subir');
+        } catch (er) { console.warn(er); toast('No se pudo crear la imagen. Intenta de nuevo.', 'warn'); }
+        finally { dl.disabled = false; dl.textContent = old; }
+      }
+    });
+    /* ================= Diseño libre: el dueño arma su publicidad a su gusto ================= */
+    const AF_FONTS = [['p', 'Moderna', "Poppins,'Segoe UI',Arial,sans-serif"], ['s', 'Elegante', "Georgia,'Times New Roman',serif"], ['m', 'Máquina', "'Courier New',monospace"]];
+    const AF_FX = [['none', 'Normal'], ['glow', 'Neón'], ['3d', '3D'], ['outline', 'Contorno'], ['shadow', 'Sombra']];
+    const AF_STICKERS = ['🍿', '🎬', '📺', '🎮', '💎', '🔥', '⚡', '🎁', '👑', '⭐', '✅', '💬', '📱', '🛒', '💳', '🎧', '📦', '🏆', '💯', '🚀', '😎', '❤️', '🎄', '🎅', '🎉', '⏰', '📅', '🔒', '👉', '🆕'];
+    const AF_BADGE = { tl: ['Arriba izquierda', 'top:44px;left:44px'], tc: ['Arriba al centro', 'top:44px;left:50%;transform:translateX(-50%)'], tr: ['Arriba derecha', 'top:44px;right:44px'], bl: ['Abajo izquierda', 'bottom:76px;left:44px'], br: ['Abajo derecha', 'bottom:76px;right:44px'], off: ['No poner', ''] };
+    const AF_BRAND = { Netflix: ['#e50914', '#0a0000'], 'Disney+': ['#1f5bff', '#040a2e'], 'HBO Max': ['#7b2cff', '#0b0420'], 'Prime Video': ['#00a8e1', '#0f171e'], 'Paramount+': ['#0064ff', '#000f33'], Crunchyroll: ['#f47521', '#140800'], Spotify: ['#1db954', '#050505'], 'YouTube Premium': ['#ff0033', '#0f0f0f'], ViX: ['#ff5c00', '#140600'], 'Apple TV': ['#8e9aa6', '#000000'], 'Canva Pro': ['#8b3dff', '#0d0520'], 'CapCut Pro': ['#00e5ff', '#000000'], 'ChatGPT Plus': ['#10a37f', '#03140f'], 'Flujo TV': ['#ff2d55', '#12030a'], IPTV: ['#00e5ff', '#020b14'] };
+    var afSel = null, afUndo = [], afStk = false, afDraftT = 0, afLib = [], afLibTag = '', afLibAct = 'bg', afQStyle = 'mosaic';
+    const AFDB = {   // galería "Mis imágenes": se guarda en este equipo (aguanta muchas más fotos que el navegador normal)
+      p: null,
+      open() { return this.p || (this.p = new Promise((res, rej) => { const r = indexedDB.open('nr_adlib', 1); r.onupgradeneeded = () => r.result.createObjectStore('img', { keyPath: 'id' }); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); },
+      async run(mode, fn) { const d = await this.open(); return new Promise((res, rej) => { const t = d.transaction('img', mode), q = fn(t.objectStore('img')); t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); }); },
+      all() { return this.run('readonly', s => s.getAll()); }, put(o) { return this.run('readwrite', s => s.put(o)); }, del(id) { return this.run('readwrite', s => s.delete(id)); }
+    };
+    async function afLoadLib() { try { afLib = ((await AFDB.all()) || []).sort((a, b) => b.t - a.t); } catch (_) { afLib = []; } if (ad && ad.mode === 'free') renderAdForm(); }
+    const afLibOf = n => afLib.filter(x => x.tag === n).map(x => x.src);
+    function afPrice(n) {
+      const k = n.toLowerCase().replace(/\+|premium|plus|pro\b/g, '').trim().split(' ')[0]; if (!k) return '';
+      const x = products.find(z => String(z.name || '').toLowerCase().includes(k)); if (!x) return '';
+      const ps = (x.packages || []).map(z => +z.price).filter(v => v > 0), v = ps.length ? Math.min(...ps) : +x.price;
+      return v > 0 ? money(v) : '';
+    }
+    const afId = () => 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const afFind = id => ad && ad.free ? ad.free.items.find(L => L.id === id) : null;
+    function afBlank() { return { bg: { t: 'grad', c1: '#0b1f4d', c2: '#050a17', ang: 160, glowOn: 1, glow: '#00e5ff', dark: 35, src: '', i: 0, p: 0, full: 1, txt: {}, chips: [], pid: '' }, badge: 'tl', badgeDk: 0, items: [] }; }
+    function afText(o) { return { id: afId(), k: 'text', txt: 'TEXTO', x: 540, y: 600, size: 90, color: '#ffffff', font: 'p', fx: 'none', fxc: '#00e5ff', bold: 1, it: 0, bgOn: 0, bgc: '#00e5ff', rot: 0, ...o }; }
+    function afStarter() {
+      const d = afBlank();
+      d.items = [afText({ txt: 'TU TÍTULO', y: 380, size: 140, fx: 'glow' }), afText({ txt: 'Escribe aquí tu oferta', y: 560, size: 54, color: '#9fe8ff', bold: 0 }),
+        { id: afId(), k: 'emoji', txt: '🍿', x: 540, y: 850, size: 260, rot: 0 }, afText({ txt: 'Pide la tuya 🚀', y: 1160, size: 46, color: '#04121f', bgOn: 1 })];
+      return d;
+    }
+    function afPush() { if (!ad || !ad.free) return; const s = JSON.stringify(ad.free); if (afUndo[afUndo.length - 1] !== s) { afUndo.push(s); if (afUndo.length > 25) afUndo.shift(); } }
+    function afDraft() { clearTimeout(afDraftT); afDraftT = setTimeout(() => { try { localStorage.setItem('nr_addraft', JSON.stringify({ fmt: ad.fmt, d: ad.free })); } catch (_) {} }, 700); }
+    function afSaved() { try { return JSON.parse(localStorage.getItem('nr_addesigns') || '[]') || []; } catch (_) { return []; } }
+    function afReadImg(file, max) {
+      return new Promise((res, rej) => {
+        const fr = new FileReader();
+        fr.onload = () => { const im = new Image(); im.onload = () => { const s = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res({ src: c.toDataURL(/png|webp|gif/.test(file.type) ? 'image/png' : 'image/jpeg', .86), w: c.width, h: c.height }); }; im.onerror = rej; im.src = fr.result; };
+        fr.onerror = rej; fr.readAsDataURL(file);
+      });
+    }
+    function afBadge(pos, dk) {
+      const st = getSettings(), w0 = String(st.name || 'NR Digital').trim().split(/\s+/), ini = (w0[0] && w0[0].length <= 3 ? w0[0] : w0.map(w => w[0]).join('').slice(0, 2)).toUpperCase() || 'NR';
+      const logo = st.logo ? `<img src="${esc(st.logo)}" alt="" />` : esc(ini);
+      return `<div class="nr${dk ? ' dk' : ''}" style="${pos}"><div class="ic">${logo}</div><div><b>${esc((st.name || 'NR Digital').toUpperCase())}</b><i>RECARGAS · STREAMING</i></div></div>`;
+    }
+    function afItem(L, sel) {
+      const c = L.fxc || '#00e5ff';
+      const fx = { glow: `text-shadow:0 0 14px ${c},0 0 46px ${c}`, '3d': `text-shadow:0 5px 0 ${c},0 10px 0 ${c}99,0 18px 30px rgba(0,0,0,.6)`, outline: `-webkit-text-stroke:${Math.max(2, Math.round(L.size * .035))}px ${c}`, shadow: 'text-shadow:0 8px 26px rgba(0,0,0,.75)' }[L.fx] || '';
+      let h = '';
+      if (L.k === 'text') { const F = (AF_FONTS.find(f => f[0] === L.font) || AF_FONTS[0])[2]; h = `<div style="width:max-content;max-width:1060px;white-space:pre-wrap;font-family:${F};font-size:${L.size}px;font-weight:${L.bold ? 800 : 500};font-style:${L.it ? 'italic' : 'normal'};color:${L.color};line-height:1.12;text-align:${L.al || 'center'};${fx};${L.bgOn ? `background:${L.bgc};padding:.35em .9em;border-radius:999px;` : ''}">${esc(L.txt)}</div>`; }
+      else if (L.k === 'emoji') h = `<div style="font-size:${L.size}px;line-height:1">${esc(L.txt)}</div>`;
+      else if (L.k === 'img') h = `<img src="${esc(L.src)}" alt="" style="display:block;width:${L.w}px;${+L.h ? `height:${L.h}px;object-fit:cover;` : ''}border-radius:${L.r || 0}px;${L.line ? `border:5px solid ${c};` : ''}" />`;
+      else if (L.k === 'apps') { const s = Math.round((L.w - (L.cols - 1) * 18) / L.cols); h = `<div style="width:${L.w}px;display:grid;grid-template-columns:repeat(${L.cols},1fr);gap:18px">${L.list.map(n => { const b = AF_BRAND[n] || ['#444', '#111']; return `<div style="height:${s}px;border-radius:${Math.round(s * .22)}px;background:linear-gradient(145deg,${b[0]},${b[1]});display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:${Math.round(s * .16)}px;line-height:1.05;padding:8px;box-shadow:0 10px 24px rgba(0,0,0,.45);border:3px solid rgba(255,255,255,.3)">${esc(n)}</div>`; }).join('')}</div>`; }
+      else if (L.k === 'plist') h = `<div style="width:${L.w}px;display:flex;flex-direction:column;gap:16px">${L.list.map(n => { const b = AF_BRAND[n] || ['#444', '#111']; return `<div style="display:flex;align-items:center;border-radius:26px;overflow:hidden;border:3px solid ${b[0]};background:rgba(0,0,0,.5)"><div style="flex:1;padding:18px 28px;font-size:40px;font-weight:800;background:linear-gradient(90deg,${b[0]},${b[0]}aa);color:#fff">${esc(n)}</div><div style="min-width:230px;padding:18px 28px;font-size:46px;font-weight:800;text-align:right;color:${L.color}">${esc((L.pr || {})[n] || '—')}</div></div>`; }).join('')}</div>`;
+      else if (L.k === 'shape') h = `<div style="width:${L.w}px;height:${L.h}px;background:${L.color};border-radius:${L.r}px;opacity:${L.o / 100};${L.line ? `border:6px solid ${c};` : ''}"></div>`;
+      else if (L.k === 'chips') h = `<div style="width:${L.w}px">${adChips(L.list, L.cols, `border-color:${c};box-shadow:0 0 18px ${c}88;background:rgba(0,0,0,.35)`)}</div>`;
+      else if (L.k === 'prices') { const R = adRows(L.pid); h = `<div style="width:${L.w}px">${R.rows.length ? R.rows.slice(0, 6).map(r => `<div class="row"><span>${esc(r[0])}</span><span class="p" style="color:${L.color}">${esc(r[1])}</span></div>`).join('') : '<div class="row">Sin productos con precio</div>'}</div>`; }
+      return `<div class="A" data-li="${L.id}" style="left:${L.x}px;top:${L.y}px;transform:translate(-50%,-50%) rotate(${L.rot || 0}deg);touch-action:none;${sel ? 'outline:5px dashed #00e5ff;outline-offset:12px;cursor:move;' : 'cursor:pointer;'}">${h}</div>`;
+    }
+    function afHTML(preview) {
+      const D = ad.free, B = D.bg, story = ad.fmt === 'story', H = story ? 1920 : 1350, st = getSettings();
+      let bg = '', under = '', tplPos = '';
+      if (B.t === 'tpl') {
+        const T = AD_TPL[B.i] || AD_TPL[0], P = AD_PAL[B.p] || AD_PAL[0]; bg = T.bg(P); tplPos = T.nrPos || 'top:44px;left:44px';
+        const d = { ...T.d, ...B.txt, chips: B.chips && B.chips.length ? B.chips : (T.chips === 'games' ? AD_GAMES : AD_PLAT).slice(0, T.max || 6), ...(T.prices ? adRows(B.pid) : {}) };
+        under = `${T.fx ? T.fx(P) : ''}${B.full ? `<div style="position:absolute;left:0;top:${story ? 285 : 0}px;width:1080px;height:1350px">${T.r(d, P)}${D.badge === 'tpl' ? afBadge(tplPos, T.dark) : ''}</div>` : ''}`;
+      } else if (B.t === 'collage') {
+        const im = B.imgs || [], cols = 5, tw = 1080 / cols, th = Math.round(tw * 1.5), rows = Math.ceil(H / th) + 1, tint = B.tint || '#e50914', n = cols * rows;
+        const tiles = Array.from({ length: n }, (_, k) => im.length ? `<img src="${esc(im[k % im.length])}" alt="" style="position:absolute;left:${(k % cols) * tw + 4}px;top:${Math.floor(k / cols) * th - 40 + 4}px;width:${tw - 8}px;height:${th - 8}px;object-fit:cover;border-radius:10px" />`
+          : `<div style="position:absolute;left:${(k % cols) * tw + 4}px;top:${Math.floor(k / cols) * th - 40 + 4}px;width:${tw - 8}px;height:${th - 8}px;border-radius:10px;background:linear-gradient(${150 + (k * 37) % 60}deg,hsl(${(k * 53) % 360},45%,${22 + (k * 7) % 18}%),#05060a)"></div>`).join('');
+        const ov = B.ov === 'full' ? `${tint}b3` : B.ov === 'none' ? 'transparent' : `linear-gradient(118deg,transparent 0 52%,${tint}d9 52% 100%)`;
+        bg = '#05060a'; under = `${tiles}<div style="position:absolute;inset:0;background:rgba(0,0,0,${(+B.dark || 0) / 100})"></div><div style="position:absolute;inset:0;background:${ov}"></div>`;
+      } else if (B.t === 'photo' && B.src) { bg = '#000'; under = `<img src="${esc(B.src)}" alt="" style="position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover" /><div style="position:absolute;inset:0;background:rgba(0,0,0,${(+B.dark || 0) / 100})"></div>`; }
+      else bg = `${B.glowOn ? `radial-gradient(800px 650px at 50% 28%,${B.glow}66,transparent 70%),` : ''}linear-gradient(${B.ang}deg,${B.c1},${B.c2})`;
+      const bpos = D.badge === 'tpl' ? (B.t === 'tpl' && B.full ? '' : AF_BADGE.tl[1]) : (AF_BADGE[D.badge] || AF_BADGE.tl)[1];
+      const ph = String(st.phone || '').trim(), ig = String(st.instagram || '').trim().replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
+      const foot = ad.contact && (ph || ig) ? `<div class="foot" style="${D.badgeDk ? 'color:#111' : ''}">${ph ? '💬 ' + esc(ph) : ''}${ph && ig ? '  ·  ' : ''}${ig ? '📸 @' + esc(ig.replace(/^@/, '')) : ''}</div>` : '';
+      return `<div class="ad" style="height:${H}px;background:${bg}"><style>${AD_CSS}</style>${under}${D.items.map(L => afItem(L, preview && L.id === afSel)).join('')}${bpos ? afBadge(bpos, D.badgeDk) : ''}${foot}</div>`;
+    }
+    const afBtn = (attr, label, on) => `<button type="button" ${attr} class="rounded-xl border py-2.5 px-2 text-sm font-semibold ${on ? 'border-neon/40 text-neon' : 'border-white/15 hover:bg-white/5'}">${label}</button>`;
+    const afRange = (k, l, v, a, b, s) => `<label class="block"><span class="mb-1 flex justify-between text-xs text-muted"><span>${l}</span><span data-afval="${k}">${v}</span></span><input type="range" data-afp="${k}" min="${a}" max="${b}" step="${s || 1}" value="${v}" class="w-full" style="accent-color:#00e5ff" /></label>`;
+    const afColor = (attr, l, v) => `<label class="flex items-center justify-between gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm"><span>${l}</span><input type="color" ${attr} value="${esc(v)}" style="width:44px;height:30px;border:0;background:none;padding:0" /></label>`;
+    function renderAfSel() {
+      const box = $('#afSelBox'); if (!box) return;
+      if (!ad || ad.mode !== 'free') { box.innerHTML = ''; return; }
+      const L = afFind(afSel);
+      if (!L) { box.innerHTML = `<p class="mt-3 rounded-xl border border-dashed border-white/15 p-3 text-center text-sm text-muted">👆 Toca un texto, sticker o foto en la vista previa para moverlo con el dedo y cambiarlo aquí.</p>`; return; }
+      const name = { text: '✍️ Texto', emoji: '😀 Sticker', img: '🖼️ Foto', shape: '⬛ Forma', chips: '📺 Plataformas', prices: '📋 Precios', apps: '🔳 Apps disponibles', plist: '💲 Precios por plataforma' }[L.k];
+      let f = '';
+      if (L.k === 'text') f = `<textarea data-afp="txt" rows="2" maxlength="120" class="field py-2 text-sm">${esc(L.txt)}</textarea>
+          <div class="grid grid-cols-2 gap-2">${afColor('data-afp="color"', 'Color', L.color)}${afColor('data-afp="fxc"', 'Color efecto', L.fxc)}</div>
+          <div class="grid grid-cols-2 gap-2"><select data-afp="font" class="field py-2 text-sm">${AF_FONTS.map(([v, l]) => `<option value="${v}" ${L.font === v ? 'selected' : ''}>Letra: ${l}</option>`).join('')}</select><select data-afp="fx" class="field py-2 text-sm">${AF_FX.map(([v, l]) => `<option value="${v}" ${L.fx === v ? 'selected' : ''}>Efecto: ${l}</option>`).join('')}</select></div>
+          <div class="flex flex-wrap gap-4 text-sm"><label class="flex items-center gap-2"><input type="checkbox" data-afp="bold" ${L.bold ? 'checked' : ''} /> Gruesa</label><label class="flex items-center gap-2"><input type="checkbox" data-afp="it" ${L.it ? 'checked' : ''} /> Inclinada</label><label class="flex items-center gap-2"><input type="checkbox" data-afp="bgOn" ${L.bgOn ? 'checked' : ''} /> Con fondo (botón)</label><select data-afp="al" class="field py-1.5 text-sm" style="width:auto;flex:0 0 auto"><option value="center" ${(L.al || 'center') === 'center' ? 'selected' : ''}>Centrado</option><option value="left" ${L.al === 'left' ? 'selected' : ''}>A la izquierda</option></select></div>
+          ${afColor('data-afp="bgc"', 'Color del fondo del texto', L.bgc)}${afRange('size', 'Tamaño', L.size, 20, 260)}`;
+      if (L.k === 'emoji') f = `<div style="display:flex;flex-wrap:wrap;gap:6px">${AF_STICKERS.map(s => `<button type="button" data-afemo="${s}" class="shrink-0 rounded-lg border ${L.txt === s ? 'border-neon/40' : 'border-white/10'}" style="width:40px;height:40px;font-size:22px">${s}</button>`).join('')}</div>${afRange('size', 'Tamaño', L.size, 40, 600)}`;
+      if (L.k === 'img') f = `${afRange('w', 'Ancho', L.w, 60, 1080)}${afRange('h', 'Alto (0 = normal)', +L.h || 0, 0, 1600)}${afRange('r', 'Bordes redondos', L.r || 0, 0, 300)}<div class="grid grid-cols-2 gap-2"><label class="flex items-center gap-2 text-sm"><input type="checkbox" data-afp="line" ${L.line ? 'checked' : ''} /> Con borde</label>${afColor('data-afp="fxc"', 'Color borde', L.fxc || '#00e5ff')}</div>`;
+      if (L.k === 'apps' || L.k === 'plist') f = `<div style="display:flex;flex-wrap:wrap;gap:6px">${AD_PLAT.map(n => `<button type="button" data-afchip="${esc(n)}" class="shrink-0 rounded-full border px-3 py-1.5 text-xs ${L.list.includes(n) ? 'border-neon/40 text-neon' : 'border-white/15 text-muted'}">${esc(n)}</button>`).join('')}</div>
+          ${L.k === 'plist' ? `<p class="text-xs text-muted">Precios (salen solos de tu tienda si el producto se llama igual; puedes cambiarlos)</p><div class="space-y-2">${L.list.map(n => `<label class="flex items-center gap-2 text-sm"><span style="flex:1 1 auto;min-width:0">${esc(n)}</span><input data-afpr="${esc(n)}" value="${esc((L.pr || {})[n] || '')}" maxlength="14" placeholder="$0.00" class="field py-1.5 text-sm" style="width:110px" /></label>`).join('')}</div>${afColor('data-afp="color"', 'Color del precio', L.color)}` : afRange('cols', 'Columnas', L.cols, 2, 6)}
+          ${afRange('w', 'Ancho', L.w, 300, 1080)}`;
+      if (L.k === 'shape') f = `<div class="grid grid-cols-2 gap-2">${afColor('data-afp="color"', 'Color', L.color)}${afColor('data-afp="fxc"', 'Color borde', L.fxc)}</div><label class="flex items-center gap-2 text-sm"><input type="checkbox" data-afp="line" ${L.line ? 'checked' : ''} /> Con borde</label>${afRange('w', 'Ancho', L.w, 20, 1080)}${afRange('h', 'Alto', L.h, 20, 1920)}${afRange('r', 'Bordes redondos', L.r, 0, 540)}${afRange('o', 'Transparencia', L.o, 5, 100)}`;
+      if (L.k === 'chips') { const pool = L.g ? AD_GAMES : AD_PLAT; f = `<div style="display:flex;flex-wrap:wrap;gap:6px">${pool.map(n => `<button type="button" data-afchip="${esc(n)}" class="shrink-0 rounded-full border px-3 py-1.5 text-xs ${L.list.includes(n) ? 'border-neon/40 text-neon' : 'border-white/15 text-muted'}">${esc(n)}</button>`).join('')}</div>${afColor('data-afp="fxc"', 'Color del borde', L.fxc)}${afRange('cols', 'Columnas', L.cols, 1, 4)}${afRange('w', 'Ancho', L.w, 200, 1080)}`; }
+      if (L.k === 'prices') { const pp = adPriceProducts(); f = `<select data-afp="pid" class="field py-2 text-sm">${pp.map(x => `<option value="${esc(x.id)}" ${x.id === L.pid ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>${afColor('data-afp="color"', 'Color del precio', L.color)}${afRange('w', 'Ancho', L.w, 400, 1080)}`; }
+      box.innerHTML = `<div class="mt-3 space-y-3 rounded-2xl border border-neon/30 p-4"><div class="flex items-center justify-between gap-2"><p class="font-semibold">${name}</p><button type="button" data-afdesel class="text-xs text-muted hover:text-white">✕ Listo</button></div>
+        ${f}${L.k === 'text' || L.k === 'emoji' || L.k === 'img' || L.k === 'shape' ? afRange('rot', 'Girar', L.rot || 0, -45, 45) : ''}
+        <div class="grid gap-2" style="grid-template-columns:repeat(5,minmax(0,1fr))">${[['-10,0', '◀'], ['0,-10', '▲'], ['0,10', '▼'], ['10,0', '▶']].map(([v, l]) => `<button type="button" data-afmv="${v}" class="rounded-xl border border-white/15 py-2 text-sm hover:bg-white/5">${l}</button>`).join('')}<button type="button" data-afcenter class="rounded-xl border border-white/15 py-2 text-xs hover:bg-white/5">Centrar</button></div>
+        <div class="grid gap-2" style="grid-template-columns:repeat(auto-fill,minmax(128px,1fr))">${afBtn('data-afz="1"', '⬆️ Al frente')}${afBtn('data-afz="-1"', '⬇️ Atrás')}${afBtn('data-afdup', '📄 Duplicar')}<button type="button" data-afdel class="rounded-xl border border-red-500/30 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-500/10">🗑️ Borrar</button></div></div>`;
+    }
+    function renderAfForm(box) {
+      const D = ad.free, B = D.bg, sv = afSaved();
+      const bgF = B.t === 'grad' ? `<div class="grid grid-cols-2 gap-2">${afColor('data-afbg="c1"', 'Color 1', B.c1)}${afColor('data-afbg="c2"', 'Color 2', B.c2)}</div>
+          <label class="block"><span class="mb-1 block text-xs text-muted">Dirección</span><input type="range" data-afbg="ang" min="0" max="360" value="${B.ang}" class="w-full" style="accent-color:#00e5ff" /></label>
+          <div class="grid grid-cols-2 gap-2"><label class="flex items-center gap-2 text-sm"><input type="checkbox" data-afbg="glowOn" ${B.glowOn ? 'checked' : ''} /> Luz de fondo</label>${afColor('data-afbg="glow"', 'Color luz', B.glow)}</div>`
+        : B.t === 'collage' ? `<label class="block rounded-xl border border-dashed border-white/20 p-3 text-center text-sm hover:bg-white/5" style="cursor:pointer">🎞️ ${(B.imgs || []).length ? `Agregar más portadas (${B.imgs.length}/15)` : 'Elegir portadas de series o pelis (hasta 15)'}<input type="file" accept="image/*" multiple data-afcol hidden /></label>
+          ${(B.imgs || []).length ? `<button type="button" data-afcolclr class="w-full rounded-xl border border-white/15 py-2 text-xs text-muted hover:bg-white/5">Quitar las portadas</button>` : '<p class="text-xs text-muted">Mientras no pongas fotos se ven cuadros de colores.</p>'}
+          <div class="grid grid-cols-2 gap-2">${afColor('data-afbg="tint"', 'Color plataforma', B.tint || '#e50914')}<select data-afbg="ov" class="field py-2 text-sm">${[['diag', 'Mitad en diagonal'], ['full', 'Todo pintado'], ['none', 'Sin color']].map(([v, l]) => `<option value="${v}" ${(B.ov || 'diag') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+          <label class="block"><span class="mb-1 block text-xs text-muted">Oscurecer las portadas</span><input type="range" data-afbg="dark" min="0" max="90" value="${B.dark}" class="w-full" style="accent-color:#00e5ff" /></label>`
+        : B.t === 'photo' ? `<label class="block rounded-xl border border-dashed border-white/20 p-3 text-center text-sm hover:bg-white/5" style="cursor:pointer">📷 ${B.src ? 'Cambiar foto de fondo' : 'Elegir foto de fondo'}<input type="file" accept="image/*" data-afbgfile hidden /></label>
+          <label class="block"><span class="mb-1 block text-xs text-muted">Oscurecer la foto (para que se lean las letras)</span><input type="range" data-afbg="dark" min="0" max="90" value="${B.dark}" class="w-full" style="accent-color:#00e5ff" /></label>`
+        : `<select data-afbg="i" class="field py-2 text-sm">${AD_TPL.map((t, i) => `<option value="${i}" ${i === +B.i ? 'selected' : ''}>${i + 1}. ${esc(t.n)}</option>`).join('')}</select>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">${AD_PAL.map((p, i) => `<button type="button" data-afpal="${i}" aria-label="${esc(p.n)}" class="shrink-0" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,${p.a},${p.b});box-shadow:${i === +B.p ? '0 0 0 3px #fff' : '0 0 0 1px rgba(255,255,255,.2)'}"></button>`).join('')}</div>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" data-afbg="full" ${B.full ? 'checked' : ''} /> Con los textos y dibujos de la plantilla</label>
+          ${B.full ? `<div class="grid gap-2 sm:grid-cols-2">${AD_FIELDS.filter(([k]) => (AD_TPL[B.i] || AD_TPL[0]).d[k] != null).map(([k, l]) => `<input data-aftxt="${k}" value="${esc(B.txt[k] != null ? B.txt[k] : (AD_TPL[B.i] || AD_TPL[0]).d[k])}" maxlength="60" placeholder="${l}" class="field py-2 text-sm" />`).join('')}</div>` : ''}`;
+      const libF = afLibTag ? afLib.filter(x => x.tag === afLibTag) : afLib;
+      box.innerHTML = `<p class="text-xs text-muted">⚡ Publicidad rápida de una plataforma</p>
+        <div class="mt-2 grid grid-cols-2 gap-2">${[['mosaic', '🎞️ Mosaico'], ['box', '🔲 Caja al centro'], ['plan', '✅ Tu plan incluye'], ['excl', '⭐ Plan exclusivo']].map(([v, l]) => afBtn(`data-afqs="${v}"`, l, afQStyle === v)).join('')}</div>
+        <p class="mt-2 text-xs text-muted">Escoge el estilo y luego toca la plataforma. Usa tus imágenes guardadas de esa plataforma.</p>
+        <div class="mt-2" style="display:flex;flex-wrap:wrap;gap:6px">${Object.entries(AF_BRAND).map(([n, c]) => `<button type="button" data-afbrand="${esc(n)}" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold" style="border-color:${c[0]};color:#fff;background:${c[0]}33">${esc(n)}</button>`).join('')}</div>
+        <div class="mt-5 rounded-2xl border border-white/10 p-3">
+          <p class="text-sm font-semibold">🗂️ Mis imágenes <span class="text-xs font-normal text-muted">(${afLib.length} · se quedan guardadas en este equipo)</span></p>
+          <div class="mt-2 grid grid-cols-2 gap-2"><select data-aflibtag class="field py-2 text-sm"><option value="">Todas / General</option>${AD_PLAT.map(n => `<option value="${esc(n)}" ${afLibTag === n ? 'selected' : ''}>${esc(n)} (${afLib.filter(x => x.tag === n).length})</option>`).join('')}</select>
+            <label class="rounded-xl border border-neon/40 py-2 text-center text-sm font-semibold text-neon hover:bg-neon/10" style="cursor:pointer">➕ Subir imágenes<input type="file" accept="image/*" multiple data-aflibup hidden /></label></div>
+          <p class="mt-2 text-xs text-muted">${afLibTag ? `Lo que subas ahora se guarda como <b>${esc(afLibTag)}</b>.` : 'Elige primero la plataforma arriba para que se guarden marcadas con ella.'}</p>
+          ${libF.length ? `<select data-afliba class="field mt-2 py-2 text-sm">${[['bg', 'Al tocar una imagen: ponerla de fondo'], ['add', 'Al tocar una imagen: ponerla encima'], ['col', 'Al tocar una imagen: sumarla al mosaico'], ['del', 'Al tocar una imagen: borrarla']].map(([v, l]) => `<option value="${v}" ${afLibAct === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+          <div class="mt-2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;max-height:300px;overflow:auto">${libF.map(x => `<button type="button" data-aflib="${esc(x.id)}" class="overflow-hidden rounded-lg border border-white/10" style="aspect-ratio:2/3;padding:0"><img src="${esc(x.src)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></button>`).join('')}</div>` : '<p class="mt-2 text-xs text-muted">Aún no hay imágenes aquí.</p>'}
+        </div>
+        <p class="mt-5 text-xs text-muted">Agregar</p>
+        <div class="mt-2 grid gap-2" style="grid-template-columns:repeat(auto-fill,minmax(128px,1fr))">${afBtn('data-afadd="text"', '✍️ Texto')}${afBtn('data-afadd="btn"', '🔘 Botón')}${afBtn('data-afadd="emoji"', '😀 Sticker', afStk)}
+          <label class="rounded-xl border border-white/15 py-2.5 px-2 text-center text-sm font-semibold hover:bg-white/5" style="cursor:pointer">🖼️ Foto / logo<input type="file" accept="image/*" data-afimg hidden /></label>
+          ${afBtn('data-afadd="shape"', '⬛ Forma')}${afBtn('data-afadd="apps"', '🔳 Apps')}${afBtn('data-afadd="plist"', '💲 Precios plataformas')}${afBtn('data-afadd="chips"', '📺 Plataformas')}${afBtn('data-afadd="games"', '🎮 Juegos')}${afBtn('data-afadd="prices"', '📋 Precios recargas')}</div>
+        ${afStk ? `<div class="mt-2" style="display:flex;flex-wrap:wrap;gap:6px">${AF_STICKERS.map(s => `<button type="button" data-afsticker="${s}" class="shrink-0 rounded-lg border border-white/10 hover:bg-white/5" style="width:42px;height:42px;font-size:24px">${s}</button>`).join('')}</div>` : ''}
+        <p class="mt-5 text-xs text-muted">Fondo</p>
+        <div class="mt-2 grid grid-cols-2 gap-2">${afBtn('data-afbgt="grad"', '🌈 Colores', B.t === 'grad')}${afBtn('data-afbgt="collage"', '🎞️ Collage', B.t === 'collage')}${afBtn('data-afbgt="photo"', '📷 Mi foto', B.t === 'photo')}${afBtn('data-afbgt="tpl"', '🧩 Plantilla', B.t === 'tpl')}</div>
+        <div class="mt-3 space-y-3">${bgF}</div>
+        <p class="mt-5 text-xs text-muted">Formato</p><div class="mt-2 grid grid-cols-2 gap-2">${[['feed', '📷 Publicación 4:5'], ['story', '📱 Estado 9:16']].map(([v, l]) => afBtn(`data-adfmt="${v}"`, l, ad.fmt === v)).join('')}</div>
+        <p class="mt-5 text-xs text-muted">Tu marca</p>
+        <div class="mt-2 grid grid-cols-2 gap-2"><select data-afbadge class="field py-2 text-sm">${Object.entries(AF_BADGE).map(([k, v]) => `<option value="${k}" ${D.badge === k ? 'selected' : ''}>Logo: ${v[0]}</option>`).join('')}${B.t === 'tpl' ? `<option value="tpl" ${D.badge === 'tpl' ? 'selected' : ''}>Logo: como la plantilla</option>` : ''}</select>
+          <label class="flex items-center gap-2 text-sm"><input type="checkbox" data-afdk ${D.badgeDk ? 'checked' : ''} /> Letras oscuras</label></div>
+        <label class="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" id="adContact" ${ad.contact ? 'checked' : ''} /> Poner mi WhatsApp e Instagram abajo</label>
+        <div class="mt-5 grid grid-cols-2 gap-2">${afBtn('data-afundo', `↩️ Deshacer${afUndo.length ? '' : ''}`)}${afBtn('data-afnew', '🧹 Empezar de cero')}</div>
+        <p class="mt-5 text-xs text-muted">💾 Mis diseños guardados (en este equipo)</p>
+        <div class="mt-2 flex gap-2"><input id="afName" maxlength="40" placeholder="Nombre, ej: Promo viernes" class="field py-2 text-sm" style="flex:1 1 auto;min-width:0" /><button type="button" data-afsave class="btn-primary shrink-0 rounded-xl px-4 text-sm font-semibold">Guardar</button></div>
+        <div class="mt-2 space-y-2">${sv.length ? sv.map(s => `<div class="flex items-center justify-between gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm"><span class="truncate">${esc(s.n)}</span><span class="flex shrink-0 gap-2"><button type="button" data-afopen="${esc(s.id)}" class="rounded-lg border border-white/15 px-3 py-1 text-xs hover:bg-white/5">Abrir</button><button type="button" data-afrm="${esc(s.id)}" class="rounded-lg border border-red-500/30 px-2 py-1 text-xs text-red-300">🗑️</button></span></div>`).join('') : '<p class="text-xs text-muted">Aún no guardas ninguno.</p>'}</div>`;
+    }
+    function afRefresh(form) { if (form) renderAdForm(); else renderAfSel(); adPreview(); afDraft(); }
+    function afAdd(L) { afPush(); ad.free.items.push(L); afSel = L.id; afStk = false; renderAdForm(); adPreview(); afDraft(); const s = $('#adStage'); if (s && innerWidth < 1280) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    function afStart(base) {
+      afUndo = []; afSel = null; ad.mode = 'free'; afLoadLib();
+      if (base) { const d = afBlank(); d.bg = { ...d.bg, t: 'tpl', i: ad.i, p: ad.p, full: 1, txt: { ...ad.txt }, chips: [...ad.chips], pid: ad.pid }; d.badge = 'tpl'; d.badgeDk = AD_TPL[ad.i].dark ? 1 : 0; ad.free = d; }
+      else if (!ad.free) { let dr = null; try { dr = JSON.parse(localStorage.getItem('nr_addraft') || 'null'); } catch (_) {} if (dr && dr.d && dr.d.items) { ad.free = dr.d; ad.fmt = dr.fmt || ad.fmt; } else ad.free = afStarter(); }
+      renderAdForm(); adPreview();
+    }
+    // mover con el dedo o el mouse
+    document.addEventListener('pointerdown', e => {
+      if (!ad || ad.mode !== 'free' || !e.target.closest) return;
+      const stage = e.target.closest('#adStage'); if (!stage) return;
+      const el = e.target.closest('[data-li]');
+      if (!el) { if (afSel) { afSel = null; renderAfSel(); adPreview(); } return; }
+      const L = afFind(el.dataset.li); if (!L) return;
+      e.preventDefault();
+      const sc = stage.clientWidth / 1080, sx = e.clientX, sy = e.clientY, ox = L.x, oy = L.y, H = ad.fmt === 'story' ? 1920 : 1350; let moved = false;
+      if (afSel !== L.id) { afSel = L.id; renderAfSel(); adPreview(); }
+      const mv = ev => {
+        if (!moved) { if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) < 3) return; moved = true; afPush(); }
+        L.x = Math.round(Math.max(-100, Math.min(1180, ox + (ev.clientX - sx) / sc))); L.y = Math.round(Math.max(-100, Math.min(H + 100, oy + (ev.clientY - sy) / sc)));
+        const n = stage.querySelector(`[data-li="${L.id}"]`); if (n) { n.style.left = L.x + 'px'; n.style.top = L.y + 'px'; }
+      };
+      const up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); if (moved) afDraft(); };
+      addEventListener('pointermove', mv); addEventListener('pointerup', up); addEventListener('pointercancel', up);
+    });
+    document.addEventListener('focusin', e => { if (ad && ad.mode === 'free' && e.target.closest && e.target.closest('#afSelBox, #adForm') && e.target.matches('input, select, textarea')) afPush(); });
+    document.addEventListener('input', e => {
+      if (!ad || ad.mode !== 'free' || !e.target.closest) return;
+      const t = e.target, v = t.type === 'checkbox' ? (t.checked ? 1 : 0) : (t.type === 'range' ? +t.value : t.value);
+      if (t.dataset.afp && t.closest('#afSelBox')) { const L = afFind(afSel); if (!L) return; L[t.dataset.afp] = v; const sp = $(`#afSelBox [data-afval="${t.dataset.afp}"]`); if (sp) sp.textContent = v; adPreview(); afDraft(); }
+      else if (t.dataset.afbg && t.type !== 'checkbox' && t.tagName !== 'SELECT') { ad.free.bg[t.dataset.afbg] = v; adPreview(); afDraft(); }
+      else if (t.dataset.aftxt) { ad.free.bg.txt[t.dataset.aftxt] = t.value; adPreview(); afDraft(); }
+      else if (t.dataset.afpr != null && t.closest('#afSelBox')) { const L = afFind(afSel); if (L) { L.pr = L.pr || {}; L.pr[t.dataset.afpr] = t.value; adPreview(); afDraft(); } }
+    });
+    document.addEventListener('change', async e => {
+      if (!ad || ad.mode !== 'free' || !e.target.closest || !e.target.closest('#adForm, #afSelBox')) return;
+      const t = e.target, B = ad.free.bg;
+      if (t.dataset.afp && t.type === 'checkbox') { const L = afFind(afSel); if (L) { L[t.dataset.afp] = t.checked ? 1 : 0; afRefresh(); } }
+      if (t.dataset.afp && t.tagName === 'SELECT') { const L = afFind(afSel); if (L) { L[t.dataset.afp] = t.value; afRefresh(); } }
+      if (t.dataset.afbg && t.type === 'checkbox') { B[t.dataset.afbg] = t.checked ? 1 : 0; afRefresh(true); }
+      if (t.dataset.afbg === 'i') { B.i = +t.value; B.txt = {}; B.chips = []; afRefresh(true); }
+      if (t.dataset.afbg === 'ov') { B.ov = t.value; afRefresh(); }
+      if (t.hasAttribute('data-aflibtag')) { afLibTag = t.value; renderAdForm(); }
+      if (t.hasAttribute('data-afliba')) afLibAct = t.value;
+      if (t.hasAttribute('data-aflibup') && t.files && t.files.length) {
+        const files = [...t.files].slice(0, 40); let ok = 0; toast(`⏳ Guardando ${files.length} imagen(es)…`);
+        for (const f of files) { try { const im = await afReadImg(f, 900); await AFDB.put({ id: afId(), src: im.src, tag: afLibTag, t: Date.now() + ok }); ok++; } catch (_) {} }
+        t.value = ''; await afLoadLib(); toast(ok ? `🗂️ ${ok} imagen(es) guardadas${afLibTag ? ' en ' + afLibTag : ''}` : 'No se pudieron guardar', ok ? 'ok' : 'warn');
+      }
+      if (t.hasAttribute('data-afcol') && t.files && t.files.length) {
+        afPush(); B.imgs = B.imgs || [];
+        for (const f of [...t.files].slice(0, 15 - B.imgs.length)) { try { B.imgs.push((await afReadImg(f, 420)).src); } catch (_) {} }
+        if (t.files.length && B.imgs.length >= 15) toast('Máximo 15 portadas', 'warn');
+        t.value = ''; afRefresh(true);
+      }
+      if (t.hasAttribute('data-afbadge')) { ad.free.badge = t.value; afRefresh(); }
+      if (t.hasAttribute('data-afdk')) { ad.free.badgeDk = t.checked ? 1 : 0; afRefresh(); }
+      if ((t.hasAttribute('data-afimg') || t.hasAttribute('data-afbgfile')) && t.files && t.files[0]) {
+        const isBg = t.hasAttribute('data-afbgfile');
+        try {
+          const im = await afReadImg(t.files[0], isBg ? 1400 : 900);
+          if (isBg) { afPush(); B.src = im.src; afRefresh(true); }
+          else { const w = Math.min(600, im.w); afAdd({ id: afId(), k: 'img', src: im.src, x: 540, y: ad.fmt === 'story' ? 960 : 675, w, r: 0, rot: 0 }); }
+        } catch (_) { toast('No se pudo abrir esa imagen', 'warn'); }
+        t.value = '';
+      }
+    });
+    document.addEventListener('click', e => {
+      if (STAFF || !ad || !e.target.closest) return;
+      if (e.target.closest('[data-admode]')) { const m = e.target.closest('[data-admode]').dataset.admode; if (m === 'free') afStart(false); else { ad.mode = 'tpl'; afSel = null; renderAdForm(); adPreview(); } return; }
+      if (e.target.closest('[data-afbase]')) { afStart(true); toast('✏️ Ahora agrégale lo que quieras encima'); return; }
+      if (ad.mode !== 'free') return;
+      const D = ad.free, L = afFind(afSel), cy = ad.fmt === 'story' ? 960 : 675;
+      const add = e.target.closest('[data-afadd]');
+      if (add) {
+        const k = add.dataset.afadd;
+        if (k === 'emoji') { afStk = !afStk; renderAdForm(); return; }
+        if (k === 'text') afAdd(afText({ txt: 'Nuevo texto', y: cy }));
+        if (k === 'btn') afAdd(afText({ txt: 'Escríbenos 💬', y: cy, size: 46, color: '#04121f', bgOn: 1 }));
+        if (k === 'shape') afAdd({ id: afId(), k: 'shape', x: 540, y: cy, w: 700, h: 260, r: 40, o: 85, color: '#000000', line: 1, fxc: '#00e5ff', rot: 0 });
+        if (k === 'apps') afAdd({ id: afId(), k: 'apps', list: ['Netflix', 'Disney+', 'HBO Max', 'Prime Video', 'Crunchyroll', 'Paramount+', 'ViX', 'Spotify', 'YouTube Premium'], cols: 3, w: 660, x: 540, y: cy });
+        if (k === 'plist') { const list = ['Netflix', 'Disney+', 'HBO Max', 'Prime Video', 'Crunchyroll', 'Spotify'], pr = {}; list.forEach(n => { pr[n] = afPrice(n); }); afAdd({ id: afId(), k: 'plist', list, pr, w: 900, x: 540, y: cy, color: '#ffffff' }); }
+        if (k === 'chips' || k === 'games') afAdd({ id: afId(), k: 'chips', g: k === 'games' ? 1 : 0, list: (k === 'games' ? AD_GAMES : AD_PLAT).slice(0, 6), cols: 3, w: 900, x: 540, y: cy, fxc: '#00e5ff' });
+        if (k === 'prices') { const pp = adPriceProducts(), x = pp.find(z => (z.packages || []).length) || pp[0]; if (!x) return toast('No tienes productos con precio', 'warn'); afAdd({ id: afId(), k: 'prices', pid: x.id, w: 900, x: 540, y: cy, color: '#00e5ff' }); }
+        return;
+      }
+      const sk = e.target.closest('[data-afsticker]'); if (sk) return afAdd({ id: afId(), k: 'emoji', txt: sk.dataset.afsticker, x: 540, y: cy, size: 200, rot: 0 });
+      const emo = e.target.closest('[data-afemo]'); if (emo && L) { afPush(); L.txt = emo.dataset.afemo; return afRefresh(); }
+      const ch = e.target.closest('[data-afchip]');
+      if (ch && L) {
+        afPush(); const n = ch.dataset.afchip, max = L.k === 'plist' ? 10 : 12;
+        if (L.list.includes(n)) L.list = L.list.filter(x => x !== n); else if (L.list.length >= max) return toast(`Máximo ${max}`, 'warn'); else { L.list = [...L.list, n]; if (L.k === 'plist') { L.pr = L.pr || {}; if (!L.pr[n]) L.pr[n] = afPrice(n); } }
+        return afRefresh();
+      }
+      const mvb = e.target.closest('[data-afmv]'); if (mvb && L) { afPush(); const [dx, dy] = mvb.dataset.afmv.split(',').map(Number); L.x += dx; L.y += dy; return afRefresh(); }
+      if (e.target.closest('[data-afcenter]') && L) { afPush(); L.x = 540; return afRefresh(); }
+      const z = e.target.closest('[data-afz]');
+      if (z && L) { afPush(); const i = D.items.indexOf(L), j = Math.max(0, Math.min(D.items.length - 1, i + +z.dataset.afz)); D.items.splice(i, 1); D.items.splice(j, 0, L); toast(+z.dataset.afz > 0 ? 'Pasó adelante' : 'Pasó atrás'); return afRefresh(); }
+      if (e.target.closest('[data-afdup]') && L) { const c = JSON.parse(JSON.stringify(L)); c.id = afId(); c.x += 40; c.y += 40; return afAdd(c); }
+      if (e.target.closest('[data-afdel]') && L) { afPush(); D.items = D.items.filter(x => x !== L); afSel = null; return afRefresh(); }
+      if (e.target.closest('[data-afdesel]')) { afSel = null; return afRefresh(); }
+      const bt = e.target.closest('[data-afbgt]'); if (bt) { afPush(); D.bg.t = bt.dataset.afbgt; if (D.bg.t !== 'tpl' && D.badge === 'tpl') D.badge = 'tl'; return afRefresh(true); }
+      if (e.target.closest('[data-afcolclr]')) { afPush(); D.bg.imgs = []; return afRefresh(true); }
+      const qs = e.target.closest('[data-afqs]'); if (qs) { afQStyle = qs.dataset.afqs; return renderAdForm(); }
+      const lb = e.target.closest('[data-aflib]');
+      if (lb) {
+        const x = afLib.find(z => z.id === lb.dataset.aflib); if (!x) return;
+        if (afLibAct === 'del') { if (!confirm('¿Borrar esta imagen de tu galería?')) return; AFDB.del(x.id).then(afLoadLib).catch(() => toast('No se pudo borrar', 'warn')); return; }
+        afPush();
+        if (afLibAct === 'bg') { D.bg.t = 'photo'; D.bg.src = x.src; if (D.bg.dark == null) D.bg.dark = 35; return afRefresh(true); }
+        if (afLibAct === 'col') { D.bg.t = 'collage'; D.bg.imgs = [...(D.bg.imgs || []), x.src].slice(-15); D.bg.tint = D.bg.tint || '#e50914'; return afRefresh(true); }
+        return afAdd({ id: afId(), k: 'img', src: x.src, x: 540, y: cy, w: 420, h: 0, r: 24, rot: 0, line: 0, fxc: '#ffffff' });
+      }
+      const br = e.target.closest('[data-afbrand]');
+      if (br) {
+        afPush(); const n = br.dataset.afbrand, [c1, c2] = AF_BRAND[n], story = ad.fmt === 'story', o = story ? 285 : 0;
+        const mine = afLibOf(n), N = n.toUpperCase(), big = n.length > 9 ? 120 : 190;
+        D.badge = 'tl'; D.badgeDk = 0; afSel = null;
+        const BEN = '✅ 30 días  ·  ⚡ Entrega rápida  ·  🔒 Con PIN', CTA = (y, t) => afText({ txt: t || 'Pide la tuya por WhatsApp 💬', y, size: 44, color: '#111111', bgOn: 1, bgc: '#ffffff' });
+        if (afQStyle === 'box') {
+          D.bg = { ...D.bg, t: 'collage', tint: c1, ov: 'none', dark: 40, imgs: mine.slice(0, 15) };
+          D.items = [{ id: afId(), k: 'shape', x: 540, y: 600 + o, w: 640, h: 560, r: 80, o: 96, color: c2, line: 1, fxc: c1, rot: 0 },
+            afText({ txt: N, y: 540 + o, size: n.length > 9 ? 84 : 130, fx: 'glow', fxc: c1 }), afText({ txt: 'PANTALLAS DISPONIBLES', y: 700 + o, size: 40, bgOn: 1, bgc: c1 }),
+            afText({ txt: BEN, y: 1020 + o, size: 36, bold: 0, fx: 'shadow' }), CTA(1170 + o)];
+        } else if (afQStyle === 'plan') {
+          D.bg = { ...D.bg, t: 'grad', c1, c2, ang: 180, glowOn: 1, glow: c1 };
+          D.items = [afText({ txt: N, y: 200 + o, size: n.length > 9 ? 110 : 160, fx: 'shadow' }), afText({ txt: 'TODO TU ENTRETENIMIENTO', y: 320 + o, size: 40, color: '#ffffff', bold: 1 }),
+            ...(mine[0] ? [{ id: afId(), k: 'img', src: mine[0], x: 540, y: 600 + o, w: 900, h: 420, r: 34, rot: 0, line: 1, fxc: c1 }] : [{ id: afId(), k: 'emoji', txt: '📺', x: 540, y: 600 + o, size: 300, rot: 0 }]),
+            afText({ txt: 'TU PLAN INCLUYE:', y: 885 + o, size: 46, color: '#ffffff', bgOn: 1, bgc: c1 }),
+            afText({ txt: '✓ Series, novelas y películas\n✓ Pantalla individual con PIN\n✓ Soporte y garantía todo el mes\n✓ Entrega rápida', y: 1060 + o, size: 40, bold: 0, al: 'left', fx: 'shadow' }), CTA(1235 + o, 'Escríbenos por WhatsApp 💬')];
+        } else if (afQStyle === 'excl') {
+          D.bg = { ...D.bg, t: 'grad', c1: '#101010', c2: '#000000', ang: 180, glowOn: 1, glow: c1 };
+          const pics = mine.slice(0, 3);
+          D.items = [afText({ txt: 'PLAN EXCLUSIVO: ' + N, y: 205 + o, size: n.length > 9 ? 54 : 64, color: c1, it: 1, fx: 'shadow' }), afText({ txt: '+ PANTALLA INDIVIDUAL + UN MES COMPLETO', y: 285 + o, size: 38, it: 1 }),
+            { id: afId(), k: 'shape', x: 540, y: 640 + o, w: 990, h: 560, r: 40, o: 70, color: '#000000', line: 1, fxc: c1, rot: 0 },
+            afText({ txt: N, y: 420 + o, size: 74, color: c1, fx: 'shadow' }),
+            ...(pics.length ? pics.map((s, i) => ({ id: afId(), k: 'img', src: s, x: pics.length === 1 ? 540 : pics.length === 2 ? 370 + i * 340 : 210 + i * 330, y: 690 + o, w: 300, h: 400, r: 24, rot: 0, line: 1, fxc: '#ffffff' })) : [{ id: afId(), k: 'emoji', txt: '🎬🍿📺', x: 540, y: 690 + o, size: 170, rot: 0 }]),
+            afText({ txt: '💲 Precios bajos   🛡️ Cuentas estables\n🎧 Soporte 24/7   🔄 Reposición garantizada', y: 1040 + o, size: 36, bold: 1 }),
+            afText({ txt: '¿Listo? Escríbenos por WhatsApp 💬', y: 1190 + o, size: 44, color: '#04230f', bgOn: 1, bgc: '#25d366' })];
+        } else {
+        D.bg = { ...D.bg, t: 'collage', tint: c1, c2, ov: 'diag', dark: 45, imgs: mine.slice(0, 15) };
+        D.items = [afText({ txt: n.toUpperCase(), y: 560 + o, size: n.length > 9 ? 120 : 190, fx: 'shadow', fxc: c1 }),
+          afText({ txt: 'PANTALLAS DISPONIBLES', y: 760 + o, size: 52, bgOn: 1, bgc: c1, color: '#ffffff' }),
+          afText({ txt: '✅ 30 días  ·  ⚡ Entrega rápida  ·  🔒 Con PIN', y: 880 + o, size: 36, bold: 0, fx: 'shadow' }),
+          afText({ txt: 'Pide la tuya por WhatsApp 💬', y: 1180 + o, size: 44, color: c1 === '#ffffff' ? '#000' : '#111111', bgOn: 1, bgc: '#ffffff' })];
+        }
+        afRefresh(true); toast(mine.length ? `✅ ${n} listo con tus imágenes` : `Listo. Sube imágenes de ${n} en 🗂️ Mis imágenes para que salgan solas`);
+        const s = $('#adStage'); if (s && innerWidth < 1280) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      const bp = e.target.closest('[data-afpal]'); if (bp) { afPush(); D.bg.p = +bp.dataset.afpal; return afRefresh(true); }
+      if (e.target.closest('[data-afundo]')) { if (!afUndo.length) return toast('No hay nada para deshacer', 'warn'); ad.free = JSON.parse(afUndo.pop()); if (!afFind(afSel)) afSel = null; return afRefresh(true); }
+      if (e.target.closest('[data-afnew]')) { if (!confirm('¿Borrar este diseño y empezar de cero?')) return; afPush(); ad.free = afStarter(); afSel = null; return afRefresh(true); }
+      if (e.target.closest('[data-afsave]')) {
+        const n = ($('#afName').value || '').trim() || 'Mi diseño ' + new Date().toLocaleDateString('es-VE'), sv = afSaved();
+        sv.unshift({ id: afId(), n, t: Date.now(), fmt: ad.fmt, d: ad.free });
+        try { localStorage.setItem('nr_addesigns', JSON.stringify(sv.slice(0, 40))); toast('💾 Diseño guardado'); renderAdForm(); }
+        catch (_) { toast('No hay espacio. Borra algún diseño guardado o usa fotos más pequeñas.', 'warn'); }
+        return;
+      }
+      const op = e.target.closest('[data-afopen]'); if (op) { const s = afSaved().find(x => x.id === op.dataset.afopen); if (s) { afPush(); ad.free = JSON.parse(JSON.stringify(s.d)); ad.fmt = s.fmt || ad.fmt; afSel = null; afRefresh(true); toast('📂 ' + s.n); } return; }
+      const rm = e.target.closest('[data-afrm]'); if (rm) { if (!confirm('¿Borrar este diseño guardado?')) return; try { localStorage.setItem('nr_addesigns', JSON.stringify(afSaved().filter(x => x.id !== rm.dataset.afrm))); } catch (_) {} renderAdForm(); }
+    });
+
+    window.addEventListener('resize', () => { if (ad && $('#adStage') && $('#adStage').offsetParent) adPreview(); });
+
 
     /* ================= Facturas a mano (para ventas por WhatsApp) ================= */
     const INV_METHODS = ['Pago Móvil', 'Binance', 'Efectivo', 'Zelle', 'Transferencia', 'Saldo NR', 'Otro'];
