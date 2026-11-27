@@ -1358,8 +1358,31 @@ window.NR_FIREBASE = {
         else applyCol(key, docs);
       }, err => { cloudError(err, 'leer ' + key); ready[key] = true; });
     }
+    const fresh = {};   // true = el dato vino del servidor (no de la copia guardada en el teléfono)
+    function putDoc(key, snap) {
+      const sp = SPEC[key], data = snap.exists() ? snap.data() : undefined;
+      if (key === 'settings') firstRun = !snap.exists();
+      cache[key] = data === undefined ? undefined : (sp.field ? data[sp.field] : data);
+      known[key] = data === undefined ? undefined : stable(sp.field ? { [sp.field]: data[sp.field] } : data);
+      ready[key] = true;
+    }
+    const DOC_PATH = { settings: 'config/settings', online: 'config/store' };
+    const refreshing = {};
+    function refresh(key) {   // pide el dato directo al servidor (sin usar la copia del teléfono)
+      if (!fb || !DOC_PATH[key] || !fb.fs.getDocFromServer) return Promise.resolve(false);
+      if (refreshing[key]) return refreshing[key];
+      return refreshing[key] = withTimeout(fb.fs.getDocFromServer(fb.fs.doc(db, ...DOC_PATH[key].split('/'))), 9000)
+        .then(snap => { const before = known[key]; putDoc(key, snap); fresh[key] = true; if (known[key] !== before) emit(key); return true; })
+        .catch(() => false).finally(() => { refreshing[key] = null; });
+    }
     function listenDoc(key, path) {
       const sp = SPEC[key];
+      if (DOC_PATH[key]) return fb.fs.onSnapshot(fb.fs.doc(db, ...path.split('/')), { includeMetadataChanges: true }, snap => {
+        const before = known[key], wasFresh = fresh[key];
+        if (!snap.metadata.fromCache) fresh[key] = true;
+        putDoc(key, snap);
+        if (known[key] !== before || fresh[key] !== wasFresh || !wasFresh) emit(key);
+      }, err => { cloudError(err, 'leer ' + key); ready[key] = true; });
       return fb.fs.onSnapshot(fb.fs.doc(db, ...path.split('/')), snap => {
         const data = snap.exists() ? snap.data() : undefined;
         if (key === 'settings') firstRun = !snap.exists();
@@ -1451,6 +1474,11 @@ window.NR_FIREBASE = {
       });
       return true;
     }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || !fb || scope !== 'store') return;
+      fresh.settings = false; fresh.online = false; emit('settings');
+      refresh('settings'); refresh('online');
+    });
     const waitFor = (cond, ms = 8000) => new Promise(res => {
       const t0 = Date.now(); (function tick() { if (cond()) return res(true); if (Date.now() - t0 > ms) return res(false); setTimeout(tick, 80); })();
     });
@@ -1474,7 +1502,8 @@ window.NR_FIREBASE = {
 
     window.NRCloud = {
       enabled, adminEmail: ADMIN_EMAIL, hasAdmin: !!ADMIN_KEY, isAdminEmail,
-      init, get, set, group, flush, whenReady, waitFor, isAdmin, authMsg,
+      init, get, set, group, flush, whenReady, waitFor, isAdmin, authMsg, refresh,
+      fresh: k => !!fresh[k],
       has: k => !!SPEC[k],
       ready: k => !!ready[k],
       user: () => user,
@@ -2580,7 +2609,21 @@ const GAME_INFO = [
         return ['🌙 Estamos cerrados', (at ? ('Abrimos ' + openWhen(at)).replace(/\.?$/, '. ') : '') + (msg ? msg + ' ' : '') + 'Los datos para pagar aparecen aquí cuando abramos.'];
       } catch (_) { return null; }
     }
+    var payCheck = { fail: false };
+    function payVerifying(px) {   // datos de la tienda aún sin confirmar con el servidor
+      if (!CLOUD || !NRCloud.refresh || (NRCloud.fresh('settings') && NRCloud.fresh('online'))) return false;
+      const box = $('#' + px + 'Pay'); if (!box) return true;
+      if (payCheck.fail) {
+        box.innerHTML = `<div style="padding:16px;border-radius:14px;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.1);font-size:14px;line-height:1.5;color:#fde68a"><b style="display:block;color:#fff">📶 Conexión lenta</b>No pudimos confirmar que la tienda esté abierta. Revisa tu internet. <b style="color:#fff">No pagues todavía.</b><button type="button" data-payretry="${px}" class="mt-3 block w-full rounded-xl border border-white/15 py-2.5 text-sm font-semibold text-white">🔄 Intentar de nuevo</button></div>`;
+        return true;
+      }
+      box.innerHTML = `<div style="padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);font-size:14px;color:#cbd5e1">⏳ Verificando que la tienda esté abierta…</div>`;
+      Promise.all([NRCloud.refresh('settings'), NRCloud.refresh('online')]).then(r => { payCheck.fail = !r.every(Boolean); try { renderPay(px); } catch (_) {} });
+      return true;
+    }
+    document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-payretry]'); if (b) { payCheck.fail = false; renderPay(b.dataset.payretry); } });
     function renderPay(px) {
+      if (payVerifying(px)) return;
       const shut = payShut();
       if (shut) {
         $('#' + px + 'Pay').innerHTML = `<div data-payshut style="padding:16px;border-radius:14px;border:1px solid rgba(244,63,94,.5);background:rgba(244,63,94,.12);font-size:14px;line-height:1.5;color:#fecdd3"><b style="display:block;color:#fff;font-size:15px">${shut[0]}</b><span style="display:block;margin-top:4px">⚠️ <b style="color:#fff">No hagas ningún pago ahora.</b> ${esc(shut[1])}</span></div>`;
@@ -3359,6 +3402,33 @@ const GAME_INFO = [
       if ($('#orderDetailModal').classList.contains('flex')) openOrderDetail(o);
     });
 
+    /* ---------- Volver a comprar (misma compra, mismo ID, precios de hoy) ---------- */
+    function reorderLines(o) {
+      return (o.items || []).filter(i => !i.renew && !i.tickets).map(i => ({ i, p: PRODUCTS.find(x => x.id === i.id) })).filter(x => x.p && !x.p.hasPkgs && !x.p.raffle && x.p.stock > 0);
+    }
+    function reorderBtn(o) {
+      try { if (!isMine(o) || o.status === 'Pendiente' || !reorderLines(o).length) return ''; } catch (_) { return ''; }
+      return `<button type="button" data-reorder="${esc(o.id)}" class="mt-4 w-full rounded-xl border border-emerald-500/40 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/10">🔁 Volver a comprar</button>`;
+    }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-reorder]'); if (!b) return;
+      e.preventDefault();
+      if (!storeOnline) return toast('🛠️ Tienda en mantenimiento. Vuelve en unos minutos.');
+      const o = DB.get('orders', []).find(x => x.id === b.dataset.reorder); if (!o || !isMine(o)) return;
+      const lines = reorderLines(o); if (!lines.length) return toast('Esos productos ya no están disponibles', 'warn');
+      let n = 0;
+      lines.forEach(({ i, p }) => {
+        const qty = Math.max(1, Math.min(+i.qty || 1, p.stock)), it = cart.find(c => c.id === p.id);
+        if (it) it.qty = Math.max(it.qty, qty); else cart.push({ id: p.id, qty });
+        if (p.needsId && i.playerId) playerIds[p.id] = String(i.playerId);
+        n++;
+      });
+      saveCart(); renderCart();
+      ['orderDetailModal', 'cnModal'].forEach(m => { try { closeModal(m); } catch (_) {} }); try { if (ordersOpen) closeOrdersView(); } catch (_) {}
+      openCart();
+      const miss = (o.items || []).length - n;
+      toast(`🔁 ${n === 1 ? 'Tu compra está' : n + ' productos están'} en el carrito con los precios de hoy${lines.some(x => x.i.playerId) ? ' y tu mismo ID' : ''}.${miss > 0 ? ' Algunos ya no están disponibles.' : ''} Revisa y paga.`);
+    });
     function orderCard(o, opts = {}) {
       const [label, cls] = STATUS[o.status] || STATUS.Pendiente;
       return `
@@ -3396,6 +3466,7 @@ const GAME_INFO = [
             <span class="text-muted">${METHOD_ICON[o.method] || '💳'} ${METHODS[o.method] || '—'} · ${fmtDate(o.date)}</span>
             <span class="text-right"><span class="block font-display text-lg font-bold">${orderBs(o) ? esc(orderBs(o)).replace('Bs ', 'Bs. ') : money(o.amount)}</span>${orderBs(o) ? `<span class="block text-xs text-muted">${money(o.amount)}</span>` : ''}</span>
           </div>
+          ${reorderBtn(o)}
           <div class="mt-4 grid grid-cols-2 gap-2">
             <button data-report="${esc(o.id)}" class="flex items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 py-2.5 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/10">⚠️ Reportar problema</button>
             <a href="${waLink(supportMsg(o))}" target="_blank" rel="noopener" class="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/40 py-2.5 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/10">${WA_ICON} Soporte</a>

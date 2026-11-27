@@ -2004,12 +2004,19 @@ window.NR_FIREBASE = {
         : `🌙 La tienda está <b>CERRADA</b>${cs.until ? ' hasta el <b>' + esc(new Date(cs.until).toLocaleString('es', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true })) + '</b> (abre sola)' : ''}: los clientes ven el aviso de cerrado y no pueden hacer pedidos ni recargas.`;
       try { renderClosedBox(); } catch (_) {}   // todavía no existe al arrancar
     }
+    function cloudConfirm(okMsg) {   // avisa cuando el cambio de verdad llegó a la nube (los clientes ya lo ven)
+      if (!CLOUD || !NRCloud.flush) return;
+      const t0 = Date.now();
+      NRCloud.flush().then(() => toast(`☁️ Listo en la nube${Date.now() - t0 > 1500 ? ` (tardó ${Math.round((Date.now() - t0) / 1000)} s)` : ''}: ${okMsg}`, 'ok'))
+        .catch(() => toast('⚠️ No se pudo guardar en la nube. Revisa tu internet y vuelve a tocar el botón.', 'warn'));
+    }
     $('#closedToggle').addEventListener('click', () => {
       const st = getSettings(), cs = closedState(st);
       if (cs.why === 'horario') { showView('config'); setTimeout(() => $('#hoursCard').scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); return toast('Está cerrado por el horario automático. Cámbialo o apágalo aquí.', 'warn'); }
       const closing = !cs.closed;
       store.set('settings', { ...store.get('settings', {}), closed: closing, closedUntil: 0, ...(closing ? { closedAt: Date.now() } : {}) }); renderClosed();
-      toast(closing ? '🌙 Tienda CERRADA: no se reciben pedidos' : '☀️ Tienda ABIERTA: ya se reciben pedidos', closing ? 'warn' : 'ok');
+      toast(closing ? '🌙 Cerrando la tienda…' : '☀️ Abriendo la tienda…', closing ? 'warn' : 'ok');
+      cloudConfirm(closing ? 'los clientes ya la ven CERRADA' : 'los clientes ya la ven ABIERTA');
     });
     setInterval(renderClosed, 60000);
 
@@ -5562,9 +5569,9 @@ window.NR_FIREBASE = {
       if (t.closest('[data-clsclose]')) {
         const v = $('#clsUntil').value, at = v ? new Date(v).getTime() || 0 : 0;
         if (!at || at <= Date.now()) return toast('Elige una fecha y hora futura para volver a abrir', 'warn');
-        set({ closed: true, closedAt: Date.now(), closedUntil: at }); toast('🌙 Tienda CERRADA hasta la hora que elegiste', 'warn');
+        set({ closed: true, closedAt: Date.now(), closedUntil: at }); toast('🌙 Cerrando la tienda hasta la hora que elegiste…', 'warn'); cloudConfirm('los clientes ya la ven CERRADA');
       }
-      if (t.closest('[data-clsopen]')) { set({ closed: false, closedUntil: 0 }); toast('☀️ Tienda ABIERTA: ya se reciben pedidos', 'ok'); }
+      if (t.closest('[data-clsopen]')) { set({ closed: false, closedUntil: 0 }); toast('☀️ Abriendo la tienda…', 'ok'); cloudConfirm('los clientes ya la ven ABIERTA'); }
     });
     function saveSoon(patch) {
       const st = store.get('settings', {}) || {}, cur = st.soon || {};
